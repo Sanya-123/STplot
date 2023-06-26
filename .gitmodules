@@ -1,0 +1,9 @@
+[submodule "deps/stlink"]
+	path = deps/stlink
+	url = https://github.com/stlink-org/stlink
+[submodule "deps/pyswd"]
+	path = deps/pyswd
+	url = https://github.com/cortexm/pyswd.git
+[submodule "stplot-gui/qt-advanced-docking-system"]
+	path = stplot-gui/qt-advanced-docking-system
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qt-advanced-docking-system.git
