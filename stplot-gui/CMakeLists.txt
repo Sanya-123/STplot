@@ -43,13 +43,13 @@ else()
 endif()
 
 set(VERSION_SHORT "3.5.2")
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/qt-advanced-docking-system/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/cmake/modules ${CMAKE_MODULE_PATH})
 option(BUILD_STATIC "Build the static library" ON)
-add_subdirectory(qt-advanced-docking-system/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
 set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
-    qt-advanced-docking-system/src
+    ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
     ${STLINK_PATH}/src/stlink-lib
     # ${STLINK_PATH}/src/stlink-lib/
     ${LIBUSB_INCLUDE_DIR}

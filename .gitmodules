@@ -1,6 +1,6 @@
-[submodule "stplot-gui/qt-advanced-docking-system"]
-	path = stplot-gui/qt-advanced-docking-system
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qt-advanced-docking-system.git
 [submodule "deps/stlink-lib/stlink"]
 	path = deps/stlink-lib/stlink
 	url = https://github.com/stlink-org/stlink
+[submodule "deps/qt-advanced-docking-system"]
+	path = deps/qt-advanced-docking-system
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qt-advanced-docking-system.git
