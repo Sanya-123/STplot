@@ -6,5 +6,5 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_subdirectory(deps)
+add_subdirectory(deps/stlink-lib)
 add_subdirectory(stplot-gui/)

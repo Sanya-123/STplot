@@ -47,7 +47,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/qt-advanced-docking-system/cma
 option(BUILD_STATIC "Build the static library" ON)
 add_subdirectory(qt-advanced-docking-system/src)
 
-set(STLINK_PATH ../deps/stlink)
+set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
     qt-advanced-docking-system/src
     ${STLINK_PATH}/src/stlink-lib
