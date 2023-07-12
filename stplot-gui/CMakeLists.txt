@@ -50,6 +50,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
+    ${CMAKE_SOURCE_DIR}/deps/elfio/elfio
     ${STLINK_PATH}/src/stlink-lib
     # ${STLINK_PATH}/src/stlink-lib/
     ${LIBUSB_INCLUDE_DIR}
@@ -59,7 +60,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   )
 
 
-target_link_libraries(stplot-gui PRIVATE Qt${QT_VERSION_MAJOR}::Widgets qtadvanceddocking xcb stlink-static)
+target_link_libraries(stplot-gui PRIVATE Qt${QT_VERSION_MAJOR}::Widgets qtadvanceddocking xcb stlink-static elfio::elfio)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     BUILD_TIME="${BUILD_TIME}"

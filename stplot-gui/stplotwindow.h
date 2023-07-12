@@ -17,11 +17,16 @@ public:
     ~STPlotWindow();
 
 protected:
-    // virtual void closeEvent(QCloseEvent *event) override;
+    virtual void closeEvent(QCloseEvent *event) override;
 
 private:
     Ui::STPlotWindow *ui;
     ads::CDockManager* m_DockManager;
+
+public slots:
+    void connect();
+    void open_elf();
+
 };
 
 
