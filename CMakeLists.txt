@@ -6,6 +6,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_subdirectory(deps/elfio)
+add_subdirectory(deps/varloc)
 add_subdirectory(deps/stlink-lib)
-add_subdirectory(stplot-gui/)
+add_subdirectory(stplot-gui)

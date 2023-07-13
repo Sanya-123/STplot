@@ -6,11 +6,13 @@
 #include <QTimer>
 #include <iostream>
 #include <format>
-#include <elfio/elfio_dump.hpp>
+
+//#include <elfio/elfio_dump.hpp>
 
 extern "C" {
 #include "stlink.h"
 #include "usb.h"
+#include "varloc.h"
 // #include <chipid.h>
 // #include <helper.h>
 // #include "logging,h"
@@ -89,63 +91,10 @@ void STPlotWindow::connect(){
 }
 
 void STPlotWindow::open_elf(){
-    ELFIO::elfio reader;
 
-    if ( !reader.load("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf") ) {
-        std::cout << "File not found or it is not an ELF file\n";
-        return;
-    }
-
-    ELFIO::Elf_Half sec_num = reader.sections.size();
-
-    for ( int i = 0; i < sec_num; ++i ) {
-        ELFIO::section* psec = reader.sections[i];
-        // Check section type
-        if ( psec->get_type() == ELFIO::SHT_SYMTAB ) {
-            const ELFIO::symbol_section_accessor symbols( reader, psec );
-            unsigned int sym_n = 0;
-            for ( unsigned int j = 0; j < symbols.get_symbols_num(); ++j ) {
-                std::string         name;
-                ELFIO::Elf64_Addr   value;
-                ELFIO::Elf_Xword    size;
-                unsigned char       bind;
-                unsigned char       type;
-                ELFIO::Elf_Half     section_index;
-                unsigned char       other;
-
-                // Read symbol properties
-                symbols.get_symbol( j, name, value, size, bind, type,
-                                   section_index, other );
-                if (type == ELFIO::STT_OBJECT){
-                    std::cout << j
-                          << " " << name
-                          << " " << value
-                          << " " << size
-                          << std::endl;
-
-
-//                    symbols.generic_get_symbol_ptr<Elf32_Sym>(j)
-                    this->ui->symbolTable->insertRow(sym_n);
-                    QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(name));
-                    this->ui->symbolTable->setItem(sym_n, 0, nameItem);
-//                    QTableWidgetItem *valueItem = new QTableWidgetItem(QString::fromStdString(format("{}", value)));
-//                    this->ui->symbolTable->setItem(sym_n, 1, valueItem);
-//                    QTableWidgetItem *sizeItem = new QTableWidgetItem(QString::fromStdString(format("{}", size)));
-//                    this->ui->symbolTable->setItem(sym_n, 2, sizeItem);
-                    sym_n++;
-
-                }
-            }
-        }
-    }
-
-    ELFIO::dump::header( std::cout, reader );
-    ELFIO::dump::section_headers( std::cout, reader );
-    ELFIO::dump::segment_headers( std::cout, reader );
-    ELFIO::dump::symbol_tables( std::cout, reader );
-    ELFIO::dump::notes( std::cout, reader );
-    ELFIO::dump::modinfo( std::cout, reader );
-    ELFIO::dump::dynamic_tags( std::cout, reader );
-    ELFIO::dump::section_datas( std::cout, reader );
-    ELFIO::dump::segment_datas( std::cout, reader );
+//    if ( !reader.load("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf") ) {
+//        std::cout << "File not found or it is not an ELF file\n";
+//        return;
+//    }
+    varloc("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf");
 }

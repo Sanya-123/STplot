@@ -7,3 +7,6 @@
 [submodule "deps/elfio"]
 	path = deps/elfio
 	url = https://github.com/serge1/ELFIO.git
+[submodule "deps/varloc/dwarves"]
+	path = deps/varloc/dwarves
+	url = https://github.com/acmel/dwarves.git
