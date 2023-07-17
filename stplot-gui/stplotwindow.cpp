@@ -96,5 +96,7 @@ void STPlotWindow::open_elf(){
 //        std::cout << "File not found or it is not an ELF file\n";
 //        return;
 //    }
+    std::cout << "Start variable locator" << std::endl;
     varloc("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf");
+    std::cout << "End variable locator" << std::endl;
 }

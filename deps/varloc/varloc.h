@@ -14,7 +14,30 @@
 #endif
 
 /* Exported includes ---------------------------------------------------------*/
+#include <stdint.h>
 /* Exported types ------------------------------------------------------------*/
+ typedef struct{
+     uint32_t base;
+     uint32_t offset_bits;
+     uint32_t size_bits;
+ }varloc_address_t;
+
+ typedef enum{
+     BASE,
+     STRUCT,
+     ENUM,
+     POINTER,
+ }varloc_type_t;
+
+ typedef struct varloc_s{
+     struct varloc_s*  sibling;
+     struct varloc_s*  child;
+     char*      name;
+     char*      ctype;
+     varloc_type_t  var_type;
+     varloc_address_t   address;
+ }varloc_node_t;
+
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
