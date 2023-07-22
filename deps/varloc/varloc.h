@@ -27,14 +27,16 @@
      STRUCT,
      ENUM,
      POINTER,
- }varloc_type_t;
+     UNION,
+     ARRAY,
+ }varloc_node_type_t;
 
  typedef struct varloc_s{
-     struct varloc_s*  sibling;
-     struct varloc_s*  child;
-     char*      name;
-     char*      ctype;
-     varloc_type_t  var_type;
+     struct varloc_s*   next;
+     struct varloc_s*   child;
+     char*              name;
+     char               ctype_name[100];
+     varloc_node_type_t var_type;
      varloc_address_t   address;
  }varloc_node_t;
 

@@ -1,22 +1,121 @@
-/*
- * SPDX-License-Identifier: GPL-2.0-only
- *
- * Copyright (C) 2007 Davi E. M. Arnaut <davi@haxent.com.br>
- */
-
-#include <argp.h>
-#include <malloc.h>
-#include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-
 #include "dwarves.h"
 #include "varloc.h"
-#include "dutil.h"
 
-static int verbose;
+
+char* varloc_node_types[] = {
+    "BASE",
+    "STRUCT",
+    "ENUM",
+    "POINTER",
+    "UNION",
+    "ARRAY"
+};
+
+
+
+varloc_node_t* tree_base;
+//varloc_node_t class_node;
+//varloc_node_t member_node;
+int indent = 0;
+
+varloc_node_t* new_var_node(){
+    varloc_node_t* ret = malloc(sizeof(*ret));
+    if (ret == NULL){
+        printf("varloc_node_t malloc failed! exiting...\n");
+        exit(1);
+    }
+    else{
+        memset(ret, 0, sizeof(*ret));
+    }
+    return ret;
+}
+
+varloc_node_t* new_child(varloc_node_t* parent){
+    varloc_node_t* child = new_var_node();
+    if (child == NULL){
+        printf("varloc_node_t malloc failed! exiting...\n");
+        exit(1);
+    }
+    else{
+        if (parent->child == NULL){
+            parent->child = child;
+        }
+        else {
+            varloc_node_t* node = parent->child;
+            while(node->next != NULL){
+                node = node->next;
+            }
+            node->next = child;
+        }
+    }
+    return child;
+}
+
+varloc_node_t* new_sibling(varloc_node_t* var){
+    varloc_node_t* sibling = new_var_node();
+    if (sibling == NULL){
+        printf("varloc_node_t malloc failed! exiting...\n");
+        exit(1);
+    }
+    else{
+        var->next = sibling;
+    }
+    return sibling;
+}
+
+uint32_t var_loop_level;
+void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*)){
+    func(root);
+    if (root->child != NULL){
+        var_loop_level++;
+        for_each_var_loop(root->child, func);
+        var_loop_level--;
+    }
+    if (root->next != NULL){
+        for_each_var_loop(root->next, func);
+    }
+}
+
+
+
+void print_var_node(varloc_node_t* var){
+    for (int i = 0; i < var_loop_level; i++){
+        printf("  ");
+    }
+    printf("%s %s %s %x %d %d\n",
+           varloc_node_types[var->var_type],
+           var->name,
+           var->ctype_name,
+           var->address.base,
+           var->address.offset_bits,
+           var->address.size_bits
+           );
+}
+
+
+
+
+
+// hacked together some functions based on dwarves_fprintf.c
+
+void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node);
+
+static void parse_type(struct tag *type, const struct cu *cu,
+                       char* name, varloc_node_t* node);
+
+static void parse_member(struct class_member *member, bool union_member,
+                         struct tag *type, const struct cu *cu,
+                         struct conf_fprintf *conf, varloc_node_t* node);
+
+static void parse_array(const struct tag *tag,
+                        const struct cu *cu, const char *name,
+                        const struct conf_fprintf *conf, varloc_node_t* node);
+
+void parse_extvar(struct variable *var, struct cu *cu);
+
 
 static struct conf_fprintf conf = {
 	.emit_stats = 1,
@@ -28,110 +127,6 @@ static struct conf_load conf_load = {
     .extra_dbg_info = 1,
 };
 
-void process_extvar(struct variable *var, struct cu *cu);
-
-//struct extvar {
-//	struct extvar		*next;
-//	const char 		*name;
-//	const struct variable	*var;
-//	const struct cu 	*cu;
-//};
-
-//struct extfun {
-//	struct extfun		*next;
-//	const char		*name;
-//	const struct function	*fun;
-//	const struct cu		*cu;
-//};
-
-//static void *tree;
-
-//static void oom(const char *msg)
-//{
-//	fprintf(stderr, "pglobal: out of memory (%s)\n", msg);
-//	exit(EXIT_FAILURE);
-//}
-
-//static struct extvar *extvar__new(const struct variable *var,
-//				  const struct cu *cu)
-//{
-//	struct extvar *gvar = malloc(sizeof(*gvar));
-
-//	if (gvar != NULL) {
-//		gvar->next = NULL;
-//		gvar->var  = var;
-//		gvar->cu   = cu;
-//		gvar->name = variable__name(var);
-//	}
-
-//	return gvar;
-//}
-
-//static struct extfun *extfun__new(struct function *fun,
-//				  const struct cu *cu)
-//{
-//	struct extfun *gfun = malloc(sizeof(*gfun));
-
-//	if (gfun != NULL) {
-//		gfun->next = NULL;
-//		gfun->fun  = fun;
-//		gfun->cu   = cu;
-//		gfun->name = function__name(fun);
-//	}
-
-//	return gfun;
-//}
-
-//static int extvar__compare(const void *a, const void *b)
-//{
-//	const struct extvar *ga = a, *gb = b;
-//	return strcmp(ga->name, gb->name);
-//}
-
-//static int extfun__compare(const void *a, const void *b)
-//{
-//	const struct extfun *ga = a, *gb = b;
-//	return strcmp(ga->name, gb->name);
-//}
-
-//static void extvar__add(const struct variable *var, const struct cu *cu)
-//{
-//	struct extvar **nodep, *gvar = extvar__new(var, cu);
-
-//	if (gvar != NULL) {
-//		nodep = tsearch(gvar, &tree, extvar__compare);
-//		if (nodep == NULL)
-//			oom("tsearch");
-//		else if (*nodep != gvar) {
-//			if (gvar->var->declaration) {
-//				gvar->next = (*nodep)->next;
-//				(*nodep)->next = gvar;
-//			} else {
-//				gvar->next = *nodep;
-//				*nodep = gvar;
-//			}
-//		}
-//	}
-//}
-
-//static void extfun__add(struct function *fun, const struct cu *cu)
-//{
-//	struct extfun **nodep, *gfun = extfun__new(fun, cu);
-
-//	if (gfun != NULL) {
-//		nodep = tsearch(gfun, &tree, extfun__compare);
-//		if (nodep == NULL)
-//			oom("tsearch");
-//		else if (*nodep != gfun) {
-//			gfun->next = (*nodep)->next;
-//			(*nodep)->next = gfun;
-//		}
-//	}
-//}
-
-
-
-
 
 static int cu_extvar_iterator(struct cu *cu, void *cookie __maybe_unused)
 {
@@ -141,58 +136,16 @@ static int cu_extvar_iterator(struct cu *cu, void *cookie __maybe_unused)
 	cu__for_each_variable(cu, id, pos) {
 		struct variable *var = tag__variable(pos);
 		if (var->external)
-            process_extvar(var,cu);
-//			extvar__add(var, cu);
+            parse_extvar(var,cu);
 	}
 	return 0;
 }
 
-//static int cu_extfun_iterator(struct cu *cu, void *cookie __maybe_unused)
-//{
-//	struct function *pos;
-//	uint32_t id;
 
-//	cu__for_each_function(cu, id, pos)
-//		if (pos->external)
-//			extfun__add(pos, cu);
-//	return 0;
-//}
-
-//static inline const struct extvar *node__variable(const void *nodep)
-//{
-//	return *((const struct extvar **)nodep);
-//}
-
-//static inline const struct extfun *node__function(const void *nodep)
-//{
-//	return *((const struct extfun **)nodep);
-//}
-
-//static inline struct tag *extvar__tag(const struct extvar *gvar)
-//{
-//    return (struct tag *)gvar->var;
-//}
-
-//static inline struct tag *extfun__tag(const struct extfun *gfun)
-//{
-//    return (struct tag *)gfun->fun;
-//}
-
-
-/*
- * -------------------------------------------------------------------------
- */
-
-void class_print(struct class *class, const struct cu *cu,
-                 const struct conf_fprintf *conf, FILE *fp);
-
-static void print_type(struct tag *type, const struct cu *cu,
-                       char* name, const struct conf_fprintf *conf);
-
-
-void process_extvar(struct variable *gvar, struct cu *cu){
+void parse_extvar(struct variable *gvar, struct cu *cu){
     uint32_t count = 0;
     struct tag *tag;
+    static varloc_node_t* last_var_node = NULL;
 
     if (gvar == NULL)
         return;
@@ -209,36 +162,51 @@ void process_extvar(struct variable *gvar, struct cu *cu){
     //        count++;
     //    printf("; /* %u */\n\n", count);
 
-    char name_buf[100];
     //    ++tag->recursivity_level;
 
 
     if (tag->tag == DW_TAG_variable){
         const struct variable *var = tag__variable(tag);
         const char *name = variable__name(var);
-        const char *type_name = variable__type_name(var, cu, name_buf, 100);
+
+        varloc_node_t *var_node = new_var_node();
+        const char *type_name = variable__type_name(var, cu, var_node->ctype_name, 100);
 
         const struct tag *type_tag = cu__type(cu, var->ip.tag.type);
         int base_type = tag__is_base_type(type_tag, cu);
-        printf("\ngot var %s %s %d %x : ",
-               name,
-               type_name,
-               base_type,
-               var->ip.addr);
+//        printf("\n\ngot var %s %s %d %x : ",
+//               name,
+//               type_name,
+//               base_type,
+//               var->ip.addr);
+
+        var_node->name = name;
+        var_node->address.base = var->ip.addr;
+
+
+        if (last_var_node != NULL){
+            last_var_node->next = var_node;
+        }
+        else{
+            tree_base = var_node;
+        }
+        last_var_node = var_node;
 
         if (!base_type){
-            //            typedef__fprintf(&var->ip.tag, gvar->cu, &cfg, stdout);
-            //            tag__fprintf(tag, gvar->cu, &cfg, stdout);
-            printf("\n");
-            print_type(type_tag, cu, NULL, &cfg);
+//            printf("\n");
+            parse_type(type_tag, cu, NULL, var_node);
         }
+        else{
+            var_node->var_type = BASE;
+        }
+
     }
 }
 
 
-static void print_array(const struct tag *tag,
+static void parse_array(const struct tag *tag,
                         const struct cu *cu, const char *name,
-                        const struct conf_fprintf *conf)
+                        const struct conf_fprintf *conf, varloc_node_t* node)
 {
     struct array_type *at = tag__array_type(tag);
     struct tag *type = cu__type(cu, tag->type);
@@ -252,7 +220,7 @@ static void print_array(const struct tag *tag,
     if (at->dimensions >= 1 && at->nr_entries[0] == 0 && tag__is_const(type))
         type = cu__type(cu, type->type);
 
-    print_type(type, cu, name, conf);
+    parse_type(type, cu, name, node);
     for (i = 0; i < at->dimensions; ++i) {
         if (conf->flat_arrays || at->is_vector) {
             /*
@@ -295,18 +263,19 @@ static void print_array(const struct tag *tag,
     return;
 }
 
-static void print_member(struct class_member *member, bool union_member,
+static void parse_member(struct class_member *member, bool union_member,
                                     struct tag *type, const struct cu *cu,
-                                    struct conf_fprintf *conf)
+                                    struct conf_fprintf *conf, varloc_node_t *node)
 {
     printf("\n");
+    printf("%*s%s", indent*4, "", "- ");
     const int size = member->byte_size;
     int member_alignment_printed = 0;
     struct conf_fprintf sconf = *conf;
     uint32_t offset = member->byte_offset;
     size_t printed = 0, printed_cacheline = 0;
-    const char *cm_name = class_member__name(member),
-        *name = cm_name;
+    const char *cm_name = class_member__name(member);
+//        *name = cm_name;
 
     if (!sconf.rel_offset) {
         offset += sconf.base_offset;
@@ -314,7 +283,7 @@ static void print_member(struct class_member *member, bool union_member,
             sconf.base_offset = offset;
     }
 
-    printf("size %d offset %d", size, offset);
+    printf("size %d offset %d bitoffset %d ", size, offset, member->bitfield_offset);
     if (member->bitfield_offset < 0)
         offset += member->byte_size;
 
@@ -322,7 +291,7 @@ static void print_member(struct class_member *member, bool union_member,
 //        printed_cacheline = class__fprintf_cacheline_boundary(conf, offset, fp);
 
     if (member->tag.tag == DW_TAG_inheritance) {
-        name = "<ancestor>";
+        cm_name = "<ancestor>";
         printf("/* ");
     }
 
@@ -333,18 +302,24 @@ static void print_member(struct class_member *member, bool union_member,
      * conflated with the name of its type, otherwise __attribute__ are
      * printed in the wrong order.
      */
+
+    varloc_node_t *child = new_child(node);
+    child->address.offset_bits = offset;
+    child->address.size_bits = size;
+
     if (tag__is_union(type) || tag__is_struct(type) ||
         tag__is_enumeration(type))
     {
-        print_type(type, cu, NULL, &sconf);
-        if (name) {
+        parse_type(type, cu, NULL, child);
+        if (cm_name) {
             if (!type__name(tag__type(type))){
                 printf(" ");
             }
-            printf("%s", name);
+            child->name = cm_name;
+            printf("%s", cm_name);
         }
     } else {
-        print_type(type, cu, name, &sconf);
+        parse_type(type, cu, cm_name, child);
     }
 
     if (member->is_static) {
@@ -431,9 +406,9 @@ static void print_member(struct class_member *member, bool union_member,
 }
 
 
-static void print_type(struct tag *type, const struct cu *cu, char* name, const struct conf_fprintf *conf){
+static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc_node_t* node){
     if (name == NULL){
-        name = "test_name";
+        name = "\0";
     }
     char tbf[128];
     char namebf[256];
@@ -472,8 +447,11 @@ static void print_type(struct tag *type, const struct cu *cu, char* name, const 
             memset(namebf, '*', nr_indirections);
             memcpy(namebf + nr_indirections, name, len);
             namebf[len + nr_indirections] = '\0';
+            node->var_type = POINTER;
+            node->name = name;
             name = namebf;
-            printf(" POINTER!  %s ", name);
+            printf("POINTER! ");
+//            printf("POINTER! %s ", name);
         }
         else{
             nr_indirections = 1;
@@ -496,12 +474,16 @@ static void print_type(struct tag *type, const struct cu *cu, char* name, const 
             int n;
 
             ctype = tag__type(type);
-            if (typedef_expanded)
-                printf(" -> %s", type__name(ctype));
-            else {
-                printf("/* typedef %s", type__name(ctype));
-                typedef_expanded = 1;
+//            if (typedef_expanded)
+//                printf(" -> %s", type__name(ctype));
+//            else {
+            if(!typedef_expanded){
+                if(*name){
+                    strcpy(node->ctype_name, type__name(ctype));
+                    printf("%s ", type__name(ctype));
+                }
             }
+            typedef_expanded++;
             type_type = cu__type(cu, type->type);
             if (type_type == NULL)
                 return;
@@ -511,11 +493,10 @@ static void print_type(struct tag *type, const struct cu *cu, char* name, const 
             type = type_type;
         }
         if (typedef_expanded){
-            printf(" */ ");
+//            printf(" */ ");
         }
     }
 
-    tconf = *conf;
 
     if (tag__is_struct(type) || tag__is_union(type) ||
         tag__is_enumeration(type)) {
@@ -557,6 +538,7 @@ next_type:
                 name = namebfptr;
                 type = ptype;
                 tconf.type_spacing -= 8;
+                printf("POINTER HERE!\n");
                 goto inner_struct;
             }
         }
@@ -564,13 +546,21 @@ next_type:
     }
     default:
     print_default:
-        printf("%-*s %s", tconf.type_spacing,
-                           tag__name(type, cu, tbf, sizeof(tbf), &tconf),
-                           name);
+        if ((node->var_type != POINTER)
+//        &&  (node->var_type != STRUCT)
+        ){
+           node->name = name;
+        }
+        if(!(*node->ctype_name)){
+           tag__name(type, cu, node->ctype_name, sizeof(node->ctype_name), &tconf);
+        }
+        printf("%s %s",tag__name(type, cu, tbf, sizeof(tbf), &tconf),
+                        name);
         break;
     case DW_TAG_subroutine_type:
 //        printed += ftype__fprintf(tag__ftype(type), cu, name, 0, 0,
 //                                  tconf.type_spacing, true, &tconf, fp);
+        printf("%s ", name);
         printf("ftype__fprintf");
         break;
     case DW_TAG_atomic_type:
@@ -579,12 +569,6 @@ next_type:
     case DW_TAG_const_type:
         modifier = "const";
     print_modifier: {
-//        if (!conf->skip_emitting_modifier) {
-//            size_t modifier_printed = fprintf(fp, "%s ", modifier);
-//            tconf.type_spacing -= modifier_printed;
-//            printed		   += modifier_printed;
-//        }
-
         struct tag *ttype = cu__type(cu, type->type);
         if (ttype) {
             type = ttype;
@@ -593,54 +577,41 @@ next_type:
     }
         goto print_default;
 
-    case DW_TAG_array_type:
-//        printed += array_type__fprintf(type, cu, name, &tconf, fp);
-        print_array(type, cu, name, &tconf);
+    case DW_TAG_array_type:        
+        node->var_type = ARRAY;
+        parse_array(type, cu, name, &tconf, node);
         break;
     case DW_TAG_string_type:
-//        printed += string_type__fprintf(type, name, &tconf, fp);
         printf("string_type__fprintf");
         break;
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
         ctype = tag__type(type);
-
-//        if (type__name(ctype) != NULL && !expand_types) {
-//            printed += fprintf(fp, "%s %-*s %s",
-//                               (type->tag == DW_TAG_class_type &&
-//                                !tconf.classes_as_structs) ? "class" : "struct",
-//                               tconf.type_spacing - 7,
-//                               type__name(ctype), name ?: "");
-//        } else {
-            struct class *cclass = tag__class(type);
-
-//           if (!tconf.suppress_comments)
-//                class__find_holes(cclass);
-            tconf.type_spacing -= 8;
-//            printed += __class__fprintf(cclass, cu, &tconf, fp);
-            class_print(cclass, cu, &tconf, stdout);
-//            printf("__class__fprintf");
-//        }
+        struct class *cclass = tag__class(type);
+        if(*name){
+            printf("%s ", name);
+            node->name = name;
+        }
+        parse_class(cclass, cu, node);
         break;
     case DW_TAG_union_type:
+        node->var_type = UNION;
         ctype = tag__type(type);
-
-//        if (type__name(ctype) != NULL && !expand_types) {
-//            printed += fprintf(fp, "union %-*s %s", tconf.type_spacing - 6, type__name(ctype), name ?: "");
-//        } else {
-            tconf.type_spacing -= 8;
-//            printed += union__fprintf(ctype, cu, &tconf, fp);
-            printf("union__fprintf");
-//        }
+        printf("union__fprintf");
         break;
     case DW_TAG_enumeration_type:
+        node->var_type = ENUM;
         ctype = tag__type(type);
-
-        if (type__name(ctype) != NULL)
-            printf("enum %-*s %s", tconf.type_spacing - 5, type__name(ctype), name ?: "");
-        else
+        if (type__name(ctype) != NULL){
+            printf("enum %s", type__name(ctype), name ?: "");
+        }
+        else{
 //            printed += enumeration__fprintf(type, &tconf, fp);
+            printf("%s ", name);
+            node->name = name;
             printf("enumeration__fprintf");
+
+        }
         break;
     case DW_TAG_LLVM_annotation: {
         struct tag *ttype = cu__type(cu, type->type);
@@ -659,8 +630,7 @@ out:
     return;
 }
 
-void class_print(struct class *class, const struct cu *cu,
-                               const struct conf_fprintf *conf, FILE *fp)
+void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 {
     struct type *type = &class->type;
     size_t last_size = 0, size;
@@ -678,7 +648,7 @@ void class_print(struct class *class, const struct cu *cu,
     struct class_member *pos, *last = NULL;
     struct tag *tag_pos;
 //    const char *current_accessibility = NULL;
-    struct conf_fprintf cconf = *conf;// : conf_fprintf__defaults;
+    struct conf_fprintf cconf = {};// : conf_fprintf__defaults;
 //    const uint16_t t = type->namespace.tag.tag;
 //    size_t printed = fprintf(fp, "%s%s%s%s%s",
 //                             cconf.prefix ?: "", cconf.prefix ? " " : "",
@@ -699,9 +669,15 @@ void class_print(struct class *class, const struct cu *cu,
 //    cconf.indent = indent + 1;
 //    cconf.no_semicolon = 0;
 
+    if (node->var_type != POINTER){
+        node->var_type = STRUCT;
+    }
+
     class__infer_packed_attributes(class, cu);
 
     /* First look if we have DW_TAG_inheritance */
+    printf("\n>>>");
+    indent++;
     type__for_each_tag(type, tag_pos) {
 
 //        const char *accessibility;
@@ -725,11 +701,15 @@ void class_print(struct class *class, const struct cu *cu,
 //           printf(" %s", accessibility);
 
         struct tag *pos_type = cu__type(cu, tag_pos->type);
-        if (pos_type != NULL)
+        if (pos_type != NULL){
+            node->name = type__name(tag__type(pos_type));
             printf(" %s",
                  type__name(tag__type(pos_type)));
-        else
-            tag__id_not_found_fprintf(fp, tag_pos->type);
+        }
+        else{
+            printf("Class tag not found!");
+//            tag__id_not_found_fprintf(fp, tag_pos->type);
+        }
     }
 
 //    fprintf(fp, " {\n");
@@ -796,7 +776,7 @@ void class_print(struct class *class, const struct cu *cu,
 
 //                printf("%.*s", cconf.indent, tabs);
                 printf(" print type");
-                print_type(pos_type, cu, NULL, conf);
+                parse_type(pos_type, cu, NULL, node);
 //                type__fprintf(pos_type, cu, "", &cconf, fp);
                 printf(":%u;\n", bitfield_size);
             }
@@ -821,7 +801,7 @@ void class_print(struct class *class, const struct cu *cu,
         size = pos->byte_size;
 //        printf("%.*s", cconf.indent, tabs);
 //        printf("struct_member__fprintf ");
-        print_member(pos, false, pos_type, cu, &cconf);
+        parse_member(pos, false, pos_type, cu, &cconf, node);
 //        struct_member__fprintf(pos, pos_type, cu, &cconf, fp);
 
 
@@ -898,7 +878,7 @@ void class_print(struct class *class, const struct cu *cu,
             for (added_padding = 0; added_padding < class->padding; added_padding += size) {
 //                printed += fprintf(fp, "%.*s", cconf.indent, tabs);
                 printf(" print type");
-                print_type(tag_pos, cu, NULL, &cconf);
+                parse_type(tag_pos, cu, NULL, node);
                 printf(":%u;\n", bit_size);
             }
         }
@@ -906,104 +886,9 @@ void class_print(struct class *class, const struct cu *cu,
 
 //    if (!cconf.show_only_data_members)
 //        class__vtable_fprintf(class, &cconf, fp);
+    printf("\n<<<");
+    indent--;
 }
-
-//static void declaration_action__walk(const void *nodep, const VISIT which,
-//                                     const int depth __maybe_unused)
-//{
-//    uint32_t count = 0;
-//    struct tag *tag;
-//    const struct extvar *gvar = NULL;
-
-//    switch(which) {
-//    case preorder:
-//        break;
-//    case postorder:
-//        gvar = node__variable(nodep);
-//        break;
-//    case endorder:
-//        break;
-//    case leaf:
-//        gvar = node__variable(nodep);
-//        break;
-//    }
-
-//    if (gvar == NULL)
-//        return;
-
-//    tag = extvar__tag(gvar);
-
-//    struct conf_fprintf cfg = {0};
-//    cfg.expand_types = 1;
-//    //    cfg.expand_pointers = 1;
-//    cfg.rel_offset = 1;
-//    //    tag__fprintf(tag, gvar->cu, &cfg, stdout);
-
-//    //    for (pos = gvar->next; pos; pos = pos->next)
-//    //        count++;
-//    //    printf("; /* %u */\n\n", count);
-
-//    char name_buf[100];
-//    //    ++tag->recursivity_level;
-
-
-//    if (tag->tag == DW_TAG_variable){
-//        const struct variable *var = tag__variable(tag);
-//        const char *name = variable__name(var);
-//        const char *type_name = variable__type_name(var, gvar->cu, name_buf, 100);
-
-//        const struct tag *type_tag = cu__type(gvar->cu, var->ip.tag.type);
-//        int base_type = tag__is_base_type(type_tag, gvar->cu);
-//        printf("\ngot var %s %s %d %x : ",
-//               name,
-//               type_name,
-//               base_type,
-//               var->ip.addr);
-
-//        if (!base_type){
-//            //            typedef__fprintf(&var->ip.tag, gvar->cu, &cfg, stdout);
-//            //            tag__fprintf(tag, gvar->cu, &cfg, stdout);
-//            printf("\n");
-//            print_type(type_tag, gvar->cu, NULL, &cfg);
-//        }
-//    }
-//}
-
-
-//static void function_action__walk(const void *nodep, const VISIT which,
-//                  const int depth __maybe_unused)
-//{
-//	struct tag *tag;
-//	const struct extfun *gfun = NULL;
-
-//	switch(which) {
-//	case preorder:
-//		break;
-//	case postorder:
-//		gfun = node__function(nodep);
-//		break;
-//	case endorder:
-//		break;
-//	case leaf:
-//		gfun = node__function(nodep);
-//		break;
-//	}
-
-//	if (gfun == NULL)
-//		return;
-
-//	tag = extfun__tag(gfun);
-
-//	tag__fprintf(tag, gfun->cu, NULL, stdout);
-
-//	fputs("\n\n", stdout);
-//}
-
-//static void free_node(void *nodep)
-//{
-//	void **node = nodep;
-//	free(*node);
-//}
 
 
 int varloc(char* file){
@@ -1025,17 +910,13 @@ int varloc(char* file){
 	if (err != 0) {
         cus__fprintf_load_files_err(cus, "pglobal", file, err, stderr);
 		goto out_cus_delete;
-	}
+    }
 
-//	if (walk_var) {
-        cus__for_each_cu(cus, cu_extvar_iterator, NULL, NULL);
-//		twalk(tree, declaration_action__walk);
-//	} else if (walk_fun) {
-//		cus__for_each_cu(cus, cu_extfun_iterator, NULL, NULL);
-//		twalk(tree, function_action__walk);
-//	}
+    cus__for_each_cu(cus, cu_extvar_iterator, NULL, NULL);
 
-//	tdestroy(tree, free_node);
+    for_each_var_loop(tree_base, print_var_node);
+
+
     rc = EXIT_SUCCESS;
 out_cus_delete:
 	cus__delete(cus);

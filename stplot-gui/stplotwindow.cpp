@@ -97,6 +97,7 @@ void STPlotWindow::open_elf(){
 //        return;
 //    }
     std::cout << "Start variable locator" << std::endl;
-    varloc("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf");
+//    varloc("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf");
+    varloc("/home/kasper/firmware/hec/Drum_mulcher/HEC_reworked.elf");
     std::cout << "End variable locator" << std::endl;
 }
