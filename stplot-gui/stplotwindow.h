@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include "DockManager.h"
-
+extern "C" {
+#include "varloc.h"
+}
 QT_BEGIN_NAMESPACE
 namespace Ui { class STPlotWindow; }
 QT_END_NAMESPACE
@@ -18,6 +20,8 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
+    void for_each_var_loop(varloc_node_t* root, void (STPlotWindow::*func)(varloc_node_t*));
+    void insert_var_row(varloc_node_t* node);
 
 private:
     Ui::STPlotWindow *ui;

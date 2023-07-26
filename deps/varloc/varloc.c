@@ -14,12 +14,90 @@ char* varloc_node_types[] = {
     "ARRAY"
 };
 
+uint32_t var_loop_level;
+void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*)){
+    func(root);
+    if (root->child != NULL){
+        var_loop_level++;
+        for_each_var_loop(root->child, func);
+        var_loop_level--;
+    }
+    if (root->next != NULL){
+        for_each_var_loop(root->next, func);
+    }
+}
+
+void varloc_delete_tree(varloc_node_t* root){
+    if (root->child != NULL){
+        varloc_delete_tree(root->child);
+    }
+    if (root->next != NULL){
+        varloc_delete_tree(root->next);
+    }
+    free(root);
+}
+
+
+
+void print_var_node(varloc_node_t* var){
+    for (int i = 0; i < var_loop_level; i++){
+        printf("  ");
+    }
+    printf("%s %s %s base:%x off:%d size:%d sign:%d type:%d items:%d\n",
+           varloc_node_types[var->var_type],
+           var->name,
+           var->ctype_name,
+           var->address.base,
+           var->address.offset_bits,
+           var->address.size_bits,
+           var->is_signed,
+           var->type_size,
+           var->n_items
+           );
+}
 
 
 varloc_node_t* tree_base;
 //varloc_node_t class_node;
 //varloc_node_t member_node;
 int indent = 0;
+
+
+char* var_node_get_type_name(varloc_node_t* node){
+    return varloc_node_types[node->var_type];
+}
+
+
+varloc_node_t* var_node_get_parent(varloc_node_t* child){
+    if (child == NULL){
+        return NULL;
+    }
+    while (child->parent == NULL){
+        child = child->previous;
+        if (child == NULL){
+            return NULL;
+        }
+    }
+    return child->parent;
+}
+
+uint32_t var_node_get_address(varloc_node_t* node){
+    uint64_t offset = node->address.offset_bits;
+    varloc_node_t* parent = var_node_get_parent(node);
+    while (parent != NULL){
+        if (parent->address.base == 0){
+            offset += parent->address.offset_bits;
+            parent = var_node_get_parent(parent);
+        }
+        else{
+            // top level variable with address
+            offset += parent->address.base;
+            return offset;
+        }
+    }
+    return offset;
+
+}
 
 varloc_node_t* new_var_node(){
     varloc_node_t* ret = malloc(sizeof(*ret));
@@ -40,8 +118,10 @@ varloc_node_t* new_child(varloc_node_t* parent){
         exit(1);
     }
     else{
+        // if parent already has child link to child next
         if (parent->child == NULL){
             parent->child = child;
+            child->parent = parent;
         }
         else {
             varloc_node_t* node = parent->child;
@@ -49,6 +129,7 @@ varloc_node_t* new_child(varloc_node_t* parent){
                 node = node->next;
             }
             node->next = child;
+            child->previous = node;
         }
     }
     return child;
@@ -66,38 +147,6 @@ varloc_node_t* new_sibling(varloc_node_t* var){
     return sibling;
 }
 
-uint32_t var_loop_level;
-void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*)){
-    func(root);
-    if (root->child != NULL){
-        var_loop_level++;
-        for_each_var_loop(root->child, func);
-        var_loop_level--;
-    }
-    if (root->next != NULL){
-        for_each_var_loop(root->next, func);
-    }
-}
-
-
-
-void print_var_node(varloc_node_t* var){
-    for (int i = 0; i < var_loop_level; i++){
-        printf("  ");
-    }
-    printf("%s %s %s %x %d %d\n",
-           varloc_node_types[var->var_type],
-           var->name,
-           var->ctype_name,
-           var->address.base,
-           var->address.offset_bits,
-           var->address.size_bits
-           );
-}
-
-
-
-
 
 // hacked together some functions based on dwarves_fprintf.c
 
@@ -109,6 +158,9 @@ static void parse_type(struct tag *type, const struct cu *cu,
 static void parse_member(struct class_member *member, bool union_member,
                          struct tag *type, const struct cu *cu,
                          struct conf_fprintf *conf, varloc_node_t* node);
+
+static void parse_union(struct type *type, const struct cu *cu,
+                        const struct conf_fprintf *conf, varloc_node_t* node);
 
 static void parse_array(const struct tag *tag,
                         const struct cu *cu, const char *name,
@@ -174,33 +226,102 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
 
         const struct tag *type_tag = cu__type(cu, var->ip.tag.type);
         int base_type = tag__is_base_type(type_tag, cu);
-//        printf("\n\ngot var %s %s %d %x : ",
-//               name,
-//               type_name,
-//               base_type,
-//               var->ip.addr);
+        printf("\n\ngot var %s %s %d %x : ",
+               name,
+               type_name,
+               base_type,
+               var->ip.addr);
 
-        var_node->name = name;
-        var_node->address.base = var->ip.addr;
 
 
         if (last_var_node != NULL){
             last_var_node->next = var_node;
+            var_node->previous = last_var_node;
         }
         else{
             tree_base = var_node;
         }
         last_var_node = var_node;
 
-        if (!base_type){
+//        if (!base_type){
 //            printf("\n");
             parse_type(type_tag, cu, NULL, var_node);
-        }
-        else{
-            var_node->var_type = BASE;
+//        }
+//        else{
+//            var_node->var_type = BASE;
+//        }
+        var_node->name = name;
+        var_node->address.base = var->ip.addr;
+//        var_node->address.base = var->ip;
+    }
+}
+
+
+static void parse_union(struct type *type, const struct cu *cu,
+                             const struct conf_fprintf *conf, varloc_node_t* node)
+{
+    struct class_member *pos;
+    size_t printed = 0;
+    int indent = conf->indent;
+    struct conf_fprintf uconf;
+    uint32_t initial_union_cacheline;
+    uint32_t cacheline = 0; /* This will only be used if this is the outermost union */
+
+//    if (indent >= (int)sizeof(tabs))
+//        indent = sizeof(tabs) - 1;
+
+//    if (conf->prefix != NULL)
+//        printed += fprintf(fp, "%s ", conf->prefix);
+//    printed += fprintf(fp, "union%s%s {\n", type__name(type) ? " " : "",
+//                       type__name(type) ?: "");
+
+    uconf = *conf;
+    uconf.indent = indent + 1;
+
+    /*
+     * If structs embedded in unions, nameless or not, have a size which isn't
+     * isn't a multiple of the union size, then it must be packed, even if
+     * it has no holes nor padding, as an array of such unions would have the
+     * natural alignments of non-multiple structs inside it broken.
+     */
+    union__infer_packed_attributes(type, cu);
+
+    /*
+     * We may be called directly or from tag__fprintf, so keep sure
+     * we keep track of the cacheline we're in.
+     *
+     * If we're being called from an outer structure, i.e. union within
+     * struct, class or another union, then this will already have a
+     * value and we'll continue to use it.
+     */
+    if (uconf.cachelinep == NULL)
+        uconf.cachelinep = &cacheline;
+    /*
+     * Save the cacheline we're in, then, after each union member, get
+     * back to it. Else we'll end up showing cacheline boundaries in
+     * just the first of a multi struct union, for instance.
+     */
+    initial_union_cacheline = *uconf.cachelinep;
+    type__for_each_member(type, pos) {
+
+        struct tag *pos_type = cu__type(cu, pos->tag.type);
+
+        if (pos_type == NULL) {
+//            printed += fprintf(fp, "%.*s", uconf.indent, tabs);
+//            printed += tag__id_not_found_fprintf(fp, pos->tag.type);
+            continue;
         }
 
+        uconf.union_member = 1;
+        printf("%.*s", uconf.indent, tabs);
+        parse_member(pos, true, pos_type, cu, &uconf, node);
+//        fputc('\n', fp);
+        ++printed;
+        *uconf.cachelinep = initial_union_cacheline;
     }
+
+//    return printed + fprintf(fp, "%.*s}%s%s", indent, tabs,
+//                             conf->suffix ? " " : "", conf->suffix ?: "");
 }
 
 
@@ -237,8 +358,11 @@ static void parse_array(const struct tag *tag,
         } else {
             bool single_member = conf->last_member && conf->first_member;
 
-            if (at->nr_entries[i] != 0 || !conf->last_member || single_member || conf->union_member)
+            if (at->nr_entries[i] != 0 || !conf->last_member || single_member || conf->union_member){
                 printf("[%u]", at->nr_entries[i]);
+                node->n_items = at->nr_entries[i];
+            }
+
             else
                 printf("[]");
         }
@@ -254,8 +378,10 @@ static void parse_array(const struct tag *tag,
     } else if (conf->flat_arrays) {
         bool single_member = conf->last_member && conf->first_member;
 
-        if (flat_dimensions != 0 || !conf->last_member || single_member || conf->union_member)
+        if (flat_dimensions != 0 || !conf->last_member || single_member || conf->union_member){
             printf("[%llu]", flat_dimensions);
+            node->n_items = flat_dimensions;
+        }
         else
             printf("[]");
     }
@@ -421,7 +547,7 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
     };
     int expand_types = 1;
     int expand_pointers = 1;
-
+    node->address.size_bits = tag__size(type, cu);
     // expand pointers
     if (expand_pointers){
         int nr_indirections = 0;
@@ -478,10 +604,8 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
 //                printf(" -> %s", type__name(ctype));
 //            else {
             if(!typedef_expanded){
-                if(*name){
-                    strcpy(node->ctype_name, type__name(ctype));
-                    printf("%s ", type__name(ctype));
-                }
+                strcpy(node->ctype_name, type__name(ctype));
+                printf("%s ", type__name(ctype));
             }
             typedef_expanded++;
             type_type = cu__type(cu, type->type);
@@ -538,7 +662,6 @@ next_type:
                 name = namebfptr;
                 type = ptype;
                 tconf.type_spacing -= 8;
-                printf("POINTER HERE!\n");
                 goto inner_struct;
             }
         }
@@ -547,7 +670,7 @@ next_type:
     default:
     print_default:
         if ((node->var_type != POINTER)
-//        &&  (node->var_type != STRUCT)
+//        &&  (!(*node->name))
         ){
            node->name = name;
         }
@@ -588,17 +711,34 @@ next_type:
     case DW_TAG_structure_type:
         ctype = tag__type(type);
         struct class *cclass = tag__class(type);
-        if(*name){
-            printf("%s ", name);
-            node->name = name;
+        if (node->var_type != POINTER){
+            node->var_type = STRUCT;
+            if(*name){
+                printf("%s ", name);
+                node->name = name;
+            }
         }
         parse_class(cclass, cu, node);
         break;
     case DW_TAG_union_type:
-        node->var_type = UNION;
+        if (node->var_type != POINTER){
+            node->var_type = UNION;
+            if(*name){
+                printf("%s ", name);
+                node->name = name;
+            }
+        }
         ctype = tag__type(type);
-        printf("union__fprintf");
+        parse_union(ctype,cu, &tconf, node);
         break;
+    case DW_TAG_base_type:
+        node->var_type = BASE;
+        struct base_type* base = tag__base_type(type);
+        node->is_signed =  base->is_signed;
+        node->type_size =  base->bit_size;
+        node->name = name;
+        break;
+
     case DW_TAG_enumeration_type:
         node->var_type = ENUM;
         ctype = tag__type(type);
@@ -668,10 +808,6 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 
 //    cconf.indent = indent + 1;
 //    cconf.no_semicolon = 0;
-
-    if (node->var_type != POINTER){
-        node->var_type = STRUCT;
-    }
 
     class__infer_packed_attributes(class, cu);
 
@@ -891,9 +1027,9 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 }
 
 
-int varloc(char* file){
-	int err, rc = EXIT_FAILURE;
-	if (dwarves__init()) {
+varloc_node_t* varloc_open_elf(char* file){
+    varloc_node_t* ret = NULL;
+    if (dwarves__init()) {
 		fputs("pglobal: insufficient memory\n", stderr);
 		goto out;
 	}
@@ -906,22 +1042,20 @@ int varloc(char* file){
 		goto out_dwarves_exit;
 	}
 
-    err = cus__load_file(cus, &conf_load, file);
+    int err = cus__load_file(cus, &conf_load, file);
 	if (err != 0) {
         cus__fprintf_load_files_err(cus, "pglobal", file, err, stderr);
-		goto out_cus_delete;
+        goto out_cus_delete;
     }
 
     cus__for_each_cu(cus, cu_extvar_iterator, NULL, NULL);
+//    for_each_var_loop(tree_base, print_var_node);
+    ret = tree_base;
 
-    for_each_var_loop(tree_base, print_var_node);
-
-
-    rc = EXIT_SUCCESS;
 out_cus_delete:
-	cus__delete(cus);
+//	cus__delete(cus);
 out_dwarves_exit:
-	dwarves__exit();
+//	dwarves__exit();
 out:
-	return rc;
+    return ret;
 }

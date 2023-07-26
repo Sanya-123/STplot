@@ -33,17 +33,35 @@
 
  typedef struct varloc_s{
      struct varloc_s*   next;
+     struct varloc_s*   previous;
      struct varloc_s*   child;
+     struct varloc_s*   parent;
      char*              name;
      char               ctype_name[100];
      varloc_node_type_t var_type;
      varloc_address_t   address;
+     uint32_t           n_items;
+     uint8_t            type_size;
+     uint8_t            is_signed;
  }varloc_node_t;
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
-int varloc(char* file);
+
+ // parse elf file for static variables and return root node
+ varloc_node_t*  varloc_open_elf(char* file);
+
+ varloc_node_t* new_var_node();
+
+ varloc_node_t* var_node_get_parent(varloc_node_t* child);
+
+ char* var_node_get_type_name(varloc_node_t* node);
+
+ uint32_t var_node_get_address(varloc_node_t* node);
+
+ void varloc_delete_tree(varloc_node_t* root);
+
 
 #ifdef __cplusplus
 }

@@ -4,15 +4,17 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTimer>
+#include <QTreeView>
+#include <QFile>
 #include <iostream>
 #include <format>
+#include "varmodel.h"
 
 //#include <elfio/elfio_dump.hpp>
 
 extern "C" {
 #include "stlink.h"
 #include "usb.h"
-#include "varloc.h"
 // #include <chipid.h>
 // #include <helper.h>
 // #include "logging,h"
@@ -90,14 +92,42 @@ void STPlotWindow::connect(){
     // }
 }
 
+
+static uint32_t sym_n;
+void STPlotWindow::insert_var_row(varloc_node_t* node){
+    if(!(node->name)){
+        return;
+    }
+//    QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(node->name));
+//    this->ui->symbolTable->setItem(sym_n, 0, nameItem);
+//    QTableWidgetItem *valueItem = new QTableWidgetItem(QString::fromStdString(node->ctype_name));
+//    this->ui->symbolTable->setItem(sym_n, 1, valueItem);
+//    sym_n++;
+}
+
+
+void STPlotWindow::for_each_var_loop(varloc_node_t* root, void (STPlotWindow::*func)(varloc_node_t*)){
+    (this->*(func))(root);
+    if (root->child != NULL){
+        this->for_each_var_loop(root->child, func);
+    }
+    if (root->next != NULL){
+        this->for_each_var_loop(root->next, func);
+    }
+}
+
+
 void STPlotWindow::open_elf(){
 
-//    if ( !reader.load("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf") ) {
-//        std::cout << "File not found or it is not an ELF file\n";
-//        return;
-//    }
+
     std::cout << "Start variable locator" << std::endl;
-//    varloc("/home/kasper/firmware/slopehelper/inclinometer_v1_1/bootable/inclinometer_v1_1.elf");
-    varloc("/home/kasper/firmware/hec/Drum_mulcher/HEC_reworked.elf");
+
+    varloc_node_t* root = varloc_open_elf("/home/kasper/STM32CubeIDE/workspace_1.12.1/elf-test/Debug/elf-test.elf");
+//    this->for_each_var_loop(root, &STPlotWindow::insert_var_row);
+    VarModel *model = new VarModel(root);
+
+    this->ui->treeView->setModel(model);
+    this->ui->treeView->show();
+
     std::cout << "End variable locator" << std::endl;
 }

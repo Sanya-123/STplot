@@ -17,6 +17,8 @@ set(PROJECT_SOURCES
         stplotwindow.cpp
         stplotwindow.h
         stplotwindow.ui
+        varmodel.cpp
+        varmodel.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
