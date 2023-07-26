@@ -58,6 +58,10 @@
 
  char* var_node_get_type_name(varloc_node_t* node);
 
+ int var_node_get_child_index(varloc_node_t* child);
+
+ varloc_node_t* var_node_get_child_at_index(varloc_node_t* parent, uint32_t index);
+
  uint32_t var_node_get_address(varloc_node_t* node);
 
  void varloc_delete_tree(varloc_node_t* root);

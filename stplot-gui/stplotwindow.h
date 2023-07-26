@@ -2,6 +2,7 @@
 #define STPLOTWINDOW_H
 
 #include <QMainWindow>
+#include <QSortFilterProxyModel>
 #include "DockManager.h"
 extern "C" {
 #include "varloc.h"
@@ -26,10 +27,12 @@ protected:
 private:
     Ui::STPlotWindow *ui;
     ads::CDockManager* m_DockManager;
+    QSortFilterProxyModel *proxyModel;
 
 public slots:
     void connect();
     void open_elf();
+    void apply_filter(const QString &);
 
 };
 

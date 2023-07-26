@@ -6,10 +6,10 @@
 #include <QTimer>
 #include <QTreeView>
 #include <QFile>
+
 #include <iostream>
 #include <format>
 #include "varmodel.h"
-
 //#include <elfio/elfio_dump.hpp>
 
 extern "C" {
@@ -28,6 +28,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     , ui(new Ui::STPlotWindow)
 {
     ui->setupUi(this);
+    proxyModel = new QSortFilterProxyModel(this);
 
     // Create the dock manager. Because the parent parameter is a QMainWindow
     // the dock manager registers itself as the central widget.
@@ -65,6 +66,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     m_DockManager->addDockWidget(ads::BottomDockWidgetArea, DockWidget);
 
     QObject::connect(ui->pushButton, SIGNAL (clicked()), this, SLOT (open_elf()));
+    QObject::connect(ui->searchField, &QLineEdit::textChanged, this, &STPlotWindow::apply_filter);
 }
 
 STPlotWindow::~STPlotWindow()
@@ -87,8 +89,8 @@ void STPlotWindow::connect(){
     enum connect_type connect = CONNECT_HOT_PLUG;
     int32_t freq = 100000;
     sl = stlink_open_usb(UDEBUG, connect, NULL, freq);
-    // if (sl == NULL){ 
-    //     return(-1); 
+    // if (sl == NULL){
+    //     return(-1);
     // }
 }
 
@@ -116,6 +118,9 @@ void STPlotWindow::for_each_var_loop(varloc_node_t* root, void (STPlotWindow::*f
     }
 }
 
+void STPlotWindow::apply_filter(const QString & text){
+    proxyModel->setFilterFixedString(text);
+}
 
 void STPlotWindow::open_elf(){
 
@@ -126,7 +131,11 @@ void STPlotWindow::open_elf(){
 //    this->for_each_var_loop(root, &STPlotWindow::insert_var_row);
     VarModel *model = new VarModel(root);
 
-    this->ui->treeView->setModel(model);
+
+    proxyModel->setSourceModel(model);
+    proxyModel->setRecursiveFilteringEnabled(true);
+
+    this->ui->treeView->setModel(proxyModel);
     this->ui->treeView->show();
 
     std::cout << "End variable locator" << std::endl;

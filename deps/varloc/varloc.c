@@ -67,7 +67,6 @@ char* var_node_get_type_name(varloc_node_t* node){
     return varloc_node_types[node->var_type];
 }
 
-
 varloc_node_t* var_node_get_parent(varloc_node_t* child){
     if (child == NULL){
         return NULL;
@@ -80,6 +79,32 @@ varloc_node_t* var_node_get_parent(varloc_node_t* child){
     }
     return child->parent;
 }
+
+varloc_node_t* var_node_get_child_at_index(varloc_node_t* parent, uint32_t index){
+    varloc_node_t* child = parent->child;
+    for (uint_fast32_t i = 0; i < index; i++){
+        if(child != NULL){
+            child = child->next;
+        }
+        else{
+            return NULL;
+        }
+    }
+    return child;
+}
+
+int var_node_get_child_index(varloc_node_t* child){
+    int row_n = 0;
+    while(child->parent == NULL){
+        child = child->previous;
+        row_n++;
+        if (child == NULL){
+            return -1;
+        }
+    }
+    return row_n;
+}
+
 
 uint32_t var_node_get_address(varloc_node_t* node){
     uint64_t offset = node->address.offset_bits;
@@ -96,7 +121,6 @@ uint32_t var_node_get_address(varloc_node_t* node){
         }
     }
     return offset;
-
 }
 
 varloc_node_t* new_var_node(){
@@ -430,8 +454,8 @@ static void parse_member(struct class_member *member, bool union_member,
      */
 
     varloc_node_t *child = new_child(node);
-    child->address.offset_bits = offset;
-    child->address.size_bits = size;
+    child->address.offset_bits = (offset * 8) + member->bitfield_offset;
+    child->address.size_bits = (member->bitfield_size) ? (member->bitfield_size) : (size * 8);
 
     if (tag__is_union(type) || tag__is_struct(type) ||
         tag__is_enumeration(type))

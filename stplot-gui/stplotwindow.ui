@@ -27,9 +27,12 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>TextLabel</string>
+         <string>Search:</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="searchField"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox">

@@ -126,28 +126,19 @@ QModelIndex VarModel::index(int row, int column, const QModelIndex &parent) cons
     else
         parentNode = static_cast<varloc_node_t*>(parent.internalPointer());
 
-
-    childNode = parentNode->child;
+    childNode = var_node_get_child_at_index(parentNode, row);
     if (childNode == NULL){
         return QModelIndex();
     }
 
-    for (int i = 0; i < row; i++){
-        if(childNode != NULL){
-            childNode = childNode->next;
-        }
-        else{
-            return QModelIndex();
-        }
-    }
     return createIndex(row, column, childNode);
 }
 
 
 QModelIndex VarModel::parent(const QModelIndex &index) const
 {
-//    if (!index.isValid())
-//        return QModelIndex();
+    if (!index.isValid())
+        return QModelIndex();
 
     varloc_node_t *child = static_cast<varloc_node_t*>(index.internalPointer());
     varloc_node_t *parent = NULL;
@@ -161,35 +152,7 @@ QModelIndex VarModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 
-    // find first parent
-//    while(child->parent == NULL){
-//        child = child->previous;
-//        if (child == rootItem || child == NULL){
-//            return QModelIndex();
-//        }
-//    }
-
-//    parent = child->parent;
-//    if ((parent == rootItem)
-//    ||  (parent == NULL)
-//    ){
-//        return QModelIndex();
-//    }
-
-    // find parent row_n
-//    child = child->parent;
-
-    int row_n = 0;
-    while(child->parent == NULL){
-        child = child->previous;
-        row_n++;
-        if ((child == rootItem)
-            ||  (child == NULL)
-            ){
-            return QModelIndex();
-        }
-    }
-    return createIndex(row_n, 0, parent);
+    return createIndex(0, 0, parent);
 }
 
 
