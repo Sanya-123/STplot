@@ -10,6 +10,7 @@
 #include <iostream>
 #include <format>
 #include "varmodel.h"
+#include "varloader.h"
 //#include <elfio/elfio_dump.hpp>
 
 extern "C" {
@@ -28,7 +29,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     , ui(new Ui::STPlotWindow)
 {
     ui->setupUi(this);
-    proxyModel = new QSortFilterProxyModel(this);
+//    proxyModel = new QSortFilterProxyModel(this);
 
     // Create the dock manager. Because the parent parameter is a QMainWindow
     // the dock manager registers itself as the central widget.
@@ -46,27 +47,21 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     // Create a dock widget with the title Label 1 and set the created label
     // as the dock widget content
-    ads::CDockWidget* DockWidget = new ads::CDockWidget("Label 1");
+    ads::CDockWidget* DockWidget = new ads::CDockWidget("Test");
     DockWidget->setWidget(l);
+
+    VarLoader* varloader = new VarLoader();
+    ads::CDockWidget* DockWidget2 = new ads::CDockWidget("VarLoader");
+    DockWidget2->setWidget(varloader);
 
     // Add the toggleViewAction of the dock widget to the menu to give
     // the user the possibility to show the dock widget if it has been closed
     ui->menuView->addAction(DockWidget->toggleViewAction());
+    ui->menuView->addAction(DockWidget2->toggleViewAction());
 
 
-    // Add the dock widget to the top dock widget area
-    m_DockManager->addDockWidget(ads::TopDockWidgetArea, DockWidget);
-
-    // Create an example editor
-//    QPlainTextEdit* te = new QPlainTextEdit();
-//    te->setPlaceholderText("Please enter your text here into this QPlainTextEdit...");
-//    DockWidget = new ads::CDockWidget("Editor 1");
-//    DockWidget->setWidget(te);
-    ui->menuView->addAction(DockWidget->toggleViewAction());
-    m_DockManager->addDockWidget(ads::BottomDockWidgetArea, DockWidget);
-
-    QObject::connect(ui->pushButton, SIGNAL (clicked()), this, SLOT (open_elf()));
-    QObject::connect(ui->searchField, &QLineEdit::textChanged, this, &STPlotWindow::apply_filter);
+    m_DockManager->addDockWidget(ads::RightDockWidgetArea, DockWidget);
+    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
 }
 
 STPlotWindow::~STPlotWindow()
@@ -94,7 +89,7 @@ void STPlotWindow::connect(){
     // }
 }
 
-
+#if 0
 static uint32_t sym_n;
 void STPlotWindow::insert_var_row(varloc_node_t* node){
     if(!(node->name)){
@@ -120,6 +115,7 @@ void STPlotWindow::for_each_var_loop(varloc_node_t* root, void (STPlotWindow::*f
 
 void STPlotWindow::apply_filter(const QString & text){
     proxyModel->setFilterFixedString(text);
+//    this->ui->treeView->expandAll();
 }
 
 void STPlotWindow::open_elf(){
@@ -140,3 +136,4 @@ void STPlotWindow::open_elf(){
 
     std::cout << "End variable locator" << std::endl;
 }
+#endif

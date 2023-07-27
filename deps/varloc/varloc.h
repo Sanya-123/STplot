@@ -36,7 +36,7 @@
      struct varloc_s*   previous;
      struct varloc_s*   child;
      struct varloc_s*   parent;
-     char*              name;
+     char               name[100];
      char               ctype_name[100];
      varloc_node_type_t var_type;
      varloc_address_t   address;

@@ -19,6 +19,9 @@ set(PROJECT_SOURCES
         stplotwindow.ui
         varmodel.cpp
         varmodel.h
+        windows/varloader.h
+        windows/varloader.cpp
+        windows/varloader.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -59,6 +62,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${STLINK_PATH}/inc
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
+    windows/
   )
 
 

@@ -1077,9 +1077,9 @@ varloc_node_t* varloc_open_elf(char* file){
     ret = tree_base;
 
 out_cus_delete:
-//	cus__delete(cus);
+    cus__delete(cus);
 out_dwarves_exit:
-//	dwarves__exit();
+    dwarves__exit();
 out:
     return ret;
 }
