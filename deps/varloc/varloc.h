@@ -66,6 +66,7 @@
 
  void varloc_delete_tree(varloc_node_t* root);
 
+ void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*));
 
 #ifdef __cplusplus
 }

@@ -1,49 +1,92 @@
 #include "varmodel.h"
 #include <QStringList>
 
-VarModel::VarModel(varloc_node_t *root, QObject *parent)
+VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
     rootItem = new_var_node();
-    rootItem->name = "variables";
-    rootItem->child = root;
+    rootItem->child = NULL;
 }
 
 VarModel::~VarModel()
 {
-    varloc_delete_tree(rootItem);
 }
 
+void VarModel::setModelRoot(varloc_node_t *root){
+    rootItem->child = root;
+    selection_map.clear();
+}
+
+varloc_node_t* VarModel::getModelRoot(){
+    return rootItem->child;
+}
 
 int VarModel::columnCount(const QModelIndex &parent) const
 {
     return 5;
-//    varloc_node_t *node = NULL;
-//    int count = 0;
-//    if (parent.isValid()){
-//        node = static_cast<varloc_node_t*>(parent.internalPointer());
-//    }
-//    else{
-//        node = rootItem;
-//    }
-
-//    while(node->next){
-//        count++;
-//        node = node->next;
-//    }
-//    return count;
 }
 
+void VarModel::select_node(varloc_node_t* node)
+{
+    this->selection_map[node] = true;
+}
+
+void VarModel::deselect_node(varloc_node_t* node)
+{
+    this->selection_map[node] = false;
+}
+
+void VarModel::apply_for_each_child(varloc_node_t* root,
+                                    void (VarModel::*func)(varloc_node_t*))
+{
+    if (root == NULL){
+        return;
+    }
+    (this->*(func))(root);
+     if (root->child != NULL){
+         this->apply_for_each_child(root->child, func);
+     }
+     if (root->next != NULL){
+         this->apply_for_each_child(root->next, func);
+     }
+}
+
+bool VarModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if ((role != Qt::EditRole) && (role != Qt::CheckStateRole)){
+        return false;
+    }
+
+    varloc_node_t *item = static_cast<varloc_node_t*>(index.internalPointer());
+
+    if (index.column() == 0){
+        if(value.toBool()){
+            this->select_node(item);
+            this->apply_for_each_child(item->child, &VarModel::select_node);
+        }
+        else{
+            this->deselect_node(item);
+            this->apply_for_each_child(item->child, &VarModel::deselect_node);
+        }
+       emit dataChanged(index, this->index(index.row()+1, index.column(), this->parent(index)), {Qt::DisplayRole, Qt::EditRole});
+        return true;
+    }
+    return false;
+}
 
 QVariant VarModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
+    varloc_node_t *item = static_cast<varloc_node_t*>(index.internalPointer());
+
+    if ( role == Qt::CheckStateRole && index.column() == 0 )
+        return static_cast< int >( selection_map[item] ? Qt::Checked : Qt::Unchecked );
+
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    varloc_node_t *item = static_cast<varloc_node_t*>(index.internalPointer());
     if (index.column() == 0){
         if ((item->name == NULL)
             //        || (item->name[0] = '\0')
@@ -65,7 +108,9 @@ QVariant VarModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (index.column() == 2){
-        return QVariant(var_node_get_address(item));
+
+        QString res = QString("%1").arg(var_node_get_address(item), 8, 16, QLatin1Char( '0' ));
+        return QVariant(res);
     }
     else if (index.column() == 3){
         return QVariant(item->address.size_bits);
@@ -80,10 +125,20 @@ QVariant VarModel::data(const QModelIndex &index, int role) const
 
 Qt::ItemFlags VarModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
-        return Qt::NoItemFlags;
 
-    return QAbstractItemModel::flags(index);
+    if (!index.isValid())
+        return 0;
+    varloc_node_t *item = static_cast<varloc_node_t*>(index.internalPointer());
+    Qt::ItemFlags flags;
+//    if (item->var_type == BASE){
+        flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+        if ( index.column() == 0 )
+            flags |= Qt::ItemIsUserCheckable;
+//    }
+//    else{
+//        flags = 0;
+//    }
+    return flags;
 }
 
 
@@ -110,6 +165,28 @@ QVariant VarModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
+
+QMap<varloc_node_t*, bool> & VarModel::get_selected_nodes(){
+    QMap<varloc_node_t*, bool> &ref = selection_map;
+    return ref;
+}
+
+
+//QString* VarModel::get_node_uniqe_name(varloc_node_t *node){
+//    QString *name = new QString(node->name);
+//    varloc_node_t * parent = var_node_get_parent(node);
+//    while (parent != NULL){
+//        name->prepend(".");
+//        name->prepend(parent->name);
+//        parent = var_node_get_parent(parent);
+//    }
+//    return name;
+//}
+
+void VarModel::deselect_all(){
+    this->apply_for_each_child(rootItem->child, &VarModel::deselect_node);
+    emit dataChanged(QModelIndex(), QModelIndex(), {Qt::DisplayRole, Qt::EditRole});
+}
 
 QModelIndex VarModel::index(int row, int column, const QModelIndex &parent) const
 {

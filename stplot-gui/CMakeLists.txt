@@ -17,11 +17,23 @@ set(PROJECT_SOURCES
         stplotwindow.cpp
         stplotwindow.h
         stplotwindow.ui
-        varmodel.cpp
-        varmodel.h
-        windows/varloader.h
-        windows/varloader.cpp
-        windows/varloader.ui
+        widgets/VarLoader/varloader.h
+        widgets/VarLoader/varloader.cpp
+        widgets/VarLoader/varloader.ui
+        widgets/VarLoader/varmodel.cpp
+        widgets/VarLoader/varmodel.h
+        widgets/ChannelsList/channelmodel.h
+        widgets/ChannelsList/channelmodel.cpp
+        widgets/ChannelsList/channels.h
+        widgets/ChannelsList/channels.cpp
+        widgets/ChannelsList/channels.ui
+        widgets/ViewManager/viewmanager.h
+        widgets/ViewManager/viewmanager.cpp
+        widgets/ViewManager/viewmanager.ui
+        modules/VarChannel/varchannel.h
+        modules/VarChannel/varchannel.cpp
+        modules/VarView/varview.cpp
+        modules/VarView/varview.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -57,12 +69,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
    ${CMAKE_SOURCE_DIR}/deps/varloc
     ${STLINK_PATH}/src/stlink-lib
-    # ${STLINK_PATH}/src/stlink-lib/
     ${LIBUSB_INCLUDE_DIR}
     ${STLINK_PATH}/inc
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
-    windows/
+    modules/VarModel
+    modules/VarChannel
+    widgets/VarLoader
+    widgets/ChannelsList
+    widgets/ViewManager/
   )
 
 

@@ -21,18 +21,13 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
-//    void for_each_var_loop(varloc_node_t* root, void (STPlotWindow::*func)(varloc_node_t*));
-//    void insert_var_row(varloc_node_t* node);
 
 private:
     Ui::STPlotWindow *ui;
     ads::CDockManager* m_DockManager;
-//    QSortFilterProxyModel *proxyModel;
 
 public slots:
     void connect();
-//    void open_elf();
-//    void apply_filter(const QString &);
 
 };
 
