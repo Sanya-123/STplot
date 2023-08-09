@@ -7,6 +7,11 @@
 extern "C" {
 #include "varloc.h"
 }
+#include "varloader.h"
+#include "channels.h"
+#include "viewmanager.h"
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class STPlotWindow; }
 QT_END_NAMESPACE
@@ -19,15 +24,16 @@ public:
     STPlotWindow(QWidget *parent = nullptr);
     ~STPlotWindow();
 
-protected:
-    virtual void closeEvent(QCloseEvent *event) override;
+public slots:
+    void connect();
+
 
 private:
     Ui::STPlotWindow *ui;
-    ads::CDockManager* m_DockManager;
-
-public slots:
-    void connect();
+//    ads::CDockManager* m_DockManager;
+    Channels* channelsView;
+    VarLoader* varloader;
+    ViewManager* viewManager;
 
 };
 

@@ -12,8 +12,9 @@ VarLoader::VarLoader(QWidget *parent) :
 {
     ui->setupUi(this);
     proxyModel = new QSortFilterProxyModel(this);
-    varModel = new VarModel();
-    QObject::connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::open_elf);
+    varModel = new VarModel(this);
+    QObject::connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::open_elf);
+    QObject::connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::load_elf);
     QObject::connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::add_variables);
     QObject::connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expand_tree);
     QObject::connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapse_tree);
@@ -32,6 +33,16 @@ VarLoader::~VarLoader()
     delete varModel;
 }
 
+void VarLoader::saveSettings(QSettings *settings)
+{
+    settings->setValue("elffile", ui->lineEdit_file->text());
+}
+
+void VarLoader::restoreSettings(QSettings *settings)
+{
+    ui->lineEdit_file->setText(settings->value("elffile").toString());
+}
+
 void VarLoader::expand_tree(){
     ui->treeView->expandAll();
 }
@@ -45,7 +56,8 @@ void VarLoader::apply_filter(const QString & text){
 }
 
 
-void VarLoader::add_variables(){
+void VarLoader::add_variables()
+{
     QMap<varloc_node_t*, bool> &selection_map = varModel->get_selected_nodes();
     QMap<varloc_node_t*, bool>::const_iterator i = selection_map.constBegin();
     while (i != selection_map.constEnd()) {
@@ -61,30 +73,25 @@ void VarLoader::add_variables(){
 
 }
 
-
-#define TESTING 1
-void VarLoader::open_elf(){
-#if !TESTING
+void VarLoader::open_elf()
+{
     QString fileName = QFileDialog::getOpenFileName(this,
-                    tr("ELF file"), NULL, tr("ELF Files (*.elf)"));
-    if (fileName.isEmpty()){
-        return;
+                    tr("ELF file"), ui->lineEdit_file->text(), tr("ELF Files (*.elf)"));
+    if (!fileName.isEmpty())
+    {
+        ui->lineEdit_file->setText(fileName);
     }
-#else
-    QString fileName = NULL;
-#endif
-    this->load_variables(fileName);
 }
 
+void VarLoader::load_elf()
+{
+    load_variables(ui->lineEdit_file->text());
+}
 
-void VarLoader::load_variables(const QString & fileName){
-
-#if TESTING
-    char* filepath = "/home/kasper/STM32CubeIDE/workspace_1.12.1/elf-test/Debug/elf-test.elf";
-#else
+void VarLoader::load_variables(const QString & fileName)
+{
     QByteArray ba = fileName.toLocal8Bit();
     char *filepath = ba.data();
-#endif
     if (varModel->getModelRoot() != NULL){
         ui->treeView->hide();
         ui->treeView->setModel(NULL);
@@ -97,7 +104,6 @@ void VarLoader::load_variables(const QString & fileName){
     if (tree_root == NULL){
         return;
     }
-    ui->label->setText(fileName);
     varModel->setModelRoot(tree_root);
     proxyModel->setSourceModel(varModel);
     proxyModel->setRecursiveFilteringEnabled(true);

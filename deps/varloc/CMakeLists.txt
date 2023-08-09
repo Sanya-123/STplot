@@ -8,7 +8,7 @@ project(
 
 
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(dwarves/)
+add_subdirectory(dwarves)
 
 
 add_library(varloc STATIC varloc.c varloc.h)

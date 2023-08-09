@@ -22,6 +22,16 @@ Channels::~Channels()
     delete m_channelModel;
 }
 
+void Channels::saveSettings(QSettings *settings)
+{
+
+}
+
+void Channels::restoreSettings(QSettings *settings)
+{
+
+}
+
 
 void Channels::add_channel(varloc_node_t* node){
     for (int i = 0; i < m_channels->size(); ++i) {

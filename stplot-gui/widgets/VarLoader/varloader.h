@@ -7,6 +7,8 @@
 extern "C" {
 #include "varloc.h"
 }
+#include <QSettings>
+
 namespace Ui {
 class VarLoader;
 }
@@ -18,15 +20,15 @@ class VarLoader : public QWidget
 public:
     explicit VarLoader(QWidget *parent = nullptr);
     ~VarLoader();
+
+    void saveSettings(QSettings *settings);
+    void restoreSettings(QSettings *settings);
+
     void load_variables(const QString &);
 
-private:
-    Ui::VarLoader *ui;
-    QSortFilterProxyModel *proxyModel;
-    VarModel *varModel;
-
-public slots:
+private slots:
     void open_elf();
+    void load_elf();
     void add_variables();
     void apply_filter(const QString &);
     void collapse_tree();
@@ -34,6 +36,11 @@ public slots:
 
 signals:
     void variable_added(varloc_node_t*);
+
+private:
+    Ui::VarLoader *ui;
+    QSortFilterProxyModel *proxyModel;
+    VarModel *varModel;
 };
 
 #endif // VARLOADER_H

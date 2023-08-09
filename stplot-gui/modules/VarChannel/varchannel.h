@@ -6,13 +6,7 @@
 #include <chrono>
 
 #include "varloc.h"
-using time_stamp = std::chrono::time_point<std::chrono::system_clock,
-                                           std::chrono::microseconds>;
-
-typedef struct {
-    float value;
-    time_stamp time;
-}VarValue;
+#include "plotinterface.h"
 
 
 class VarChannel

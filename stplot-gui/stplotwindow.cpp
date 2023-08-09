@@ -6,9 +6,11 @@
 #include <QTimer>
 #include <QTreeView>
 #include <QFile>
+#include <QSettings>
+#include <QDebug>
 
-#include <iostream>
-#include <format>
+//#include <iostream>
+//#include <format>
 #include "varmodel.h"
 #include "varloader.h"
 //#include <elfio/elfio_dump.hpp>
@@ -31,49 +33,89 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->setupUi(this);
 //    proxyModel = new QSortFilterProxyModel(this);
 
-    // Create the dock manager. Because the parent parameter is a QMainWindow
-    // the dock manager registers itself as the central widget.
-    QVBoxLayout* Layout = new QVBoxLayout(ui->dockContainer);
-    Layout->setContentsMargins(QMargins(0, 0, 0, 0));
-    m_DockManager = new ads::CDockManager(ui->dockContainer);
-    Layout->addWidget(m_DockManager);
+//    // Create the dock manager. Because the parent parameter is a QMainWindow
+//    // the dock manager registers itself as the central widget.
+//    QVBoxLayout* Layout = new QVBoxLayout(ui->dockContainer);
+//    Layout->setContentsMargins(QMargins(0, 0, 0, 0));
+//    m_DockManager = new ads::CDockManager(ui->dockContainer);
+//    Layout->addWidget(m_DockManager);
 
-    Channels* channels_view = new Channels();
-    ads::CDockWidget* DockWidget1 = new ads::CDockWidget("Channels");
-    DockWidget1->setWidget(channels_view);
+    ads::CDockWidget* dockWidgetChanaleWivw = new ads::CDockWidget("Channels");
+    channelsView = new Channels(dockWidgetChanaleWivw);
+    dockWidgetChanaleWivw->setWidget(channelsView);
 
-    VarLoader* varloader = new VarLoader();
-    ads::CDockWidget* DockWidget2 = new ads::CDockWidget("VarLoader");
-    DockWidget2->setWidget(varloader);
+    ads::CDockWidget* dockWidgetVarLoader = new ads::CDockWidget("VarLoader");
+    varloader = new VarLoader(dockWidgetVarLoader);
+    dockWidgetVarLoader->setWidget(varloader);
+
+    ads::CDockWidget* dockWidgetViwManager = new ads::CDockWidget("ViewManager");
+    viewManager = new ViewManager(dockWidgetViwManager);
+    dockWidgetViwManager->setWidget(viewManager);
 
     // Add the toggleViewAction of the dock widget to the menu to give
     // the user the possibility to show the dock widget if it has been closed
-    ui->menuView->addAction(DockWidget1->toggleViewAction());
-    ui->menuView->addAction(DockWidget2->toggleViewAction());
+    ui->menuView->addAction(dockWidgetChanaleWivw->toggleViewAction());
+    ui->menuView->addAction(dockWidgetVarLoader->toggleViewAction());
+    ui->menuView->addAction(dockWidgetViwManager->toggleViewAction());
 
 
-    m_DockManager->addDockWidget(ads::RightDockWidgetArea, DockWidget1);
+    ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
 //    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
-    m_DockManager->addDockWidgetFloating(DockWidget2);
-    DockWidget2->toggleViewAction();
+    ui->dockContainer->addDockWidgetFloating(dockWidgetVarLoader);
+    ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
-    QObject::connect(varloader, &VarLoader::variable_added, channels_view, &Channels::add_channel);
+    QObject::connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
+
+    //restore settings
+    QSettings settings("STdebuger", "STplotDebuger");
+    restoreGeometry(settings.value("windows/geometry").toByteArray());
+    restoreState(settings.value("windows/state").toByteArray());
+    ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
+
+    settings.beginGroup("channels");
+    channelsView->restoreSettings(&settings);
+    settings.endGroup();
+
+    settings.beginGroup("varloader");
+    varloader->restoreSettings(&settings);
+    settings.endGroup();
+
+    settings.beginGroup("viewmanager");
+    viewManager->restoreSettings(&settings);
+    settings.endGroup();
 }
 
 STPlotWindow::~STPlotWindow()
 {
+    //save settings
+    QSettings settings("STdebuger", "STplotDebuger");
+    settings.setValue("windows/state", saveState());
+    settings.setValue("windows/geometry", saveGeometry());
+    settings.setValue("windows/docker/state", ui->dockContainer->saveState());
+    //chanale
+    settings.beginGroup("channels");
+    channelsView->saveSettings(&settings);
+    settings.endGroup();
+    //varloader
+    settings.beginGroup("varloader");
+    varloader->saveSettings(&settings);
+    settings.endGroup();
+    //
+    settings.beginGroup("viewmanager");
+    viewManager->saveSettings(&settings);
+    settings.endGroup();
     delete ui;
 }
 
 
-void STPlotWindow::closeEvent(QCloseEvent *event)
-{
-    QMainWindow::closeEvent(event);
-    if (m_DockManager)
-    {
-        m_DockManager->deleteLater();
-    }
-}
+//void STPlotWindow::closeEvent(QCloseEvent *event)
+//{
+//    QMainWindow::closeEvent(event);
+//    if (m_DockManager)
+//    {
+//        m_DockManager->deleteLater();
+//    }
+//}
 
 void STPlotWindow::connect(){
     stlink_t* sl = NULL;

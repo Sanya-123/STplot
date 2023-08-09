@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
         modules/VarChannel/varchannel.cpp
         modules/VarView/varview.cpp
         modules/VarView/varview.h
+        modules/ViewManager/plotinterface.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -75,6 +76,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules/VarModel
     modules/VarChannel
+    modules/ViewManager
     widgets/VarLoader
     widgets/ChannelsList
     widgets/ViewManager/

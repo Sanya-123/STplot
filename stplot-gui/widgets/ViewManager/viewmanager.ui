@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>514</height>
+    <width>375</width>
+    <height>210</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,33 +15,95 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QListView" name="listView"/>
+    <widget class="QTableWidget" name="tableWidget_availebleWidgets">
+     <row>
+      <property name="text">
+       <string>0</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>3</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>4</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>viewes</string>
+      </property>
+     </column>
+     <item row="0" column="0">
+      <property name="text">
+       <string>a</string>
+      </property>
      </item>
-    </layout>
+     <item row="1" column="0">
+      <property name="text">
+       <string>d</string>
+      </property>
+     </item>
+     <item row="2" column="0">
+      <property name="text">
+       <string>123</string>
+      </property>
+     </item>
+     <item row="3" column="0">
+      <property name="text">
+       <string>v</string>
+      </property>
+     </item>
+     <item row="4" column="0">
+      <property name="text">
+       <string>s</string>
+      </property>
+     </item>
+    </widget>
    </item>
    <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QComboBox" name="comboBox"/>
+      <widget class="QComboBox" name="comboBox_typeView"/>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QPushButton" name="pushButton_addView">
        <property name="text">
-        <string>CheckBox</string>
+        <string>add</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QPushButton" name="pushButton_deleteViewes">
        <property name="text">
-        <string>TextLabel</string>
+        <string>delete selected</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="listWidget"/>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
