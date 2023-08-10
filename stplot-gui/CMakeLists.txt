@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -35,6 +35,7 @@ set(PROJECT_SOURCES
         modules/VarView/varview.cpp
         modules/VarView/varview.h
         modules/ViewManager/plotinterface.h
+        modules/ViewManager/plotwidgetabstract.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -82,9 +83,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ViewManager/
   )
 
+add_subdirectory(PlotPluginsDir)
+
 
 target_link_libraries(stplot-gui PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::SerialPort
+    Qt${QT_VERSION_MAJOR}::PrintSupport
     qtadvanceddocking
     xcb
     stlink-static

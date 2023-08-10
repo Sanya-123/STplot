@@ -4,6 +4,11 @@
 #include <QWidget>
 #include <QSettings>
 #include "plotinterface.h"
+#include "DockManager.h"
+
+QT_BEGIN_NAMESPACE
+class QMenu;
+QT_END_NAMESPACE
 
 #define MINIMUM_PLUGIN_PLOT_HEADER_VERSION          0x00000000
 
@@ -22,11 +27,18 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
 
+    void setDockContainer(ads::CDockManager *newDockContainer);
+    void setMenuView(QMenu *newMenuView);
+
+
+signals:
+    //TODO add update list graphsignals
+
 private:
     void loadPlugin();
 
 private slots:
-    void on_tableWidget_cellChanged(int row, int column);
+    void on_tableWidget_availebleWidgets_cellChanged(int row, int column);
 
     void on_pushButton_addView_clicked();
 
@@ -35,7 +47,9 @@ private slots:
 private:
     Ui::ViewManager *ui;
     QList<PlotWidgetInterfacePlugin*> pluginsPlot;
-    QList<PlotWidgetAbstract*> listPlots;
+    QList<QPair<PlotWidgetAbstract*, ads::CDockWidget*>> listPlots;//list ow widgets plot and docker widgets for remove
+    ads::CDockManager *dockContainer;
+    QMenu *menuView;
 };
 
 #endif // VIEWMANAGER_H

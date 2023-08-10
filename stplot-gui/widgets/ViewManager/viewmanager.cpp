@@ -3,12 +3,19 @@
 #include <QDebug>
 #include <QDir>
 #include <QPluginLoader>
+#include <QMenu>
 
 ViewManager::ViewManager(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ViewManager)
+    ui(new Ui::ViewManager), dockContainer(nullptr), menuView(nullptr)
 {
     ui->setupUi(this);
+    loadPlugin();
+    //add availeble graph to cobobocx
+    for(int i = 0 ; i < pluginsPlot.size(); i++)
+    {
+        ui->comboBox_typeView->addItem(pluginsPlot[i]->getName());
+    }
 }
 
 ViewManager::~ViewManager()
@@ -24,6 +31,16 @@ void ViewManager::saveSettings(QSettings *settings)
 void ViewManager::restoreSettings(QSettings *settings)
 {
 
+}
+
+void ViewManager::setDockContainer(ads::CDockManager *newDockContainer)
+{
+    dockContainer = newDockContainer;
+}
+
+void ViewManager::setMenuView(QMenu *newMenuView)
+{
+    menuView = newMenuView;
 }
 
 void ViewManager::loadPlugin()
@@ -85,23 +102,61 @@ void ViewManager::loadPlugin()
                 qDebug() << "unload plugin:" << fileName;
                 pluginLoader.unload();
             }
-
         }
     }
 }
 
-void ViewManager::on_tableWidget_cellChanged(int row, int column)
+void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int column)
 {
-    qDebug() << "change:" << row << column;
+    if(row >= 0 && row < listPlots.size())
+    {
+        QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
+        listPlots[row].first->setName(newName);
+        listPlots[row].second->setWindowTitle(newName);
+    }
 }
 
 void ViewManager::on_pushButton_addView_clicked()
 {
+    int numberRow = ui->tableWidget_availebleWidgets->rowCount();
+    if(ui->comboBox_typeView->currentIndex() >= 0 && ui->comboBox_typeView->currentIndex() < pluginsPlot.size())
+    {
+        //get selected plugin
+        PlotWidgetInterfacePlugin* plotType = pluginsPlot[ui->comboBox_typeView->currentIndex()];
 
+        //create widgets for gui
+        ads::CDockWidget* widgetDocker = new ads::CDockWidget("_");
+        PlotWidgetAbstract *widgetPlot = plotType->createWidgetPlot(widgetDocker);
+        widgetDocker->setWidget(widgetPlot);
+        if(dockContainer != nullptr)
+            dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
+
+        if(menuView != nullptr)
+            menuView->addAction(widgetDocker->toggleViewAction());
+
+        listPlots.append(qMakePair(widgetPlot, widgetDocker));
+
+        ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
+        ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(plotType->getName() + "_" +
+                                                      QString::number(numberRow)));
+    }
 }
 
 void ViewManager::on_pushButton_deleteViewes_clicked()
 {
+    QList<QTableWidgetItem*> iteams = ui->tableWidget_availebleWidgets->selectedItems();
 
+    for(int i = 0; i < iteams.size(); i++)
+    {
+        int numberElement = ui->tableWidget_availebleWidgets->row(iteams[i]);
+        //remove from menu
+        if(menuView != nullptr)
+            menuView->removeAction(listPlots[numberElement].second->toggleViewAction());
+        //remove from docker
+        if(dockContainer != nullptr)
+            dockContainer->removeDockWidget(listPlots[numberElement].second);
+        listPlots.removeAt(numberElement);
+        ui->tableWidget_availebleWidgets->removeRow(numberElement);
+    }
 }
 

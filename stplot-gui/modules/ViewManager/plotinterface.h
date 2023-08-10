@@ -48,6 +48,7 @@ typedef struct {
  */
 class PlotWidgetAbstract : public QWidget
 {
+    Q_OBJECT
 public:
     PlotWidgetAbstract(QWidget *parent = nullptr) :QWidget(parent) {}
     /**
@@ -100,7 +101,7 @@ public:
      * @brief getWidgets - make new plot widget
      * @return - plot widget (alocate new QWidget)
      */
-    virtual PlotWidgetAbstract* createWidget(QWidget *parent = nullptr) = 0;
+    virtual PlotWidgetAbstract* createWidgetPlot(QWidget *parent = nullptr) = 0;
 
     /**
      * @brief getName - get plugin name

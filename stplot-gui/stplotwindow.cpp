@@ -61,10 +61,13 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
 //    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
-    ui->dockContainer->addDockWidgetFloating(dockWidgetVarLoader);
+    ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetVarLoader);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
     QObject::connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
+
+    viewManager->setDockContainer(ui->dockContainer);
+    viewManager->setMenuView(ui->menuView);
 
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");

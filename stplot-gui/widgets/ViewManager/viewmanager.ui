@@ -16,61 +16,11 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QTableWidget" name="tableWidget_availebleWidgets">
-     <row>
-      <property name="text">
-       <string>0</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>1</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>2</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>3</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>4</string>
-      </property>
-     </row>
      <column>
       <property name="text">
        <string>viewes</string>
       </property>
      </column>
-     <item row="0" column="0">
-      <property name="text">
-       <string>a</string>
-      </property>
-     </item>
-     <item row="1" column="0">
-      <property name="text">
-       <string>d</string>
-      </property>
-     </item>
-     <item row="2" column="0">
-      <property name="text">
-       <string>123</string>
-      </property>
-     </item>
-     <item row="3" column="0">
-      <property name="text">
-       <string>v</string>
-      </property>
-     </item>
-     <item row="4" column="0">
-      <property name="text">
-       <string>s</string>
-      </property>
-     </item>
     </widget>
    </item>
    <item row="0" column="1">
