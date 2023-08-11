@@ -68,6 +68,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     viewManager->setDockContainer(ui->dockContainer);
     viewManager->setMenuView(ui->menuView);
+    viewManager->setChanales(channelsView);
 
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");

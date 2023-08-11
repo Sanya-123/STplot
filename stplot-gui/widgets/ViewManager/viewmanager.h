@@ -5,6 +5,7 @@
 #include <QSettings>
 #include "plotinterface.h"
 #include "DockManager.h"
+#include "channels.h"
 
 QT_BEGIN_NAMESPACE
 class QMenu;
@@ -29,7 +30,7 @@ public:
 
     void setDockContainer(ads::CDockManager *newDockContainer);
     void setMenuView(QMenu *newMenuView);
-
+    void setChanales(Channels *newChanales);
 
 signals:
     //TODO add update list graphsignals
@@ -50,6 +51,7 @@ private:
     QList<QPair<PlotWidgetAbstract*, ads::CDockWidget*>> listPlots;//list ow widgets plot and docker widgets for remove
     ads::CDockManager *dockContainer;
     QMenu *menuView;
+    Channels *chanales;
 };
 
 #endif // VIEWMANAGER_H

@@ -23,6 +23,9 @@ public:
 
 public slots:
     void add_channel(varloc_node_t* node);
+    void addPlot();
+    void deletePlot(int number);
+    void setPlotName(int number, QString name);
 
 private:
     Ui::Channels *ui;

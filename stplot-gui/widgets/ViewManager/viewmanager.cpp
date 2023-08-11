@@ -7,7 +7,7 @@
 
 ViewManager::ViewManager(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ViewManager), dockContainer(nullptr), menuView(nullptr)
+    ui(new Ui::ViewManager), dockContainer(nullptr), menuView(nullptr), chanales(nullptr)
 {
     ui->setupUi(this);
     loadPlugin();
@@ -41,6 +41,11 @@ void ViewManager::setDockContainer(ads::CDockManager *newDockContainer)
 void ViewManager::setMenuView(QMenu *newMenuView)
 {
     menuView = newMenuView;
+}
+
+void ViewManager::setChanales(Channels *newChanales)
+{
+    chanales = newChanales;
 }
 
 void ViewManager::loadPlugin()
@@ -113,6 +118,9 @@ void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int colum
         QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
         listPlots[row].first->setName(newName);
         listPlots[row].second->setWindowTitle(newName);
+
+        if(chanales != nullptr)
+            chanales->setPlotName(row, newName);
     }
 }
 
@@ -133,6 +141,9 @@ void ViewManager::on_pushButton_addView_clicked()
 
         if(menuView != nullptr)
             menuView->addAction(widgetDocker->toggleViewAction());
+        //add to chanal modele
+        if(chanales != nullptr)
+            chanales->addPlot();
 
         listPlots.append(qMakePair(widgetPlot, widgetDocker));
 
@@ -155,6 +166,10 @@ void ViewManager::on_pushButton_deleteViewes_clicked()
         //remove from docker
         if(dockContainer != nullptr)
             dockContainer->removeDockWidget(listPlots[numberElement].second);
+        //remove from  chanales model
+        if(chanales != nullptr)
+            chanales->deletePlot(numberElement);
+
         listPlots.removeAt(numberElement);
         ui->tableWidget_availebleWidgets->removeRow(numberElement);
     }

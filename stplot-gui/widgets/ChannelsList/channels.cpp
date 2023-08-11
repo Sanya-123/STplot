@@ -10,6 +10,9 @@ Channels::Channels(QWidget *parent) :
     m_channelModel = new ChannelModel(m_channels);
     ui->tableView->setModel(m_channelModel);
     ui->tableView->show();
+
+    connect(m_channelModel, &ChannelModel::updateViewport,
+            ui->tableView->viewport(), QOverload<>::of(&QWidget::update));
 }
 
 Channels::~Channels()
@@ -42,4 +45,19 @@ void Channels::add_channel(varloc_node_t* node){
     }
     m_channels->push_back(new VarChannel(node));
     emit m_channelModel->layoutChanged();
+}
+
+void Channels::addPlot()
+{
+    m_channelModel->addPlot();
+}
+
+void Channels::deletePlot(int number)
+{
+    m_channelModel->deletePlot(number);
+}
+
+void Channels::setPlotName(int number, QString name)
+{
+    m_channelModel->setPlotName(number, name);
 }
