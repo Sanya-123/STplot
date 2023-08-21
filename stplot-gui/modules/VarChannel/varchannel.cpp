@@ -33,10 +33,20 @@ bool VarChannel::has_var_node(varloc_node_t* node){
     return (m_var_node == node);
 }
 
+uint32_t VarChannel::addres()
+{
+    return m_var_node->address.base;
+}
+
 QString* VarChannel::name(){
     return m_name;
 }
 
 float VarChannel::value(){
     return m_value;
+}
+
+QVector<bool> *VarChannel::getPlotList()
+{
+    return &m_plotListl;
 }

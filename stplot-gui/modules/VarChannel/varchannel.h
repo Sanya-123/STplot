@@ -7,10 +7,12 @@
 
 #include "varloc.h"
 #include "plotinterface.h"
+#include "qcustomplot.h"
 
 
-class VarChannel
+class VarChannel : public QObject
 {
+    Q_OBJECT
 public:
     VarChannel(varloc_node_t* node);
     ~VarChannel();
@@ -18,11 +20,26 @@ public:
     QString* name();
     float value();
     bool has_var_node(varloc_node_t* node);
+    uint32_t addres();
+    QVector<bool> *getPlotList();
+
 private:
     float                   m_value;
     QString*                m_name;
     varloc_node_t*          m_var_node;
     std::vector<VarValue>   m_buffer;
+    //list for each plot gruph
+    QVector<bool>           m_plotListl;
+
+    //graph styles
+    QColor                  m_lineColor;
+    QCPGraph::LineStyle     m_lineStyle;
+    QCPScatterStyle::ScatterShape m_dotStyle;
+
+signals:
+    void changePlotColor();
+    void changePlotLineStyle();
+    void changePlotDotStyle();
 };
 
 #endif // VARCHANNEL_H

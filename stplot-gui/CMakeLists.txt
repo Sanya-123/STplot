@@ -36,6 +36,9 @@ set(PROJECT_SOURCES
         modules/VarView/varview.h
         modules/ViewManager/plotinterface.h
         modules/ViewManager/plotwidgetabstract.h
+
+        ${PATH_COMMON_QT_LIBS}/qcustomplot.h
+        ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -69,7 +72,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
-   ${CMAKE_SOURCE_DIR}/deps/varloc
+    ${CMAKE_SOURCE_DIR}/deps/varloc
     ${STLINK_PATH}/src/stlink-lib
     ${LIBUSB_INCLUDE_DIR}
     ${STLINK_PATH}/inc
@@ -81,6 +84,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/VarLoader
     widgets/ChannelsList
     widgets/ViewManager/
+    ${PATH_COMMON_QT_LIBS}
   )
 
 add_subdirectory(PlotPluginsDir)

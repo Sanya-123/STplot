@@ -10,3 +10,6 @@
 [submodule "deps/varloc/dwarves"]
 	path = deps/varloc/dwarves
 	url = https://github.com/acmel/dwarves.git
+[submodule "deps/commonQtLibs"]
+	path = deps/commonQtLibs
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/commonqtlibs.git

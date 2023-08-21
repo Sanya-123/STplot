@@ -11,6 +11,8 @@ Channels::Channels(QWidget *parent) :
     ui->tableView->setModel(m_channelModel);
     ui->tableView->show();
 
+//    ui->tableView->setItemDelegateForColumn(1, cbid);
+
     connect(m_channelModel, &ChannelModel::updateViewport,
             ui->tableView->viewport(), QOverload<>::of(&QWidget::update));
 }
