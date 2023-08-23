@@ -24,6 +24,7 @@ public slots:
 
 signals:
     void updateViewport();
+    void changeEnablePlo(int numVar, int numPlot, bool en);
 
 private:
     QVector<VarChannel*> *m_channels;

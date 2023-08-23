@@ -21,7 +21,15 @@ public:
     float value();
     bool has_var_node(varloc_node_t* node);
     uint32_t addres();
-    QVector<bool> *getPlotList();
+
+    QVector<bool> getPlotList();
+    int getTotalSizePlot();
+    void setTotalSizePlot(int size);
+    void removePlot(int numberPlot);
+    bool isEnableOnPlot(int numberPlot);
+    void setEnableOnPlot(int numberPlot, bool en);
+
+
 
 private:
     float                   m_value;
@@ -40,6 +48,8 @@ signals:
     void changePlotColor();
     void changePlotLineStyle();
     void changePlotDotStyle();
+    void changeName();
+    void updatePlot();
 };
 
 #endif // VARCHANNEL_H

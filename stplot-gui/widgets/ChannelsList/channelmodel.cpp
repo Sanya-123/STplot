@@ -50,15 +50,14 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
             if(numGraph >= numberGraph)
                 return QVariant();
 
-            QVector<bool> * plotList = m_channels->at(index.row())->getPlotList();
-
-            if(plotList->size() != numberGraph)
-            {//if there isa proble in gruph size it is mean that it is new varibel
-                plotList->resize(0);
-                plotList->resize(numberGraph);
+            //if varible is new you should reinit size gruph
+            if(m_channels->at(index.row())->getTotalSizePlot() != numberGraph)
+            {
+                m_channels->at(index.row())->setTotalSizePlot(0);
+                m_channels->at(index.row())->setTotalSizePlot(numberGraph);
             }
 
-            return Qt::Checked;
+            return m_channels->at(index.row())->isEnableOnPlot(index.column() - GRUPH_FERST_COLUMN) ? Qt::Checked : Qt::Unchecked;
         }
     }
     return QVariant();
@@ -84,14 +83,19 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
 bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (role == Qt::CheckStateRole && index.isValid())
-    {//TODO
+    {
         if(index.column() >= GRUPH_FERST_COLUMN)
-        qDebug() << index.column() << index.row() << value;
+        {
+//            qDebug() << index.column() << index.row() << value;
+            m_channels->at(index.row())->setEnableOnPlot(index.column() - GRUPH_FERST_COLUMN, value.toInt());
+            emit changeEnablePlo(index.row(), index.column() - GRUPH_FERST_COLUMN, value.toInt());
 
-        QModelIndex topLeft = index;
-        QModelIndex bottomRight = index;
-        emit dataChanged(topLeft, bottomRight);
-        return true;
+            QModelIndex topLeft = index;
+            QModelIndex bottomRight = index;
+            emit dataChanged(topLeft, bottomRight);
+
+            return true;
+        }
     }
 
     return QAbstractTableModel::setData(index, value, role);
@@ -117,7 +121,7 @@ void ChannelModel::addPlot()
 
     for(int i = 0; i < m_channels->size(); i++)
     {
-        m_channels->at(i)->getPlotList()->resize(numberGraph);
+        m_channels->at(i)->setTotalSizePlot(numberGraph);
     }
 
     emit updateViewport();
@@ -131,15 +135,15 @@ void ChannelModel::deletePlot(int number)
         //update grupt list for each varible
         for(int i = 0; i < m_channels->size(); i++)
         {
-            QVector<bool> * plotList = m_channels->at(i)->getPlotList();
-            if(plotList->size() >= numberGraph)
+            if(m_channels->at(i)->getTotalSizePlot() == numberGraph)
             {
-                plotList->removeAt(number);
+                m_channels->at(i)->removePlot(number);
+//                plotList->removeAt(number);
             }//if size != numberGraph it is mean that there is error in var list
             else
             {
-                plotList->resize(0);
-                plotList->resize(numberGraph - 1);
+                m_channels->at(i)->setTotalSizePlot(0);
+                m_channels->at(i)->setTotalSizePlot(numberGraph);
             }
 
         }

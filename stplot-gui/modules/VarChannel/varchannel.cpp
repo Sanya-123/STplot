@@ -46,7 +46,42 @@ float VarChannel::value(){
     return m_value;
 }
 
-QVector<bool> *VarChannel::getPlotList()
+QVector<bool> VarChannel::getPlotList()
 {
-    return &m_plotListl;
+    return m_plotListl;
+}
+
+int VarChannel::getTotalSizePlot()
+{
+    m_plotListl.size();
+}
+
+void VarChannel::setTotalSizePlot(int size)
+{
+    m_plotListl.resize(size);
+}
+
+void VarChannel::removePlot(int numberPlot)
+{
+    if(m_plotListl.size() > numberPlot)
+    {
+        m_plotListl.removeAt(numberPlot);
+    }
+}
+
+bool VarChannel::isEnableOnPlot(int numberPlot)
+{
+    if(m_plotListl.size() > numberPlot)
+    {
+        return m_plotListl[numberPlot];
+    }
+    return false;
+}
+
+void VarChannel::setEnableOnPlot(int numberPlot, bool en)
+{
+    if(m_plotListl.size() > numberPlot)
+    {
+        m_plotListl[numberPlot] = en;
+    }
 }
