@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "qcustomplot.h"
 
-#define GRUPH_FERST_COLUMN          5
+#define GRUPH_FERST_COLUMN          3
 
 ChannelModel::ChannelModel( QVector<VarChannel*> *channels, QObject *parent)
     : QAbstractTableModel{parent}, numberGraph(0)
