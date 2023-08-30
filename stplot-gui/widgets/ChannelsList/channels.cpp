@@ -15,6 +15,8 @@ Channels::Channels(QWidget *parent) :
 
     connect(m_channelModel, &ChannelModel::updateViewport,
             ui->tableView->viewport(), QOverload<>::of(&QWidget::update));
+
+    connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 }
 
 Channels::~Channels()

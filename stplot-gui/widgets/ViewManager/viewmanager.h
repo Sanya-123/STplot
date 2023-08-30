@@ -39,6 +39,7 @@ private:
     void loadPlugin();
 
 private slots:
+    void addPotToPlot(VarChannel* var, int numPlot, bool en);
     void on_tableWidget_availebleWidgets_cellChanged(int row, int column);
 
     void on_pushButton_addView_clicked();

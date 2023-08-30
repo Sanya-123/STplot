@@ -6,19 +6,19 @@ VarChannel::VarChannel(varloc_node_t* node)
 {
     if (node != NULL){
         m_var_node = node;
-        m_name = new QString(node->name);
+        m_name = QString(node->name);
         varloc_node_t * parent = var_node_get_parent(node);
         while (parent != NULL){
-            m_name->prepend(".");
-            m_name->prepend(parent->name);
+            m_name.prepend(".");
+            m_name.prepend(parent->name);
             parent = var_node_get_parent(parent);
         }
-        m_buffer.reserve(100);
+//        m_buffer.reserve(100);
     }
 }
 
 VarChannel::~VarChannel(){
-    delete m_name;
+
 }
 
 void VarChannel::push_value(float value){
@@ -26,7 +26,8 @@ void VarChannel::push_value(float value){
         .value = value,
         .time = time_point_cast<microseconds>(system_clock::now()),
     };
-    m_buffer.push_back(var);
+//    m_buffer.push_back(var);
+    m_buffer.append(var);
 }
 
 bool VarChannel::has_var_node(varloc_node_t* node){
@@ -38,7 +39,7 @@ uint32_t VarChannel::addres()
     return m_var_node->address.base;
 }
 
-QString* VarChannel::name(){
+QString VarChannel::name(){
     return m_name;
 }
 
@@ -53,7 +54,7 @@ QVector<bool> VarChannel::getPlotList()
 
 int VarChannel::getTotalSizePlot()
 {
-    m_plotListl.size();
+    return m_plotListl.size();
 }
 
 void VarChannel::setTotalSizePlot(int size)
@@ -84,4 +85,19 @@ void VarChannel::setEnableOnPlot(int numberPlot, bool en)
     {
         m_plotListl[numberPlot] = en;
     }
+}
+
+VarValue VarChannel::getValue(int numberElement)
+{
+    if(numberElement < m_buffer.size() && numberElement >= 0)
+        return m_buffer[numberElement];
+
+
+    return (VarValue){0, time_point_cast<microseconds>(system_clock::now())};
+}
+
+QVector<VarValue> VarChannel::getBuffer()
+{
+
+    return m_buffer;
 }

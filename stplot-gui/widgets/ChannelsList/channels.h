@@ -27,6 +27,9 @@ public slots:
     void deletePlot(int number);
     void setPlotName(int number, QString name);
 
+signals:
+    void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
+
 private:
     Ui::Channels *ui;
     ChannelModel *m_channelModel;

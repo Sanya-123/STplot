@@ -1,7 +1,8 @@
 #include "channelmodel.h"
 #include <QDebug>
+#include "qcustomplot.h"
 
-#define GRUPH_FERST_COLUMN          2
+#define GRUPH_FERST_COLUMN          5
 
 ChannelModel::ChannelModel( QVector<VarChannel*> *channels, QObject *parent)
     : QAbstractTableModel{parent}, numberGraph(0)
@@ -20,7 +21,7 @@ int ChannelModel::rowCount(const QModelIndex &parent) const
 
 int ChannelModel::columnCount(const QModelIndex &parent) const
 {
-    return 2 + numberGraph;
+    return GRUPH_FERST_COLUMN + numberGraph;
 }
 
 QVariant ChannelModel::data(const QModelIndex &index, int role) const
@@ -32,8 +33,7 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
     {
         if (index.column() == 0){
-            QString* name = m_channels->at(index.row())->name();
-            return QVariant(*name);
+            return QVariant( m_channels->at(index.row())->name());
         }
         else if(index.column() == 1){
             return QVariant("0x" + QString::number(m_channels->at(index.row())->addres(), 16).rightJustified(8, '0'));
@@ -60,6 +60,13 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
             return m_channels->at(index.row())->isEnableOnPlot(index.column() - GRUPH_FERST_COLUMN) ? Qt::Checked : Qt::Unchecked;
         }
     }
+    else if (role == Qt::BackgroundRole)
+    {
+        if(index.column() == 2)
+            return QColor(Qt::green);
+    }
+
+
     return QVariant();
 }
 
@@ -71,6 +78,10 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
         }
         if (section == 1){
             return QVariant("Addres");
+        }
+        else if(section == 2)
+        {
+            return QVariant("LineColor");
         }
         else if((section - GRUPH_FERST_COLUMN) <  numberGraph)
         {
@@ -88,7 +99,7 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
         {
 //            qDebug() << index.column() << index.row() << value;
             m_channels->at(index.row())->setEnableOnPlot(index.column() - GRUPH_FERST_COLUMN, value.toInt());
-            emit changeEnablePlo(index.row(), index.column() - GRUPH_FERST_COLUMN, value.toInt());
+            emit changeEnablePlo(m_channels->at(index.row()), index.column() - GRUPH_FERST_COLUMN, value.toInt());
 
             QModelIndex topLeft = index;
             QModelIndex bottomRight = index;
@@ -112,6 +123,65 @@ Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const
         return /*flags | */Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;
+}
+
+ComboBoxDelegate *ChannelModel::makeIteamLineStye(QObject *parent)
+{
+    QVector<QCPGraph::LineStyle> shapes;
+    shapes << QCPGraph::lsNone;
+    shapes << QCPGraph::lsLine;
+    shapes << QCPGraph::lsStepLeft;
+    shapes << QCPGraph::lsStepRight;
+    shapes << QCPGraph::lsStepCenter;
+    shapes << QCPGraph::lsImpulse;
+
+    QStringList lineStyles;
+
+    //get name for each style
+    for(int i = 0; i < shapes.size(); i++)
+    {
+        QString name = QCPGraph::staticMetaObject.enumerator(
+                    QCPGraph::staticMetaObject.indexOfEnumerator("LineStyle")).valueToKey(shapes.at(i));
+
+        lineStyles.append(name);
+    }
+
+    return new ComboBoxDelegate(lineStyles, parent);
+}
+
+ComboBoxDelegate *ChannelModel::makeIteamDotStye(QObject *parent)
+{
+    //https://www.qcustomplot.com/index.php/demos/scatterstyledemo
+    QVector<QCPScatterStyle::ScatterShape> shapes;
+    shapes << QCPScatterStyle::ssNone;
+    shapes << QCPScatterStyle::ssDot;
+    shapes << QCPScatterStyle::ssCross;
+    shapes << QCPScatterStyle::ssPlus;
+    shapes << QCPScatterStyle::ssCircle;
+    shapes << QCPScatterStyle::ssDisc;
+    shapes << QCPScatterStyle::ssSquare;
+    shapes << QCPScatterStyle::ssDiamond;
+    shapes << QCPScatterStyle::ssStar;
+    shapes << QCPScatterStyle::ssTriangle;
+    shapes << QCPScatterStyle::ssTriangleInverted;
+    shapes << QCPScatterStyle::ssCrossSquare;
+    shapes << QCPScatterStyle::ssPlusSquare;
+    shapes << QCPScatterStyle::ssCrossCircle;
+    shapes << QCPScatterStyle::ssPlusCircle;
+    shapes << QCPScatterStyle::ssPeace;
+
+    QStringList dotStyles;
+
+    //get name for each style
+    for(int i = 0; i < shapes.size(); i++)
+    {
+        QString name = QCPScatterStyle::staticMetaObject.enumerator(
+                    QCPScatterStyle::staticMetaObject.indexOfEnumerator("ScatterShape")).valueToKey(shapes.at(i));
+
+        dotStyles.append(name);
+    }
+
+    return new ComboBoxDelegate(dotStyles, parent);
 }
 
 void ChannelModel::addPlot()

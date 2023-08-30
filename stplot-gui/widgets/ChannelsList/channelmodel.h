@@ -4,6 +4,8 @@
 #include <QAbstractTableModel>
 #include <QVector>
 #include "varchannel.h"
+#include "comboboxdelegate.h"
+
 class ChannelModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    static ComboBoxDelegate* makeIteamLineStye(QObject *parent = nullptr);
+    static ComboBoxDelegate* makeIteamDotStye(QObject *parent = nullptr);
+
 public slots:
     void addPlot();
     void deletePlot(int number);
@@ -24,7 +29,7 @@ public slots:
 
 signals:
     void updateViewport();
-    void changeEnablePlo(int numVar, int numPlot, bool en);
+    void changeEnablePlo(VarChannel* var, int numPlot, bool en);
 
 private:
     QVector<VarChannel*> *m_channels;

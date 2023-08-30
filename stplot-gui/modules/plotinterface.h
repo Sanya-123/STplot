@@ -11,8 +11,9 @@
 #include <QMap>
 #include <QtPlugin>
 #include <chrono>
+#include "varchannel.h"
 
-#define PLOT_INTERFACE_HEADER_VERSION           0x00020000
+#define PLOT_INTERFACE_HEADER_VERSION           0x00000000
 
 union __attribute__((packed)) VersionUnion {
     uint32_t version32;
@@ -35,14 +36,6 @@ static QString versionUnionToString(uint32_t version)
     return QString::asprintf("%d.%d.%d", _version.versionS.major, _version.versionS.minor, _version.versionS.build);
 }
 
-using time_stamp = std::chrono::time_point<std::chrono::system_clock,
-                                           std::chrono::microseconds>;
-
-typedef struct {
-    double value;
-    time_stamp time;
-}VarValue;
-
 /**
  * @brief The PlotWidgetAbstract class - abstrac widget clas for plot data
  */
@@ -55,33 +48,33 @@ public:
      * @brief addPlot - add new plot(graph)
      * @param plotName - plot name
      */
-    virtual void addPlot(QString plotName) = 0;
+    virtual void addPlot(VarChannel *varChanale) = 0;
 
     /**
      * @brief deletePlot - delete plot
      * @param plotName - plot name
      */
-    virtual void deletePlot(QString plotName) = 0;
+    virtual void deletePlot(VarChannel *varChanale) = 0;
 
-    /**
-     * @brief plotVar - update plot(update graph)
-     * @param plotName - plot name
-     * @param values - vector of values
-     * @return - trye if plot is created
-     */
-    virtual bool plotVar(QString plotName, QVector<VarValue> values) = 0;
+//    /**
+//     * @brief plotVar - update plot(update graph)
+//     * @param plotName - plot name
+//     * @param values - vector of values
+//     * @return - trye if plot is created
+//     */
+//    virtual bool plotVar(QString plotName, QVector<VarValue> values) = 0;
 
-    virtual void plotVars(QMap<QString, QVector<VarValue>> plotsMap)
-    {
-        for(QMap<QString, QVector<VarValue>>::const_iterator i = plotsMap.constBegin();
-            i != plotsMap.constEnd(); i++)
-        {
-            plotVar(i.key(), i.value());
-        }
-    }
+//    virtual void plotVars(QMap<QString, QVector<VarValue>> plotsMap)
+//    {
+//        for(QMap<QString, QVector<VarValue>>::const_iterator i = plotsMap.constBegin();
+//            i != plotsMap.constEnd(); i++)
+//        {
+//            plotVar(i.key(), i.value());
+//        }
+//    }
 
-    virtual void setName(QString name) = 0;
-    virtual QString getName() = 0;
+//    virtual void setName(QString name) = 0;
+//    virtual QString getName() = 0;
 
 };
 

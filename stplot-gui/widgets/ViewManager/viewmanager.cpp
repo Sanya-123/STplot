@@ -46,6 +46,10 @@ void ViewManager::setMenuView(QMenu *newMenuView)
 void ViewManager::setChanales(Channels *newChanales)
 {
     chanales = newChanales;
+    if(chanales != nullptr)
+    {
+        connect(chanales, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)), this, SLOT(addPotToPlot(VarChannel*,int,bool)));
+    }
 }
 
 void ViewManager::loadPlugin()
@@ -111,12 +115,23 @@ void ViewManager::loadPlugin()
     }
 }
 
+void ViewManager::addPotToPlot(VarChannel *var, int numPlot, bool en)
+{
+    if(numPlot < 0 || numPlot >= listPlots.size())
+        return;
+
+
+    if(en)
+        listPlots[numPlot].first->addPlot(var);
+    else
+        listPlots[numPlot].first->deletePlot(var);
+}
+
 void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int column)
 {
     if(row >= 0 && row < listPlots.size())
     {
         QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
-        listPlots[row].first->setName(newName);
         listPlots[row].second->setWindowTitle(newName);
 
         if(chanales != nullptr)

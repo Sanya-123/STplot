@@ -13,12 +13,12 @@ VarLoader::VarLoader(QWidget *parent) :
     ui->setupUi(this);
     proxyModel = new QSortFilterProxyModel(this);
     varModel = new VarModel(this);
-    QObject::connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::open_elf);
-    QObject::connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::load_elf);
-    QObject::connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::add_variables);
-    QObject::connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expand_tree);
-    QObject::connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapse_tree);
-    QObject::connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::apply_filter);
+    connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::open_elf);
+    connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::load_elf);
+    connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::add_variables);
+    connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expand_tree);
+    connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapse_tree);
+    connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::apply_filter);
 }
 
 VarLoader::~VarLoader()

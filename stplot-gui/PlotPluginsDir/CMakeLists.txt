@@ -8,8 +8,8 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 COMPONENTS Widgets Network SerialPort PrintSupport REQUIRED)
 
-set(PATH_PLOT_INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../modules/ViewManager)
+set(PATH_PLOT_INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../modules)
 
-include_directories(${PATH_PLOT_INTERFACE})
+include_directories(${PATH_PLOT_INTERFACE} ${PATH_COMMON_QT_LIBS} ${CMAKE_CURRENT_LIST_DIR}/../../deps/varloc)
 link_libraries(Qt5::Widgets Qt5::Network Qt5::SerialPort Qt5::PrintSupport)
 add_subdirectory(pluginSimpleGraph)

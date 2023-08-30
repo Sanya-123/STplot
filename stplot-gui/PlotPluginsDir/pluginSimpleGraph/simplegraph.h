@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "plotinterface.h"
+#include "qcustomplot.h"
 
 namespace Ui {
 class SimpleGraph;
@@ -15,15 +16,20 @@ class SimpleGraph : public PlotWidgetAbstract
 public:
     explicit SimpleGraph(QWidget *parent = nullptr);
     ~SimpleGraph();
-    void addPlot(QString plotName);
-    void deletePlot(QString plotName);
-    bool plotVar(QString plotName, QVector<VarValue> values);
-    void setName(QString name);
-    QString getName();
+    void addPlot(VarChannel *varChanale);
+    void deletePlot(VarChannel *varChanale);
+//    bool plotVar(QString plotName, QVector<VarValue> values);
+//    void setName(QString name);
+//    QString getName();
+
+private slots:
+    void doUpdatePlot();
 
 private:
     Ui::SimpleGraph *ui;
-    QString name;
+//    QString name;
+    QCustomPlot *plotWidget;
+    QMap<VarChannel*,QCPGraph*> mapPlots;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

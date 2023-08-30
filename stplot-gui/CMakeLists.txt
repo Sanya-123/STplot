@@ -27,15 +27,15 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/channels.h
         widgets/ChannelsList/channels.cpp
         widgets/ChannelsList/channels.ui
+        widgets/ChannelsList/comboboxdelegate.h
+        widgets/ChannelsList/comboboxdelegate.cpp
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
-        modules/VarChannel/varchannel.h
-        modules/VarChannel/varchannel.cpp
-        modules/VarView/varview.cpp
-        modules/VarView/varview.h
-        modules/ViewManager/plotinterface.h
-        modules/ViewManager/plotwidgetabstract.h
+        modules/varchannel.h
+        modules/varchannel.cpp
+        modules/plotinterface.h
+        modules/plotwidgetabstract.h
 
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
@@ -78,9 +78,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${STLINK_PATH}/inc
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
-    modules/VarModel
-    modules/VarChannel
-    modules/ViewManager
+    modules
     widgets/VarLoader
     widgets/ChannelsList
     widgets/ViewManager/
