@@ -2,7 +2,7 @@
 
 using namespace std::chrono;
 
-VarChannel::VarChannel(varloc_node_t* node) : tmpDesc(0)
+VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) : tmpDesc(0), m_lineColor(lineColor)
 {
     if (node != NULL){
         m_var_node = node;
@@ -18,6 +18,8 @@ VarChannel::VarChannel(varloc_node_t* node) : tmpDesc(0)
 
     m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
     m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
+
+    setDotStyle(dotStyle);
 }
 
 VarChannel::~VarChannel(){
@@ -131,6 +133,8 @@ void VarChannel::setDotStyle(int newDotStyle)
         newDotStyle = MAX_NUMBER_DOT_STYLE - 1;
 
     m_dotStyle = newDotStyle;
+
+    emit changePlotDotStyle();
 }
 
 int VarChannel::lineStyle() const
@@ -146,4 +150,17 @@ void VarChannel::setLineStyle(int newLineStyle)
         newLineStyle = MAX_NUMBER_LINE_STYLE - 1;
 
     m_lineStyle = newLineStyle;
+
+    emit changePlotLineStyle();
+}
+
+QColor VarChannel::lineColor() const
+{
+    return m_lineColor;
+}
+
+void VarChannel::setLineColor(const QColor &newLineColor)
+{
+    m_lineColor = newLineColor;
+    emit changePlotColor();
 }

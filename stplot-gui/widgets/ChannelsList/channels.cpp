@@ -6,7 +6,7 @@
 
 Channels::Channels(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Channels), iteamDeclarater(this)
+    ui(new Ui::Channels), iteamDeclarater(this), curentColorSet(0), curentDotStyle(MAX_DEFAOULT_DOT_STYLE)
 {
     ui->setupUi(this);
     m_channels = new QVector<VarChannel*>();
@@ -21,6 +21,29 @@ Channels::Channels(QWidget *parent) :
             ui->treeView->viewport(), QOverload<>::of(&QWidget::update));
 
     connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
+
+    //init colur sequnce
+    colorSetSequese.append(QColor(40, 110, 255));
+    colorSetSequese.append(QColor(255, 110, 40));
+    colorSetSequese.append(QColor(40, 255, 110));
+    for(int i = 0 ; i < 18; i++ )
+    {
+        colorSetSequese.append(QColor(qSin(i*0.3)*128+128, qSin(i*0.6+0.7)*128+128, qSin(i*0.4+0.6)*128+128));
+    }
+//    colorSetSequese.append(QColor("#99e600"));
+//    colorSetSequese.append(QColor("#99cc00"));
+//    colorSetSequese.append(QColor("#99b300"));
+//    colorSetSequese.append(QColor("#9f991a"));
+//    colorSetSequese.append(QColor("#a48033"));
+//    colorSetSequese.append(QColor("#a9664d"));
+//    colorSetSequese.append(QColor("#ae4d66"));
+//    colorSetSequese.append(QColor("#b33380"));
+//    colorSetSequese.append(QColor("#a64086"));
+//    colorSetSequese.append(QColor("#994d8d"));
+//    colorSetSequese.append(QColor("#8d5a93"));
+//    colorSetSequese.append(QColor("#806699"));
+//    colorSetSequese.append(QColor("#8073a6"));
+//    colorSetSequese.append(QColor("#8080b3"));
 }
 
 Channels::~Channels()
@@ -51,7 +74,15 @@ void Channels::add_channel(varloc_node_t* node){
             return;
         }
     }
-    m_channels->push_back(new VarChannel(node));
+    //set colour from sequence
+    m_channels->push_back(new VarChannel(node, colorSetSequese[curentColorSet++], curentDotStyle++));
+    //reset sequnce colour set
+    if(curentColorSet >= colorSetSequese.size())
+        curentColorSet = 0;
+
+    if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
+        curentDotStyle = 1;//1 becouse 0 is none style
+
     emit m_channelModel->layoutChanged();
 }
 

@@ -21,7 +21,6 @@
 
 typedef struct {
     double value;
-//    time_stamp time;
     QTime qtime;
 }VarValue;
 
@@ -29,7 +28,7 @@ class VarChannel : public QObject
 {
     Q_OBJECT
 public:
-    VarChannel(varloc_node_t* node);
+    VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();
     void push_value(float value);
     QString name();
@@ -53,6 +52,9 @@ public:
 
     int lineStyle() const;
     void setLineStyle(int newLineStyle);
+
+    QColor lineColor() const;
+    void setLineColor(const QColor &newLineColor);
 
 private:
     float                   m_value;

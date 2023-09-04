@@ -40,6 +40,8 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
         else if(index.column() == 1){
             return QVariant("0x" + QString::number(m_channels->at(index.row())->addres(), 16).rightJustified(8, '0'));
         }
+        else if(index.column() == 2)
+            return QVariant(m_channels->at(index.row())->lineColor().name());
         else if(index.column() == 3){
             return QVariant(dotStyles[m_channels->at(index.row())->dotStyle()]);
         }
@@ -68,10 +70,10 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
             return m_channels->at(index.row())->isEnableOnPlot(index.column() - GRUPH_FERST_COLUMN) ? Qt::Checked : Qt::Unchecked;
         }
     }
-    else if (role == Qt::BackgroundRole)
+    else if (role == Qt::DecorationRole)
     {
         if(index.column() == 2)
-            return QColor(Qt::green);
+            return QVariant(m_channels->at(index.row())->lineColor());
     }
 
 
@@ -126,7 +128,12 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
     }
     else if(role == Qt::EditRole && index.isValid())
     {
-        if(index.column() == 3)
+        if(index.column() == 2)
+        {
+            m_channels->at(index.row())->setLineColor(QColor(value.toString()));
+            return true;
+        }
+        else if(index.column() == 3)
         {
             m_channels->at(index.row())->setDotStyle(value.toInt());
             return true;
@@ -150,7 +157,7 @@ Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const
 
     if (index.column() >= GRUPH_FERST_COLUMN)
         return /*flags | */Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    else if(index.column() == 3 || index.column() == 4)
+    else if(index.column() == 2 || index.column() == 3 || index.column() == 4)
         return /*flags | */Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;

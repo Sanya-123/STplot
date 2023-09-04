@@ -36,9 +36,17 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
 
     QCPGraph* newGruph = plotWidget->addGraph();
     newGruph->setName(varChanale->name());
+    newGruph->setLineStyle((QCPGraph::LineStyle)varChanale->lineStyle());
+    newGruph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
+    newGruph->setPen(QPen(varChanale->lineColor()));
+
 
 
     connect(varChanale, SIGNAL(updatePlot()), this, SLOT(doUpdatePlot()));
+
+    connect(varChanale, SIGNAL(changePlotColor()), this, SLOT(updateColourPlot()));
+    connect(varChanale, SIGNAL(changePlotLineStyle()), this, SLOT(updateLineStyleGruph()));
+    connect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     mapPlots[varChanale] = newGruph;
 }
 
@@ -52,22 +60,30 @@ void SimpleGraph::deletePlot(VarChannel *varChanale)
     mapPlots.remove(varChanale);
 }
 
+QCPGraph *SimpleGraph::getGruph(QObject *_sender, VarChannel** varChanale)
+{
+    *varChanale = nullptr;
+    //get sender of this signal
+//    VarChannel * varChanale = qobject_cast<VarChannel*>(_sender);//? it is note work now becouse it show
+    if(typeid(*_sender) != typeid(VarChannel))
+        return nullptr;
+
+    *varChanale = (VarChannel*)_sender;
+
+
+    if(!mapPlots.contains(*varChanale))//if is note created
+        return nullptr;
+
+
+    return mapPlots[*varChanale];
+}
+
 void SimpleGraph::doUpdatePlot()
 {
-    //get sender of this signal
-//    VarChannel * varChanale = qobject_cast<VarChannel*>(sender());//? it is note work now becouse it show
-    QObject *_sender = sender();
-    VarChannel * varChanale = (VarChannel*)_sender;
-
-
-    if(typeid(*_sender) != typeid(VarChannel))
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+    if(gpuh == nullptr || varChanale == nullptr)
         return;
-
-    if(!mapPlots.contains(varChanale))//if is note created
-        return;
-
-
-    QCPGraph* gpuh = mapPlots[varChanale];
 
     //try just apend data
     if(varChanale->getBufferSize() < gpuh->dataCount())
@@ -87,7 +103,40 @@ void SimpleGraph::doUpdatePlot()
     gpuh->rescaleAxes();
     plotWidget->update();
     plotWidget->replot();
+}
 
+void SimpleGraph::updateColourPlot()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+
+    gpuh->setPen(QPen(varChanale->lineColor()));
+
+    plotWidget->update();
+    plotWidget->replot();
+}
+
+void SimpleGraph::updateLineStyleGruph()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+
+    gpuh->setLineStyle((QCPGraph::LineStyle)varChanale->lineStyle());
+
+    plotWidget->update();
+    plotWidget->replot();
+}
+
+
+void SimpleGraph::updateDotStyleGruph()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+
+    gpuh->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
+
+    plotWidget->update();
+    plotWidget->replot();
 }
 
 //bool SimpleGraph::plotVar(QString plotName, QVector<VarValue> values)

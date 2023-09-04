@@ -39,6 +39,10 @@ private:
     ChannelModel *m_channelModel;
     QVector<VarChannel*> *m_channels;
     ChanaleItemDelegate iteamDeclarater;
+    //sequnce sent color for new gruph
+    QList<QColor> colorSetSequese;
+    int curentColorSet;
+    int curentDotStyle;
 };
 
 #endif // CHANNELS_H

@@ -22,8 +22,14 @@ public:
 //    void setName(QString name);
 //    QString getName();
 
+private:
+    QCPGraph* getGruph(QObject *sender, VarChannel **varChanale);
+
 private slots:
     void doUpdatePlot();
+    void updateColourPlot();
+    void updateLineStyleGruph();
+    void updateDotStyleGruph();
 
 private:
     Ui::SimpleGraph *ui;
