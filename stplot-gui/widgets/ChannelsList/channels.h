@@ -22,6 +22,8 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
 
+    QVector<VarChannel*> *getListChanales() const;
+
 public slots:
     void add_channel(varloc_node_t* node);
     void addPlot();

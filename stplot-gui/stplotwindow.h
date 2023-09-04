@@ -10,6 +10,10 @@ extern "C" {
 #include "varloader.h"
 #include "channels.h"
 #include "viewmanager.h"
+#include "readwritedevice.h"
+#include "stlinkdevice.h"
+#include "readloop.h"
+#include <QThread>
 
 
 QT_BEGIN_NAMESPACE
@@ -25,8 +29,8 @@ public:
     ~STPlotWindow();
 
 public slots:
-    void connect();
-
+    void startRead();
+//    void connect();
 
 private:
     Ui::STPlotWindow *ui;
@@ -34,7 +38,11 @@ private:
     Channels* channelsView;
     VarLoader* varloader;
     ViewManager* viewManager;
-
+    QVector<ReadDeviceObject*> readDeviceces;
+    QVector<SaveDeviceObject*> saveDeviceces;
+    STlinkDevice stlinkDevice;
+    ReadLoop readLoop;
+    QThread readLoopThread;
 };
 
 

@@ -36,6 +36,8 @@ set(PROJECT_SOURCES
         widgets/ViewManager/viewmanager.ui
         widgets/stlinkdevice.h
         widgets/stlinkdevice.cpp
+        widgets/readloop.h
+        widgets/readloop.cpp
         modules/varchannel.h
         modules/varchannel.cpp
         modules/plotinterface.h
@@ -84,6 +86,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules
+    widgets
     widgets/VarLoader
     widgets/ChannelsList
     widgets/ViewManager/

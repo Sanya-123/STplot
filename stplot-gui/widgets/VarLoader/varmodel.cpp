@@ -127,7 +127,7 @@ Qt::ItemFlags VarModel::flags(const QModelIndex &index) const
 {
 
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
     varloc_node_t *item = static_cast<varloc_node_t*>(index.internalPointer());
     Qt::ItemFlags flags;
 //    if (item->var_type == BASE){

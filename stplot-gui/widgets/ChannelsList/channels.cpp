@@ -66,6 +66,11 @@ void Channels::restoreSettings(QSettings *settings)
 
 }
 
+QVector<VarChannel *> *Channels::getListChanales() const
+{
+    return m_channels;
+}
+
 
 void Channels::add_channel(varloc_node_t* node){
     for (int i = 0; i < m_channels->size(); ++i) {

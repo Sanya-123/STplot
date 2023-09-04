@@ -70,6 +70,9 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     viewManager->setMenuView(ui->menuView);
     viewManager->setChanales(channelsView);
 
+    //init devicec
+    readDeviceces.append(&stlinkDevice);
+
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");
     restoreGeometry(settings.value("windows/geometry").toByteArray());
@@ -111,6 +114,27 @@ STPlotWindow::~STPlotWindow()
     delete ui;
 }
 
+void STPlotWindow::startRead()
+{
+    //TODO total remeke work with thread
+    ReadDeviceObject* readObj = readDeviceces[0];
+
+    readLoop.setChannels(channelsView->getListChanales());
+    readLoop.setReadDevicec(readObj);
+    readLoop.setSaveDeviceces(&saveDeviceces);
+
+//    //move all object to thread
+//    readObj->moveToThread(&readLoopThread);
+//    for(int i = 0; i < saveDeviceces.size(); i++)
+//        saveDeviceces[i]->moveToThread(&readLoopThread);
+//    readLoop.moveToThread(&readLoopThread);
+    //TODO check and reimplement read this stuff in thread mode
+
+
+    readLoop.readLoop();
+
+}
+
 
 //void STPlotWindow::closeEvent(QCloseEvent *event)
 //{
@@ -121,10 +145,11 @@ STPlotWindow::~STPlotWindow()
 //    }
 //}
 
-void STPlotWindow::connect(){
-    stlink_t* sl = NULL;
-    sl = stlink_open_usb(UDEBUG, CONNECT_HOT_PLUG, NULL, 100000);
-    // if (sl == NULL){
-    //     return(-1);
-    // }
-}
+//void STPlotWindow::connect(){
+//    stlink_t* sl = NULL;
+//    sl = stlink_open_usb(UDEBUG, CONNECT_HOT_PLUG, NULL, 100000);
+//    // if (sl == NULL){
+//    //     return(-1);
+//    // }
+//}
+

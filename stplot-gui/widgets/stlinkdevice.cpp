@@ -7,7 +7,61 @@ STlinkDevice::STlinkDevice() : configWidget(nullptr)
 
 int STlinkDevice::initDevise(QVector<VarChannel *> *channels)
 {
+    if(channels == nullptr)
+        return -1;
+
+    if(channels->size() < 1)
+        return -1;
+
     //NOTE this is very importatn stuff for make sequence for readn with optimized addres reads
+    readSeuqence.clear();
+    QMap<uint32_t, VarChannel *> addresVarMap;
+    //TODO var with same add reses
+    for(int i = 0 ; i < channels->size(); i++)
+    {
+        addresVarMap[channels->at(i)->addres()] = channels->at(i);
+    }
+
+    QList<uint32_t> addresses = addresVarMap.keys();
+
+    struct ReadAddres readAdd;
+    struct ReadChanale readChan;
+    readChan.chanale = addresVarMap[addresses[0]];
+    readChan.offset = addresses[0]%4;
+    readChan.varSize = 4;
+
+    readAdd.vectorChanales.append(readChan);
+    readAdd.addres = (addresses[0]/4)*4;
+    readAdd.readSize = 4;
+    for(int i = 1; addresses.size(); i++)
+    {
+        readChan.chanale = addresVarMap[addresses[i]];
+        readChan.offset = addresses[i]%4;
+        readChan.varSize = 4;
+
+
+        uint32_t addresVaribel = (addresses[i]/4)*4;
+        if(addresVaribel == readAdd.addres)
+        {
+//            readChan.chanale = addresVarMap[addresses[i]];
+//            readChan.offset = addresses[i]%4;
+//            readChan.varSize = 4;
+            readAdd.vectorChanales.append(readChan);
+        }
+        else
+        {
+            readSeuqence.append(readAdd);
+            readAdd.vectorChanales.clear();
+
+            readAdd.addres = addresVaribel;
+            readAdd.vectorChanales.append(readChan);
+        }
+    }
+
+
+    readSeuqence.append(readAdd);
+
+
     return -1;
 
     enum connect_type connect = CONNECT_HOT_PLUG;
@@ -18,6 +72,8 @@ int STlinkDevice::initDevise(QVector<VarChannel *> *channels)
     }
 
     stlink_enter_swd_mode(sl);
+
+    return 0;
 
 }
 
