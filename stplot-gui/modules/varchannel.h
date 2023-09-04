@@ -6,16 +6,23 @@
 #include <QString>
 #include <vector>
 #include <chrono>
+#include <QTime>
 
 #include "varloc.h"
 //#include "qcustomplot.h"
 
-using time_stamp = std::chrono::time_point<std::chrono::system_clock,
-                                           std::chrono::microseconds>;
+//using time_stamp = std::chrono::time_point<std::chrono::system_clock,
+//                                           std::chrono::microseconds>;
+#define MAX_NUMBER_DOT_STYLE                16
+#define MAX_NUMBER_LINE_STYLE               6
+
+#define MAX_DEFAOULT_DOT_STYLE              1
+#define MAX_DEFAOULT_LINE_STYLE             1
 
 typedef struct {
     double value;
-    time_stamp time;
+//    time_stamp time;
+    QTime qtime;
 }VarValue;
 
 class VarChannel : public QObject
@@ -39,8 +46,13 @@ public:
 
     VarValue getValue(int numberElement);
     QVector<VarValue> getBuffer();
+    int getBufferSize();
 
+    int dotStyle() const;
+    void setDotStyle(int newDotStyle);
 
+    int lineStyle() const;
+    void setLineStyle(int newLineStyle);
 
 private:
     float                   m_value;
@@ -54,8 +66,10 @@ private:
     QColor                  m_lineColor;
 //    QCPGraph::LineStyle     m_lineStyle;
 //    QCPScatterStyle::ScatterShape m_dotStyle;
-    int                     m_lineStyle;
     int                     m_dotStyle;
+    int                     m_lineStyle;
+
+    int tmpDesc;
 
 signals:
     void changePlotColor();

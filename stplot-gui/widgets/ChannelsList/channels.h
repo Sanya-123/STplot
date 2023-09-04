@@ -5,6 +5,7 @@
 #include "varloc.h"
 #include "channelmodel.h"
 #include <QSettings>
+#include "chanaleitemdelegate.h"
 
 namespace Ui {
 class Channels;
@@ -30,10 +31,14 @@ public slots:
 signals:
     void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::Channels *ui;
     ChannelModel *m_channelModel;
     QVector<VarChannel*> *m_channels;
+    ChanaleItemDelegate iteamDeclarater;
 };
 
 #endif // CHANNELS_H

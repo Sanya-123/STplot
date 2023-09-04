@@ -2,7 +2,7 @@
 
 using namespace std::chrono;
 
-VarChannel::VarChannel(varloc_node_t* node)
+VarChannel::VarChannel(varloc_node_t* node) : tmpDesc(0)
 {
     if (node != NULL){
         m_var_node = node;
@@ -15,6 +15,9 @@ VarChannel::VarChannel(varloc_node_t* node)
         }
 //        m_buffer.reserve(100);
     }
+
+    m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
+    m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
 }
 
 VarChannel::~VarChannel(){
@@ -24,10 +27,18 @@ VarChannel::~VarChannel(){
 void VarChannel::push_value(float value){
     VarValue var = {
         .value = value,
-        .time = time_point_cast<microseconds>(system_clock::now()),
+//        .time = time_point_cast<microseconds>(system_clock::now()),
+        .qtime = QTime::currentTime(),
     };
 //    m_buffer.push_back(var);
     m_buffer.append(var);
+
+    tmpDesc++;
+    if(tmpDesc == 100)
+    {
+        tmpDesc = 0;
+        emit updatePlot();
+    }
 }
 
 bool VarChannel::has_var_node(varloc_node_t* node){
@@ -93,11 +104,46 @@ VarValue VarChannel::getValue(int numberElement)
         return m_buffer[numberElement];
 
 
-    return (VarValue){0, time_point_cast<microseconds>(system_clock::now())};
+    return (VarValue){0, QTime::currentTime()};
 }
 
 QVector<VarValue> VarChannel::getBuffer()
 {
 
     return m_buffer;
+}
+
+int VarChannel::getBufferSize()
+{
+    return m_buffer.size();
+}
+
+int VarChannel::dotStyle() const
+{
+    return m_dotStyle;
+}
+
+void VarChannel::setDotStyle(int newDotStyle)
+{
+    if(newDotStyle < 0)
+        newDotStyle = 0;
+    if(newDotStyle >= MAX_NUMBER_DOT_STYLE)
+        newDotStyle = MAX_NUMBER_DOT_STYLE - 1;
+
+    m_dotStyle = newDotStyle;
+}
+
+int VarChannel::lineStyle() const
+{
+    return m_lineStyle;
+}
+
+void VarChannel::setLineStyle(int newLineStyle)
+{
+    if(newLineStyle < 0)
+        newLineStyle = 0;
+    if(newLineStyle >= MAX_NUMBER_LINE_STYLE)
+        newLineStyle = MAX_NUMBER_LINE_STYLE - 1;
+
+    m_lineStyle = newLineStyle;
 }

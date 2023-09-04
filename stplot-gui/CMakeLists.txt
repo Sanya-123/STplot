@@ -29,6 +29,8 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/channels.ui
         widgets/ChannelsList/comboboxdelegate.h
         widgets/ChannelsList/comboboxdelegate.cpp
+        widgets/ChannelsList/chanaleitemdelegate.h
+        widgets/ChannelsList/chanaleitemdelegate.cpp
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui

@@ -13,6 +13,12 @@ SimpleGraph::SimpleGraph(QWidget *parent) :
     plotWidget = new QCustomPlot(this);
     defaultPlotInit(plotWidget);
 
+    //time x axis
+    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+    timeTicker->setTimeFormat("%h:%m:%s:%z");
+    plotWidget->xAxis->setTicker(timeTicker);
+
+
     QGridLayout *loaout = new QGridLayout(this);
     loaout->addWidget(plotWidget,0, 0, 1, 1);
     this->setLayout(loaout);
@@ -49,31 +55,38 @@ void SimpleGraph::deletePlot(VarChannel *varChanale)
 void SimpleGraph::doUpdatePlot()
 {
     //get sender of this signal
-    VarChannel * varChanale = qobject_cast<VarChannel*>(sender());
+//    VarChannel * varChanale = qobject_cast<VarChannel*>(sender());//? it is note work now becouse it show
+    QObject *_sender = sender();
+    VarChannel * varChanale = (VarChannel*)_sender;
 
-    if(!varChanale)
+
+    if(typeid(*_sender) != typeid(VarChannel))
         return;
 
     if(!mapPlots.contains(varChanale))//if is note created
         return;
 
+
     QCPGraph* gpuh = mapPlots[varChanale];
 
     //try just apend data
-    if(varChanale->getTotalSizePlot() < gpuh->dataCount())
+    if(varChanale->getBufferSize() < gpuh->dataCount())
     {//if replot gruyph
         QVector<double> zeroAray;
         gpuh->setData(zeroAray, zeroAray);
     }
 
 
-
-    for(int i = gpuh->dataCount(); i < varChanale->getTotalSizePlot(); i++)
+    for(int i = gpuh->dataCount(); i < varChanale->getBufferSize(); i++)
     {
         VarValue val = varChanale->getValue(i);
-        gpuh->addData(val.time.time_since_epoch().count(), val.value);
+//        gpuh->addData(val.time.time_since_epoch().count(), val.value);
+        gpuh->addData(val.qtime.msecsSinceStartOfDay()*1.0/1000.0, val.value);
     }
 
+    gpuh->rescaleAxes();
+    plotWidget->update();
+    plotWidget->replot();
 
 }
 

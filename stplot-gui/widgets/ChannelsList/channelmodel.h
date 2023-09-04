@@ -22,6 +22,9 @@ public:
     static ComboBoxDelegate* makeIteamLineStye(QObject *parent = nullptr);
     static ComboBoxDelegate* makeIteamDotStye(QObject *parent = nullptr);
 
+    static QStringList getDotStyle();
+    static QStringList getLineStyle();
+
 public slots:
     void addPlot();
     void deletePlot(int number);
@@ -35,6 +38,9 @@ private:
     QVector<VarChannel*> *m_channels;
     int numberGraph;
     QList<QString> graphNames;
+
+    QStringList dotStyles;
+    QStringList lineStyles;
 
 };
 

@@ -1,20 +1,24 @@
 #include "channels.h"
 #include "ui_channels.h"
+#include <QDebug>
+#include <qmath.h>
+#include <unistd.h>
 
 Channels::Channels(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Channels)
+    ui(new Ui::Channels), iteamDeclarater(this)
 {
     ui->setupUi(this);
     m_channels = new QVector<VarChannel*>();
     m_channelModel = new ChannelModel(m_channels);
-    ui->tableView->setModel(m_channelModel);
-    ui->tableView->show();
+    ui->treeView->setItemDelegate(new ChanaleItemDelegate(this));
+//    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
+    ui->treeView->setModel(m_channelModel);
 
 //    ui->tableView->setItemDelegateForColumn(1, cbid);
 
     connect(m_channelModel, &ChannelModel::updateViewport,
-            ui->tableView->viewport(), QOverload<>::of(&QWidget::update));
+            ui->treeView->viewport(), QOverload<>::of(&QWidget::update));
 
     connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 }
@@ -65,3 +69,23 @@ void Channels::setPlotName(int number, QString name)
 {
     m_channelModel->setPlotName(number, name);
 }
+
+void Channels::on_pushButton_clicked()
+{
+    int curentElement = ui->treeView->currentIndex().row();
+
+    VarChannel* plotChanale = m_channels->at(curentElement);
+
+    static int sinFreq = 0;
+    sinFreq++;
+
+
+    for(int i = 0; i < 100; i++)
+    {
+        usleep(1000);
+        plotChanale->push_value( qSin(i*1.0*2*M_PI*sinFreq/100.0) );
+    }
+
+
+}
+
