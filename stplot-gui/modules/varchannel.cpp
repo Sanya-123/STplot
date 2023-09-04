@@ -27,6 +27,7 @@ VarChannel::~VarChannel(){
 }
 
 void VarChannel::push_value(float value){
+    m_value = value;
     VarValue var = {
         .value = value,
 //        .time = time_point_cast<microseconds>(system_clock::now()),
@@ -49,7 +50,8 @@ bool VarChannel::has_var_node(varloc_node_t* node){
 
 uint32_t VarChannel::addres()
 {
-    return m_var_node->address.base;
+    return var_node_get_address(m_var_node);
+//    return m_var_node->address.base;
 }
 
 QString VarChannel::name(){

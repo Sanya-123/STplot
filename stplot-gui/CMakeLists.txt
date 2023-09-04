@@ -34,10 +34,13 @@ set(PROJECT_SOURCES
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
+        widgets/stlinkdevice.h
+        widgets/stlinkdevice.cpp
         modules/varchannel.h
         modules/varchannel.cpp
         modules/plotinterface.h
         modules/plotwidgetabstract.h
+        modules/readwritedevice.h
 
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp

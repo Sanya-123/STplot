@@ -1,0 +1,136 @@
+#ifndef READDEVICE_H
+#define READDEVICE_H
+
+#include <QObject>
+#include "varchannel.h"
+
+#define READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION              0x00000000
+
+class ReadDeviceObject : public QObject
+{
+    Q_OBJECT
+public:
+    /**
+     * @brief isFileDevice - is read from file (if true soft will not save data in file)
+     * @return
+     */
+    virtual bool isFileDevice() = 0;
+
+    /**
+     * @brief initDevise - init device (exec when push connect button) read var adresses and prepear read data
+     * @param channels - list of varibels
+     * @return - 0 if OK else return error code
+     */
+    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+
+    /**
+     * @brief stopDev - disconnect from device
+     */
+    virtual void stopDev() = 0;
+
+    /**
+     * @brief execReadDevice - do read from instance
+     * @return - 0 if OK else return error code
+     */
+    virtual int execReadDevice() = 0;
+
+    /**
+     * @brief getReadDevConfigWidget - get configure widget
+     * @return - configure widget for curent device
+     */
+    virtual QWidget* getReadDevConfigWidget() = 0;
+};
+
+class SaveDeviceObject : public QObject
+{
+    Q_OBJECT
+public:
+    /**
+     * @brief initDevise - init device (exec when push connect button) read var adresses and prepear save data
+     * @param channels - list of varibels
+     * @return - 0 if OK else return error code
+     */
+    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+
+    /**
+     * @brief stopDev - disconnect from device
+     */
+    virtual void stopDev() = 0;
+
+    /**
+     * @brief execSaveDevice - do save varibels should exec after read waribels and append just last value
+     * @return - 0 if OK else return error code
+     */
+    virtual int execSaveDevice() = 0;
+
+    /**
+     * @brief getSaveDevConfigWidget - get configure widget
+     * @return - configure widget for curent device
+     */
+    virtual QWidget* getSaveDevConfigWidget() = 0;
+};
+
+
+/************************************************************************/
+/* BEGIN init plugins */
+/************************************************************************/
+/**
+ * @brief The ReadDeviceInterfacePlugin class - plugin for read data from device
+ */
+class ReadDeviceInterfacePlugin
+{
+public:
+    /**
+     * @brief getVersion - get version builded library(SHOULDN'T be implemented)
+     * @return - ersion builded library
+     */
+    virtual uint32_t getVersion() {return READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION;}
+
+    /**
+     * @brief createDeviceObject - make new device object
+     * @return - plot widget (alocate new QWidget)
+     */
+    virtual ReadDeviceObject* createReadDeviceObject() = 0;
+
+    /**
+     * @brief getName - get plugin name
+     * @return - plugin name
+     */
+    virtual QString getName() { return QString(""); }
+};
+
+/**
+ * @brief The ReadDeviceInterfacePlugin class - plugin for save data
+ */
+class SaveDeviceInterfacePlugin
+{
+public:
+    /**
+     * @brief getVersion - get version builded library(SHOULDN'T be implemented)
+     * @return - ersion builded library
+     */
+    virtual uint32_t getVersion() {return READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION;}
+
+    /**
+     * @brief createDeviceObject - make new device object
+     * @return - plot widget (alocate new QWidget)
+     */
+    virtual SaveDeviceObject* createWriteDeviceObject() = 0;
+
+    /**
+     * @brief getName - get plugin name
+     * @return - plugin name
+     */
+    virtual QString getName() { return QString(""); }
+};
+
+// registrate plugin
+QT_BEGIN_NAMESPACE
+#define ReadDeviceInterfacePlugin_iid "org.qt-project.S.debuger.ReadDeviceInterfacePlugin"
+Q_DECLARE_INTERFACE(ReadDeviceInterfacePlugin, ReadDeviceInterfacePlugin_iid)
+#define SaveDeviceInterfacePlugin_iid "org.qt-project.S.debuger.SaveDeviceInterfacePlugin"
+Q_DECLARE_INTERFACE(SaveDeviceInterfacePlugin, SaveDeviceInterfacePlugin_iid)
+QT_END_NAMESPACE
+
+
+#endif // READDEVICE_H
