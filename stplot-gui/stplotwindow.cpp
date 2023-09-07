@@ -90,6 +90,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     settings.beginGroup("viewmanager");
     viewManager->restoreSettings(&settings);
     settings.endGroup();
+
 }
 
 STPlotWindow::~STPlotWindow()
@@ -116,22 +117,6 @@ STPlotWindow::~STPlotWindow()
 
 void STPlotWindow::startRead()
 {
-    //TODO total remeke work with thread
-    ReadDeviceObject* readObj = readDeviceces[0];
-
-    readLoop.setChannels(channelsView->getListChanales());
-    readLoop.setReadDevicec(readObj);
-    readLoop.setSaveDeviceces(&saveDeviceces);
-
-//    //move all object to thread
-//    readObj->moveToThread(&readLoopThread);
-//    for(int i = 0; i < saveDeviceces.size(); i++)
-//        saveDeviceces[i]->moveToThread(&readLoopThread);
-//    readLoop.moveToThread(&readLoopThread);
-    //TODO check and reimplement read this stuff in thread mode
-
-
-    readLoop.readLoop();
 
 }
 

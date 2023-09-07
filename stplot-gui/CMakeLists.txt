@@ -38,6 +38,8 @@ set(PROJECT_SOURCES
         widgets/stlinkdevice.cpp
         widgets/readloop.h
         widgets/readloop.cpp
+        widgets/readmanager.h
+        widgets/readmanager.cpp
         modules/varchannel.h
         modules/varchannel.cpp
         modules/plotinterface.h
@@ -96,7 +98,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 add_subdirectory(PlotPluginsDir)
 
 
-target_link_libraries(stplot-gui PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::SerialPort
@@ -105,7 +107,12 @@ target_link_libraries(stplot-gui PRIVATE
     xcb
     stlink-static
     varloc
+    stlink
 #    elfio::elfio
+)
+
+target_link_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_BINARY_DIR}/lib
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -118,7 +125,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 
-set_target_properties(stplot-gui PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -126,7 +133,7 @@ set_target_properties(stplot-gui PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS stplot-gui
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

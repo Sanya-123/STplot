@@ -19,7 +19,8 @@ void ReadLoop::readLoop()
     try {
 
         //try init dev
-        int res = readDevicec->initDevise(channels);
+//        int res = readDevicec->initDevise(channels);
+        int res = readDevicec->initDevise(readSequence);
         if(res != 0)//error read device
             throw res;
 
@@ -72,6 +73,11 @@ void ReadLoop::setReadDevicec(ReadDeviceObject *newReadDevicec)
 void ReadLoop::stopLoop()
 {
     stopSignal = true;
+}
+
+void ReadLoop::setReadSequence(const QVector<ReadDeviceObject::ReadAddres> &newReadSequence)
+{
+    readSequence = newReadSequence;
 }
 
 void ReadLoop::setChannels(QVector<VarChannel *> *newChannels)

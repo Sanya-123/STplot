@@ -15,6 +15,8 @@ public:
     void setReadDevicec(ReadDeviceObject *newReadDevicec);
     void setChannels(QVector<VarChannel *> *newChannels);
 
+    void setReadSequence(const QVector<ReadDeviceObject::ReadAddres> &newReadSequence);
+
 public slots:
     void stopLoop();
 
@@ -26,6 +28,7 @@ private:
     ReadDeviceObject* readDevicec;
     QVector<VarChannel*> *channels;
     bool stopSignal;
+    QVector<ReadDeviceObject::ReadAddres> readSequence;
 
 };
 

@@ -25,12 +25,38 @@ ViewManager::~ViewManager()
 
 void ViewManager::saveSettings(QSettings *settings)
 {
+    QMap<QString,PlotWidgetInterfacePlugin*> plotMap;
 
+    for(int i = 0; i < pluginsPlot.size(); i++)
+        plotMap[pluginsPlot[i]->getName()] = pluginsPlot[i];
+
+    settings->beginWriteArray("plots");
+    for (int i = 0; i < listPlotParants.size(); i++) {
+        settings->setArrayIndex(i);
+        settings->setValue("pluginName", listPlotParants[i].second);
+        settings->setValue("plotName", listPlotParants[i].first->windowTitle());
+    }
+    settings->endArray();
 }
 
 void ViewManager::restoreSettings(QSettings *settings)
 {
+    QMap<QString,PlotWidgetInterfacePlugin*> plotMap;
 
+    for(int i = 0; i < pluginsPlot.size(); i++)
+        plotMap[pluginsPlot[i]->getName()] = pluginsPlot[i];
+
+    int size = settings->beginReadArray("plots");
+    for (int i = 0; i < size; ++i) {
+        settings->setArrayIndex(i);
+        QString pluginName = settings->value("pluginName").toString();
+        QString plotName = settings->value("plotName").toString();
+        if(plotMap.contains(pluginName))
+        {
+            addPlot(plotMap[pluginName], plotName);
+        }
+    }
+    settings->endArray();
 }
 
 void ViewManager::setDockContainer(ads::CDockManager *newDockContainer)
@@ -127,12 +153,36 @@ void ViewManager::addPotToPlot(VarChannel *var, int numPlot, bool en)
         listPlots[numPlot].first->deletePlot(var);
 }
 
+void ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, QString name)
+{
+    int numberRow = ui->tableWidget_availebleWidgets->rowCount();
+    //create widgets for gui
+    ads::CDockWidget* widgetDocker = new ads::CDockWidget("_");
+    PlotWidgetAbstract *widgetPlot = plotType->createWidgetPlot(widgetDocker);
+    widgetDocker->setWidget(widgetPlot);
+    if(dockContainer != nullptr)
+        dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
+
+    if(menuView != nullptr)
+        menuView->addAction(widgetDocker->toggleViewAction());
+    //add to chanal modele
+    if(chanales != nullptr)
+        chanales->addPlot();
+
+    listPlots.append(qMakePair(widgetPlot, widgetDocker));
+    listPlotParants.append(qMakePair(widgetPlot, plotType->getName()));
+
+    ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
+    ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(name));
+}
+
 void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int column)
 {
     if(row >= 0 && row < listPlots.size())
     {
         QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
         listPlots[row].second->setWindowTitle(newName);
+        listPlots[row].first->setWindowTitle(newName);
 
         if(chanales != nullptr)
             chanales->setPlotName(row, newName);
@@ -146,25 +196,27 @@ void ViewManager::on_pushButton_addView_clicked()
     {
         //get selected plugin
         PlotWidgetInterfacePlugin* plotType = pluginsPlot[ui->comboBox_typeView->currentIndex()];
+        addPlot(plotType, plotType->getName() + "_" + QString::number(numberRow));
 
-        //create widgets for gui
-        ads::CDockWidget* widgetDocker = new ads::CDockWidget("_");
-        PlotWidgetAbstract *widgetPlot = plotType->createWidgetPlot(widgetDocker);
-        widgetDocker->setWidget(widgetPlot);
-        if(dockContainer != nullptr)
-            dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
+//        //create widgets for gui
+//        ads::CDockWidget* widgetDocker = new ads::CDockWidget("_");
+//        PlotWidgetAbstract *widgetPlot = plotType->createWidgetPlot(widgetDocker);
+//        widgetDocker->setWidget(widgetPlot);
+//        if(dockContainer != nullptr)
+//            dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
 
-        if(menuView != nullptr)
-            menuView->addAction(widgetDocker->toggleViewAction());
-        //add to chanal modele
-        if(chanales != nullptr)
-            chanales->addPlot();
+//        if(menuView != nullptr)
+//            menuView->addAction(widgetDocker->toggleViewAction());
+//        //add to chanal modele
+//        if(chanales != nullptr)
+//            chanales->addPlot();
 
-        listPlots.append(qMakePair(widgetPlot, widgetDocker));
+//        listPlots.append(qMakePair(widgetPlot, widgetDocker));
+//        listPlotParants.append(qMakePair(widgetPlot, plotType->getName()));
 
-        ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
-        ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(plotType->getName() + "_" +
-                                                      QString::number(numberRow)));
+//        ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
+//        ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(plotType->getName() + "_" +
+//                                                      QString::number(numberRow)));
     }
 }
 
@@ -186,6 +238,7 @@ void ViewManager::on_pushButton_deleteViewes_clicked()
             chanales->deletePlot(numberElement);
 
         listPlots.removeAt(numberElement);
+        listPlotParants.removeAt(numberElement);
         ui->tableWidget_availebleWidgets->removeRow(numberElement);
     }
 }

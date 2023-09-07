@@ -40,6 +40,7 @@ private:
 
 private slots:
     void addPotToPlot(VarChannel* var, int numPlot, bool en);
+    void addPlot(PlotWidgetInterfacePlugin* plotType, QString name);
     void on_tableWidget_availebleWidgets_cellChanged(int row, int column);
 
     void on_pushButton_addView_clicked();
@@ -50,6 +51,7 @@ private:
     Ui::ViewManager *ui;
     QList<PlotWidgetInterfacePlugin*> pluginsPlot;
     QList<QPair<PlotWidgetAbstract*, ads::CDockWidget*>> listPlots;//list ow widgets plot and docker widgets for remove
+    QList<QPair<PlotWidgetAbstract*, QString>> listPlotParants;//list for save and restore plot
     ads::CDockManager *dockContainer;
     QMenu *menuView;
     Channels *chanales;

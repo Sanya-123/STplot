@@ -10,6 +10,18 @@ class ReadDeviceObject : public QObject
 {
     Q_OBJECT
 public:
+    //addres and waribels with curent addres
+    struct ReadChanale {
+        VarChannel* chanale;
+        uint8_t offset;
+        uint8_t varSize;
+    };
+    struct ReadAddres {
+        QVector<struct ReadChanale> vectorChanales;//varivels with offset for this addres
+        uint32_t addres;//begin addres read
+        uint32_t readSize;//read addresses
+    };
+
     /**
      * @brief isFileDevice - is read from file (if true soft will not save data in file)
      * @return
@@ -21,7 +33,8 @@ public:
      * @param channels - list of varibels
      * @return - 0 if OK else return error code
      */
-    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+//    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+    virtual int initDevise(QVector<struct ReadAddres> readSeuqence) = 0;
 
     /**
      * @brief stopDev - disconnect from device
@@ -39,6 +52,9 @@ public:
      * @return - configure widget for curent device
      */
     virtual QWidget* getReadDevConfigWidget() = 0;
+
+signals:
+    void addressesReed(uint32_t addres, QVector<uint8_t> data);
 };
 
 class SaveDeviceObject : public QObject

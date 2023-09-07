@@ -12,23 +12,24 @@ class STlinkDevice : public ReadDeviceObject
 public:
     STlinkDevice();
     bool isFileDevice() {return false;}
-    int initDevise(QVector<VarChannel*> *channels);
+//    int initDevise(QVector<VarChannel*> *channels);
+    int initDevise(QVector<struct ReadAddres> readSeuqence);
     void stopDev();
     int execReadDevice();
     QWidget *getReadDevConfigWidget();
 
 private:
-    //addres and waribels with curent addres
-    struct ReadChanale {
-        VarChannel* chanale;
-        uint8_t offset;
-        uint8_t varSize;
-    };
-    struct ReadAddres {
-        QVector<struct ReadChanale> vectorChanales;//varivels with offset for this addres
-        uint32_t addres;//begin addres read
-        uint32_t readSize;//read addresses
-    };
+//    //addres and waribels with curent addres
+//    struct ReadChanale {
+//        VarChannel* chanale;
+//        uint8_t offset;
+//        uint8_t varSize;
+//    };
+//    struct ReadAddres {
+//        QVector<struct ReadChanale> vectorChanales;//varivels with offset for this addres
+//        uint32_t addres;//begin addres read
+//        uint32_t readSize;//read addresses
+//    };
     QVector<struct ReadAddres> readSeuqence;
 
     //dev
