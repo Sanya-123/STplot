@@ -109,7 +109,14 @@ QVariant VarModel::data(const QModelIndex &index, int role) const
     }
     else if (index.column() == 2){
 
-        QString res = QString("%1").arg(var_node_get_address(item), 8, 16, QLatin1Char( '0' ));
+        uint32_t address = var_node_get_address(item);
+        QString res;
+        if (address == 0xFFFFFFFF){
+            res = QString("???");
+        }
+        else{
+            res = QString("0x%1").arg(var_node_get_address(item), 8, 16, QLatin1Char( '0' ));
+        }
         return QVariant(res);
     }
     else if (index.column() == 3){

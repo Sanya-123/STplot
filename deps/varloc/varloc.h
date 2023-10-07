@@ -43,6 +43,7 @@
      uint32_t           n_items;
      uint8_t            type_size;
      uint8_t            is_signed;
+     uint8_t            is_anon;
  }varloc_node_t;
 
 /* Exported constants --------------------------------------------------------*/

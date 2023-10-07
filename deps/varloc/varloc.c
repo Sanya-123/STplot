@@ -109,11 +109,14 @@ int var_node_get_child_index(varloc_node_t* child){
 
 
 uint32_t var_node_get_address(varloc_node_t* node){
-    uint64_t offset = node->address.offset_bits;
+    uint64_t offset = node->address.base + (node->address.offset_bits / 8);
     varloc_node_t* parent = var_node_get_parent(node);
     while (parent != NULL){
-        if (parent->address.base == 0){
-            offset += parent->address.offset_bits;
+        if (parent->var_type == POINTER){
+            return 0xFFFFFFFF;
+        }
+        else if (parent->address.base == 0){
+            offset += parent->address.offset_bits / 8;
             parent = var_node_get_parent(parent);
         }
         else{
@@ -122,7 +125,7 @@ uint32_t var_node_get_address(varloc_node_t* node){
             return offset;
         }
     }
-    return offset;
+    return offset ;
 }
 
 varloc_node_t* new_var_node(){
@@ -196,7 +199,7 @@ void parse_extvar(struct variable *var, struct cu *cu);
 
 
 static struct conf_fprintf conf = {
-	.emit_stats = 1,
+    .emit_stats = 0,
 };
 
 static struct conf_load conf_load = {
@@ -212,9 +215,10 @@ static int cu_extvar_iterator(struct cu *cu, void *cookie __maybe_unused)
 	uint32_t id;
 
 	cu__for_each_variable(cu, id, pos) {
-		struct variable *var = tag__variable(pos);
-		if (var->external)
+        struct variable *var = tag__variable(pos);
+        if (var->external || var->has_specification){
             parse_extvar(var,cu);
+        }
 	}
 	return 0;
 }
@@ -227,12 +231,35 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
     if (gvar == NULL)
         return;
 
+    if (gvar->has_specification){
+        // get address of extern variables
+        varloc_node_t *spec_node = last_var_node;
+        while (spec_node){
+            if (!strcmp(gvar->spec->name, spec_node->name)){
+                spec_node->address.base = gvar->ip.addr;
+                break;
+            }
+            spec_node = spec_node->previous;
+        }
+        return;
+    }
+    else if (gvar->declaration){
+        // refuse allready collected nodes
+        varloc_node_t *spec_node = last_var_node;
+        while (spec_node){
+            if (!strcmp(gvar->name, spec_node->name)){
+                return;
+            }
+            spec_node = spec_node->previous;
+        }
+    }
+
     tag = &gvar->ip.tag; //extvar__tag(var);
 
     struct conf_fprintf cfg = {0};
-    cfg.expand_types = 1;
+//    cfg.expand_types = 1;
     //    cfg.expand_pointers = 1;
-    cfg.rel_offset = 1;
+//    cfg.rel_offset = 1;
     //    tag__fprintf(tag, gvar->cu, &cfg, stdout);
 
     //    for (pos = gvar->next; pos; pos = pos->next)
@@ -243,19 +270,20 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
 
 
     if (tag->tag == DW_TAG_variable){
-        const struct variable *var = tag__variable(tag);
-        const char *name = variable__name(var);
+//        const struct variable *var = tag__variable(tag);
+        const char *name = variable__name(gvar);
 
         varloc_node_t *var_node = new_var_node();
-        const char *type_name = variable__type_name(var, cu, var_node->ctype_name, 100);
+        const char *type_name = variable__type_name(gvar, cu, var_node->ctype_name, 100);
 
-        const struct tag *type_tag = cu__type(cu, var->ip.tag.type);
+        const struct tag *type_tag = cu__type(cu, gvar->ip.tag.type);
         int base_type = tag__is_base_type(type_tag, cu);
-        printf("\n\ngot var %s %s %d %x : ",
+        printf("\n\ngot var %s %s %d %x %x: ",
                name,
                type_name,
                base_type,
-               var->ip.addr);
+               gvar->declaration,
+               gvar->ip.addr);
 
 
 
@@ -276,9 +304,8 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
 //            var_node->var_type = BASE;
 //        }
         strcpy(var_node->name, name);
-//        var_node->name = name;
-        var_node->address.base = var->ip.addr;
-//        var_node->address.base = var->ip;
+        var_node->is_anon = 0;
+        var_node->address.base = gvar->ip.addr;
     }
 }
 
@@ -419,8 +446,8 @@ static void parse_member(struct class_member *member, bool union_member,
                                     struct tag *type, const struct cu *cu,
                                     struct conf_fprintf *conf, varloc_node_t *node)
 {
-    printf("\n");
-    printf("%*s%s", indent*4, "", "- ");
+//    printf("\n");
+//    printf("%*s%s", indent*4, "", "- ");
     const int size = member->byte_size;
     int member_alignment_printed = 0;
     struct conf_fprintf sconf = *conf;
@@ -435,7 +462,7 @@ static void parse_member(struct class_member *member, bool union_member,
             sconf.base_offset = offset;
     }
 
-    printf("size %d offset %d bitoffset %d ", size, offset, member->bitfield_offset);
+//    printf("size %d offset %d bitoffset %d ", size, offset, member->bitfield_offset);
     if (member->bitfield_offset < 0)
         offset += member->byte_size;
 
@@ -444,11 +471,11 @@ static void parse_member(struct class_member *member, bool union_member,
 
     if (member->tag.tag == DW_TAG_inheritance) {
         cm_name = "<ancestor>";
-        printf("/* ");
+//        printf("/* ");
     }
 
-    if (member->is_static)
-        printf("static ");
+//    if (member->is_static)
+//        printf("static ");
 
     /* For struct-like constructs, the name of the member cannot be
      * conflated with the name of its type, otherwise __attribute__ are
@@ -457,7 +484,6 @@ static void parse_member(struct class_member *member, bool union_member,
 
     varloc_node_t *child = new_child(node);
     child->address.offset_bits = (offset * 8) + member->bitfield_offset;
-    child->address.size_bits = (member->bitfield_size) ? (member->bitfield_size) : (size * 8);
 
     if (tag__is_union(type) || tag__is_struct(type) ||
         tag__is_enumeration(type))
@@ -465,11 +491,11 @@ static void parse_member(struct class_member *member, bool union_member,
         parse_type(type, cu, NULL, child);
         if (cm_name) {
             if (!type__name(tag__type(type))){
-                printf(" ");
+//                printf(" ");
             }
             strcpy(child->name, cm_name);
 //            child->name = cm_name;
-            printf("%s", cm_name);
+//            printf("%s", cm_name);
         }
     } else {
         parse_type(type, cu, cm_name, child);
@@ -479,7 +505,8 @@ static void parse_member(struct class_member *member, bool union_member,
         if (member->const_value != 0)
             printf(" = %", member->const_value);
     } else if (member->bitfield_size != 0) {
-        printf(":%u", member->bitfield_size);
+        child->address.size_bits = member->bitfield_size;
+//        printf(":%u", member->bitfield_size);
     }
 
 //    if (!sconf.suppress_aligned_attribute && member->alignment != 0) {
@@ -574,7 +601,7 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
     };
     int expand_types = 1;
     int expand_pointers = 1;
-    node->address.size_bits = tag__size(type, cu);
+    node->address.size_bits = tag__size(type, cu) * 8;
     // expand pointers
     if (expand_pointers){
         int nr_indirections = 0;
@@ -601,11 +628,9 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
             memcpy(namebf + nr_indirections, name, len);
             namebf[len + nr_indirections] = '\0';
             node->var_type = POINTER;
-            strcpy(node->name, name);
-//            node->name = name;
             name = namebf;
+            strcpy(node->name, name);
             printf("POINTER! ");
-//            printf("POINTER! %s ", name);
         }
         else{
             nr_indirections = 1;
@@ -747,6 +772,10 @@ next_type:
                 strcpy(node->name, name);
 //                node->name = name;
             }
+            else{
+                sprintf(node->name, "struct ...");
+                node->is_anon = 1;
+            }
         }
         parse_class(cclass, cu, node);
         break;
@@ -757,6 +786,10 @@ next_type:
                 printf("%s ", name);
                 strcpy(node->name, name);
 //                node->name = name;
+            }
+            else{
+                sprintf(node->name, "union ...");
+                node->is_anon = 1;
             }
         }
         ctype = tag__type(type);

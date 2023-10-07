@@ -9,8 +9,15 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) : tm
         m_name = QString(node->name);
         varloc_node_t * parent = var_node_get_parent(node);
         while (parent != NULL){
-            m_name.prepend(".");
-            m_name.prepend(parent->name);
+            if (!parent->is_anon){
+                if(parent->var_type == POINTER){
+                    m_name.prepend("->");
+                }
+                else{
+                    m_name.prepend(".");
+                }
+                m_name.prepend(parent->name);
+            }
             parent = var_node_get_parent(parent);
         }
 //        m_buffer.reserve(100);
