@@ -3,8 +3,11 @@
 
 #include "readwritedevice.h"
 #include <QMap>
+
+extern "C" {
 #include "stlink.h"
 #include <usb.h>
+}
 
 class STlinkDevice : public ReadDeviceObject
 {

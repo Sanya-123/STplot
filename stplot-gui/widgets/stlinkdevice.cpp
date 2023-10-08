@@ -80,7 +80,7 @@ STlinkDevice::STlinkDevice() : configWidget(nullptr)
 int STlinkDevice::initDevise(QVector<ReadAddres> readSeuqence)
 {
     this->readSeuqence = readSeuqence;
-    return -1;
+//    return -1;
 
     enum connect_type connect = CONNECT_HOT_PLUG;
     int32_t freq = 100000;

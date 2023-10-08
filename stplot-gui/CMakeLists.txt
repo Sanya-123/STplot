@@ -105,10 +105,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     qtadvanceddocking
     xcb
-    stlink-static
     varloc
-    stlink
-#    elfio::elfio
+    stlink-static
 )
 
 target_link_directories(${PROJECT_NAME} PRIVATE
