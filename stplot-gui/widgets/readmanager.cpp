@@ -38,7 +38,7 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
     //TODO var with same add reses
     for(int i = 0 ; i < channels->size(); i++)
     {
-        addresVarMap[channels->at(i)->addres()] = channels->at(i);
+        addresVarMap[channels->at(i)->getLocation().address.base] = channels->at(i);
     }
 
     QList<uint32_t> addresses = addresVarMap.keys();
@@ -101,7 +101,7 @@ void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
         memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, addresSequence.vectorChanales[j].varSize);
 
         //TODO some logig base on type
-        addresSequence.vectorChanales[j].chanale->push_value(combiner._32*1.0);
+        addresSequence.vectorChanales[j].chanale->pushValue(combiner._32*1.0);
     }
 }
 

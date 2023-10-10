@@ -35,7 +35,7 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
         return;
 
     QCPGraph* newGruph = plotWidget->addGraph();
-    newGruph->setName(varChanale->name());
+    newGruph->setName(varChanale->getName());
     newGruph->setLineStyle((QCPGraph::LineStyle)varChanale->lineStyle());
     newGruph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
     newGruph->setPen(QPen(varChanale->lineColor()));

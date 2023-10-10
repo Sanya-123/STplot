@@ -39,7 +39,7 @@ private:
     varloc_node_t *rootItem;
     void select_node(varloc_node_t* node);
     void deselect_node(varloc_node_t* node);
-    void apply_for_each_child(varloc_node_t* root, void (VarModel::*func)(varloc_node_t*));
+    void apply_for_each_child(varloc_node_t* root, void (VarModel::*func)(varloc_node_t*), bool first);
 
 };
 

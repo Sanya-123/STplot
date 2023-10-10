@@ -35,10 +35,10 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
     {
         if (index.column() == 0){
-            return QVariant( m_channels->at(index.row())->name());
+            return QVariant( m_channels->at(index.row())->getName());
         }
         else if(index.column() == 1){
-            return QVariant("0x" + QString::number(m_channels->at(index.row())->addres(), 16).rightJustified(8, '0'));
+            return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
         }
         else if(index.column() == 2)
             return QVariant(m_channels->at(index.row())->lineColor().name());

@@ -63,7 +63,9 @@ void VarLoader::add_variables()
     while (i != selection_map.constEnd()) {
         if (i.value() == true){
             varloc_node_t* node = i.key();
-            if (node->var_type == BASE){
+            if ((node->var_type == BASE)
+                || (node->var_type == ENUM)
+            ){
                 emit variable_added(node);
             }
         }

@@ -6,12 +6,12 @@
 
 
 char* varloc_node_types[] = {
-    "BASE",
-    "STRUCT",
-    "ENUM",
-    "POINTER",
-    "UNION",
-    "ARRAY"
+    "Base",
+    "Struct",
+    "Enum",
+    "Pointer",
+    "Union",
+    "Array"
 };
 
 
@@ -19,26 +19,20 @@ void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*)){
     if (root == NULL){
         return;
     }
-    func(root);
     if (root->child != NULL){
         for_each_var_loop(root->child, func);
     }
     if (root->next != NULL){
         for_each_var_loop(root->next, func);
     }
+    func(root);
 }
 
 void varloc_delete_tree(varloc_node_t* root){
     if (root == NULL){
         return;
     }
-    if (root->child != NULL){
-        varloc_delete_tree(root->child);
-    }
-    if (root->next != NULL){
-        varloc_delete_tree(root->next);
-    }
-    free(root);
+    for_each_var_loop(root, free);
 }
 
 
@@ -47,15 +41,13 @@ void print_var_node(varloc_node_t* var){
 //    for (int i = 0; i < var_loop_level; i++){
 //        printf("  ");
 //    }
-    printf("%s %s %s base:%x off:%d size:%d sign:%d type:%d items:%d\n",
+    printf("%s %s %s base:%x off:%d size:%d items:%d\n",
            varloc_node_types[var->var_type],
            var->name,
            var->ctype_name,
            var->address.base,
            var->address.offset_bits,
            var->address.size_bits,
-           var->is_signed,
-           var->type_size,
            var->n_items
            );
 }
@@ -107,9 +99,8 @@ int var_node_get_child_index(varloc_node_t* child){
     return row_n;
 }
 
-
 uint32_t var_node_get_address(varloc_node_t* node){
-    uint64_t offset = node->address.base + (node->address.offset_bits / 8);
+    uint32_t offset = node->address.base + (node->address.offset_bits / 8);
     varloc_node_t* parent = var_node_get_parent(node);
     while (parent != NULL){
         if (parent->var_type == POINTER){
@@ -126,6 +117,25 @@ uint32_t var_node_get_address(varloc_node_t* node){
         }
     }
     return offset ;
+}
+
+
+varloc_location_t var_node_get_load_location(varloc_node_t* node){
+    varloc_location_t loc = {0};
+    varloc_node_t* parent = var_node_get_parent(node);
+    if (parent){
+        uint32_t byte_address = var_node_get_address(parent);
+        loc.address.base = (byte_address + (node->address.offset_bits / 8)) & 0xFFFFFFFC;
+        loc.address.offset_bits = node->address.offset_bits % 32;
+        loc.address.size_bits = node->address.size_bits;
+        if (node->is_float){
+            loc.type =  VARLOC_FLOAT;
+        }
+        else if (node->is_signed){
+            loc.type = VARLOC_SIGNED;
+        }
+    }
+    return loc;
 }
 
 varloc_node_t* new_var_node(){
@@ -182,7 +192,7 @@ varloc_node_t* new_sibling(varloc_node_t* var){
 void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node);
 
 static void parse_type(struct tag *type, const struct cu *cu,
-                       char* name, varloc_node_t* node);
+                       const char* name, varloc_node_t* node);
 
 static void parse_member(struct class_member *member, bool union_member,
                          struct tag *type, const struct cu *cu,
@@ -254,38 +264,20 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         }
     }
 
-    tag = &gvar->ip.tag; //extvar__tag(var);
-
+    tag = &gvar->ip.tag;
     struct conf_fprintf cfg = {0};
-//    cfg.expand_types = 1;
-    //    cfg.expand_pointers = 1;
-//    cfg.rel_offset = 1;
-    //    tag__fprintf(tag, gvar->cu, &cfg, stdout);
-
-    //    for (pos = gvar->next; pos; pos = pos->next)
-    //        count++;
-    //    printf("; /* %u */\n\n", count);
-
-    //    ++tag->recursivity_level;
-
-
     if (tag->tag == DW_TAG_variable){
-//        const struct variable *var = tag__variable(tag);
         const char *name = variable__name(gvar);
-
         varloc_node_t *var_node = new_var_node();
         const char *type_name = variable__type_name(gvar, cu, var_node->ctype_name, 100);
-
-        const struct tag *type_tag = cu__type(cu, gvar->ip.tag.type);
-        int base_type = tag__is_base_type(type_tag, cu);
-        printf("\n\ngot var %s %s %d %x %x: ",
-               name,
-               type_name,
-               base_type,
-               gvar->declaration,
-               gvar->ip.addr);
-
-
+        struct tag *type_tag = cu__type(cu, gvar->ip.tag.type);
+//        int base_type = tag__is_base_type(type_tag, cu);
+//        printf("\n\ngot var %s %s %d %x %x: ",
+//               name,
+//               type_name,
+//               base_type,
+//               gvar->declaration,
+//               gvar->ip.addr);
 
         if (last_var_node != NULL){
             last_var_node->next = var_node;
@@ -296,16 +288,11 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         }
         last_var_node = var_node;
 
-//        if (!base_type){
-//            printf("\n");
-            parse_type(type_tag, cu, NULL, var_node);
-//        }
-//        else{
-//            var_node->var_type = BASE;
-//        }
-        strcpy(var_node->name, name);
-        var_node->is_anon = 0;
         var_node->address.base = gvar->ip.addr;
+        parse_type(type_tag, cu, NULL, var_node);
+
+        strlcpy(var_node->name, name, sizeof(var_node->name));
+        var_node->is_anon = 0;
     }
 }
 
@@ -319,14 +306,6 @@ static void parse_union(struct type *type, const struct cu *cu,
     struct conf_fprintf uconf;
     uint32_t initial_union_cacheline;
     uint32_t cacheline = 0; /* This will only be used if this is the outermost union */
-
-//    if (indent >= (int)sizeof(tabs))
-//        indent = sizeof(tabs) - 1;
-
-//    if (conf->prefix != NULL)
-//        printed += fprintf(fp, "%s ", conf->prefix);
-//    printed += fprintf(fp, "union%s%s {\n", type__name(type) ? " " : "",
-//                       type__name(type) ?: "");
 
     uconf = *conf;
     uconf.indent = indent + 1;
@@ -366,15 +345,12 @@ static void parse_union(struct type *type, const struct cu *cu,
         }
 
         uconf.union_member = 1;
-        printf("%.*s", uconf.indent, tabs);
+//        printf("%.*s", uconf.indent, tabs);
         parse_member(pos, true, pos_type, cu, &uconf, node);
 //        fputc('\n', fp);
         ++printed;
         *uconf.cachelinep = initial_union_cacheline;
     }
-
-//    return printed + fprintf(fp, "%.*s}%s%s", indent, tabs,
-//                             conf->suffix ? " " : "", conf->suffix ?: "");
 }
 
 
@@ -412,12 +388,12 @@ static void parse_array(const struct tag *tag,
             bool single_member = conf->last_member && conf->first_member;
 
             if (at->nr_entries[i] != 0 || !conf->last_member || single_member || conf->union_member){
-                printf("[%u]", at->nr_entries[i]);
+//                printf("[%u]", at->nr_entries[i]);
                 node->n_items = at->nr_entries[i];
             }
 
-            else
-                printf("[]");
+//            else
+//                printf("[]");
         }
     }
 
@@ -432,11 +408,11 @@ static void parse_array(const struct tag *tag,
         bool single_member = conf->last_member && conf->first_member;
 
         if (flat_dimensions != 0 || !conf->last_member || single_member || conf->union_member){
-            printf("[%llu]", flat_dimensions);
+//            printf("[%llu]", flat_dimensions);
             node->n_items = flat_dimensions;
         }
-        else
-            printf("[]");
+//        else
+//            printf("[]");
     }
 
     return;
@@ -446,8 +422,6 @@ static void parse_member(struct class_member *member, bool union_member,
                                     struct tag *type, const struct cu *cu,
                                     struct conf_fprintf *conf, varloc_node_t *node)
 {
-//    printf("\n");
-//    printf("%*s%s", indent*4, "", "- ");
     const int size = member->byte_size;
     int member_alignment_printed = 0;
     struct conf_fprintf sconf = *conf;
@@ -466,14 +440,6 @@ static void parse_member(struct class_member *member, bool union_member,
     if (member->bitfield_offset < 0)
         offset += member->byte_size;
 
-//    if (!conf->suppress_comments)
-//        printed_cacheline = class__fprintf_cacheline_boundary(conf, offset, fp);
-
-    if (member->tag.tag == DW_TAG_inheritance) {
-        cm_name = "<ancestor>";
-//        printf("/* ");
-    }
-
 //    if (member->is_static)
 //        printf("static ");
 
@@ -490,12 +456,7 @@ static void parse_member(struct class_member *member, bool union_member,
     {
         parse_type(type, cu, NULL, child);
         if (cm_name) {
-            if (!type__name(tag__type(type))){
-//                printf(" ");
-            }
-            strcpy(child->name, cm_name);
-//            child->name = cm_name;
-//            printf("%s", cm_name);
+            strlcpy(child->name, cm_name, sizeof(child->name));
         }
     } else {
         parse_type(type, cu, cm_name, child);
@@ -506,87 +467,13 @@ static void parse_member(struct class_member *member, bool union_member,
             printf(" = %", member->const_value);
     } else if (member->bitfield_size != 0) {
         child->address.size_bits = member->bitfield_size;
-//        printf(":%u", member->bitfield_size);
     }
 
-//    if (!sconf.suppress_aligned_attribute && member->alignment != 0) {
-//        member_alignment_printed = fprintf(fp, " __attribute__((__aligned__(%u)))", member->alignment);
-//        printed += member_alignment_printed;
-//    }
-
-//    printf(';');
-
-//    if ((tag__is_union(type) || tag__is_struct(type) ||
-//         tag__is_enumeration(type)) &&
-//        /* Look if is a type defined inline */
-//            type__name(tag__type(type)) == NULL) {
-//        if (!sconf.suppress_offset_comment) {
-//            /* Check if this is a anonymous union */
-//            int slen = member_alignment_printed + (cm_name ? (int)strlen(cm_name) : -1);
-//            int size_spacing = 5;
-
-//            if (tag__is_struct(type) && tag__class(type)->is_packed && !conf->suppress_packed) {
-//                int packed_len = sizeof("__attribute__((__packed__))");
-//                slen += packed_len;
-//            }
-
-//            printed += fprintf(fp, sconf.hex_fmt ?
-//                                       "%*s/* %#5x" :
-//                                       "%*s/* %5u",
-//                               (sconf.type_spacing +
-//                                sconf.name_spacing - slen - 3),
-//                               " ", offset);
-
-//            if (member->bitfield_size != 0) {
-//                unsigned int bitfield_offset = member->bitfield_offset;
-
-//                if (member->bitfield_offset < 0)
-//                    bitfield_offset = member->byte_size * 8 + member->bitfield_offset;
-
-//                printed += fprintf(fp, sconf.hex_fmt ?  ":%#2x" : ":%2u", bitfield_offset);
-//                size_spacing -= 3;
-//            }
-
-//            printed += fprintf(fp, sconf.hex_fmt ?  " %#*x */" : " %*u */", size_spacing, size);
-//        }
-//    } else {
-//        int spacing = sconf.type_spacing + sconf.name_spacing - printed;
-
-//        if (member->tag.tag == DW_TAG_inheritance) {
-//            const size_t p = fprintf(fp, " */");
-//            printed += p;
-//            spacing -= p;
-//        }
-//        if (!sconf.suppress_offset_comment) {
-//            int size_spacing = 5;
-
-//            printed += fprintf(fp, sconf.hex_fmt ?
-//                                       "%*s/* %#5x" : "%*s/* %5u",
-//                               spacing > 0 ? spacing : 0, " ",
-//                               offset);
-
-//            if (member->bitfield_size != 0) {
-//                unsigned int bitfield_offset = member->bitfield_offset;
-
-//                if (member->bitfield_offset < 0)
-//                    bitfield_offset = member->byte_size * 8 + member->bitfield_offset;
-
-//                printed += fprintf(fp, sconf.hex_fmt ?
-//                                           ":%#2x" : ":%2u",
-//                                   bitfield_offset);
-//                size_spacing -= 3;
-//            }
-
-//            printed += fprintf(fp, sconf.hex_fmt ?
-//                                       " %#*x */" : " %*u */",
-//                               size_spacing, size);
-//        }
-//    }
     return;
 }
 
 
-static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc_node_t* node){
+static void parse_type(struct tag *type, const struct cu *cu, const char* name, varloc_node_t* node){
     if (name == NULL){
         name = "\0";
     }
@@ -629,8 +516,8 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
             namebf[len + nr_indirections] = '\0';
             node->var_type = POINTER;
             name = namebf;
-            strcpy(node->name, name);
-            printf("POINTER! ");
+            strlcpy(node->name, name, sizeof(node->name));
+//            printf("POINTER! ");
         }
         else{
             nr_indirections = 1;
@@ -653,12 +540,9 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
             int n;
 
             ctype = tag__type(type);
-//            if (typedef_expanded)
-//                printf(" -> %s", type__name(ctype));
-//            else {
             if(!typedef_expanded){
-                strcpy(node->ctype_name, type__name(ctype));
-                printf("%s ", type__name(ctype));
+                strlcpy(node->ctype_name, type__name(ctype), sizeof(node->ctype_name));
+//                printf("%s ", type__name(ctype));
             }
             typedef_expanded++;
             type_type = cu__type(cu, type->type);
@@ -668,9 +552,6 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
             if (n)
                 return;
             type = type_type;
-        }
-        if (typedef_expanded){
-//            printf(" */ ");
         }
     }
 
@@ -689,7 +570,6 @@ static void parse_type(struct tag *type, const struct cu *cu, char* name, varloc
 next_type:
     switch (type->tag) {
     case DW_TAG_pointer_type: {
-//        type_id_t ptype_id = skip_llvm_annotations(cu, type->type);
 
         if (type->type != 0) {
             int n;
@@ -699,13 +579,6 @@ next_type:
             n = tag__has_type_loop(type, ptype, NULL, 0, stdout);
             if (n)
                 return;
-//            if (ptype->tag == DW_TAG_subroutine_type) {
-//                printed += ftype__fprintf(tag__ftype(ptype),
-//                                          cu, name, 0, 1,
-//                                          tconf.type_spacing, true,
-//                                          &tconf, fp);
-//                break;
-//            }
             if ((tag__is_struct(ptype) || tag__is_union(ptype) ||
                  tag__is_enumeration(ptype)) && type__name(tag__type(ptype)) == NULL) {
                 if (name == namebfptr)
@@ -723,22 +596,14 @@ next_type:
     default:
     print_default:
         if ((node->var_type != POINTER)
-//        &&  (!(*node->name))
         ){
-            strcpy(node->name, name);
-//           node->name = name;
+            strlcpy(node->name, name, sizeof(node->name));
         }
         if(!(*node->ctype_name)){
            tag__name(type, cu, node->ctype_name, sizeof(node->ctype_name), &tconf);
         }
-        printf("%s %s",tag__name(type, cu, tbf, sizeof(tbf), &tconf),
-                        name);
         break;
     case DW_TAG_subroutine_type:
-//        printed += ftype__fprintf(tag__ftype(type), cu, name, 0, 0,
-//                                  tconf.type_spacing, true, &tconf, fp);
-        printf("%s ", name);
-        printf("ftype__fprintf");
         break;
     case DW_TAG_atomic_type:
         modifier = "_Atomic";
@@ -759,7 +624,6 @@ next_type:
         parse_array(type, cu, name, &tconf, node);
         break;
     case DW_TAG_string_type:
-        printf("string_type__fprintf");
         break;
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
@@ -768,9 +632,7 @@ next_type:
         if (node->var_type != POINTER){
             node->var_type = STRUCT;
             if(*name){
-                printf("%s ", name);
                 strcpy(node->name, name);
-//                node->name = name;
             }
             else{
                 sprintf(node->name, "struct ...");
@@ -783,9 +645,7 @@ next_type:
         if (node->var_type != POINTER){
             node->var_type = UNION;
             if(*name){
-                printf("%s ", name);
-                strcpy(node->name, name);
-//                node->name = name;
+                strlcpy(node->name, name, sizeof(node->name));
             }
             else{
                 sprintf(node->name, "union ...");
@@ -795,27 +655,31 @@ next_type:
         ctype = tag__type(type);
         parse_union(ctype,cu, &tconf, node);
         break;
-//    case DW_TAG_base_type:
-//        node->var_type = BASE;
-//        struct base_type* base = tag__base_type(type);
-//        node->is_signed =  base->is_signed;
-//        node->type_size =  base->bit_size;
-//        strcpy(node->name, name);
-////        node->name = name;
-//        break;
+    case DW_TAG_base_type:
+        node->var_type = BASE;
+        strlcpy(node->name, name, sizeof(node->name));
+        if(!(*node->ctype_name)){
+            tag__name(type, cu, node->ctype_name, sizeof(node->ctype_name), &tconf);
+        }
+        struct base_type* base = tag__base_type(type);
+        node->is_signed =  base->is_signed;
+        if (base->float_type){
+            node->is_float = 1;
+        }
+        break;
 
     case DW_TAG_enumeration_type:
         node->var_type = ENUM;
         ctype = tag__type(type);
         if (type__name(ctype) != NULL){
-            printf("enum %s", type__name(ctype), name ?: "");
+//            printf("enum %s", type__name(ctype), name ?: "");
         }
         else{
 //            printed += enumeration__fprintf(type, &tconf, fp);
-            printf("%s ", name);
-            strcpy(node->name, name);
+//            printf("%s ", name);
+            strlcpy(node->name, name, sizeof(node->name));
 //            node->name = name;
-            printf("enumeration__fprintf");
+//            printf("enumeration__fprintf");
 
         }
         break;
@@ -853,88 +717,34 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
     int first = 1;
     struct class_member *pos, *last = NULL;
     struct tag *tag_pos;
-//    const char *current_accessibility = NULL;
     struct conf_fprintf cconf = {};// : conf_fprintf__defaults;
-//    const uint16_t t = type->namespace.tag.tag;
-//    size_t printed = fprintf(fp, "%s%s%s%s%s",
-//                             cconf.prefix ?: "", cconf.prefix ? " " : "",
-//                             ((cconf.classes_as_structs ||
-//                               t == DW_TAG_structure_type) ? "struct" :
-//                                  t == DW_TAG_class_type ? "class" :
-//                                  "interface"),
-//                             type__name(type) ? " " : "",
-//                             type__name(type) ?: "");
-//    int indent = cconf.indent;
-
-//    if (indent >= (int)sizeof(tabs))
-//        indent = sizeof(tabs) - 1;
-
-//    if (cconf.cachelinep == NULL)
-//        cconf.cachelinep = &cacheline;
-
-//    cconf.indent = indent + 1;
-//    cconf.no_semicolon = 0;
 
     class__infer_packed_attributes(class, cu);
 
     /* First look if we have DW_TAG_inheritance */
-    printf("\n>>>");
+//    printf("\n>>>");
     indent++;
     type__for_each_tag(type, tag_pos) {
 
 //        const char *accessibility;
 
-        if (tag_pos->tag != DW_TAG_inheritance)
+        if (tag_pos->tag != DW_TAG_inheritance){
             continue;
-
-        if (first) {
-            printf(" :");
-            first = 0;
-        } else
-            printf(",");
+        }
 
         pos = tag__class_member(tag_pos);
 
-        if (pos->virtuality == DW_VIRTUALITY_virtual)
-            printf(" virtual");
-
-//        accessibility = tag__accessibility(tag_pos);
-//        if (accessibility != NULL)
-//           printf(" %s", accessibility);
-
         struct tag *pos_type = cu__type(cu, tag_pos->type);
         if (pos_type != NULL){
-            strcpy(node->name, type__name(tag__type(pos_type)));
-//            node->name = type__name(tag__type(pos_type));
-            printf(" %s",
-                 type__name(tag__type(pos_type)));
-        }
-        else{
-            printf("Class tag not found!");
-//            tag__id_not_found_fprintf(fp, tag_pos->type);
+            strlcpy(node->name, type__name(tag__type(pos_type)), sizeof(node->name));
         }
     }
 
-//    fprintf(fp, " {\n");
 
     type__for_each_tag(type, tag_pos) {
 
-//        const char *accessibility = tag__accessibility(tag_pos);
-
-//        if (accessibility != NULL &&
-//            accessibility != current_accessibility) {
-//            current_accessibility = accessibility;
-//            printf("%.*s%s:\n\n",
-//                               cconf.indent - 1, tabs,
-//                               accessibility);
-//        }
-
         if (tag_pos->tag != DW_TAG_member &&
             tag_pos->tag != DW_TAG_inheritance) {
-//            if (!cconf.show_only_data_members) {
-//                tag__fprintf(tag_pos, cu, &cconf, stdout);
-                printf("tag__fprintf");
-//            }
             continue;
         }
         pos = tag__class_member(tag_pos);
@@ -964,8 +774,6 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
                 struct tag *pos_type = cu__type(cu, pos->tag.type);
 
                 if (pos_type == NULL) {
-                    printf("%.*s", cconf.indent, tabs);
-//                    tag__id_not_found_fprintf(fp, pos->tag.type);
                     continue;
                 }
                 /*
@@ -973,28 +781,14 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
                  * i.e. _explicitely_ adding a bit hole.
                  */
                 if (last->byte_offset != pos->byte_offset) {
-                    printf("\n%.*s/* Force alignment to the next boundary: */\n", cconf.indent, tabs);
                     bitfield_size = 0;
                 }
-
-//                printf("%.*s", cconf.indent, tabs);
-                printf(" print type");
                 parse_type(pos_type, cu, NULL, node);
-//                type__fprintf(pos_type, cu, "", &cconf, fp);
-                printf(":%u;\n", bitfield_size);
             }
         }
 
-//        if (newline) {
-//            fputc('\n', fp);
-//            newline = 0;
-//            ++printed;
-//        }
-
         struct tag *pos_type = cu__type(cu, pos->tag.type);
         if (pos_type == NULL) {
-//            printed += fprintf(fp, "%.*s", cconf.indent, tabs);
-//            printed += tag__id_not_found_fprintf(fp, pos->tag.type);
             continue;
         }
 
@@ -1002,15 +796,7 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
         cconf.first_member = last == NULL;
 
         size = pos->byte_size;
-//        printf("%.*s", cconf.indent, tabs);
-//        printf("struct_member__fprintf ");
         parse_member(pos, false, pos_type, cu, &cconf, node);
-//        struct_member__fprintf(pos, pos_type, cu, &cconf, fp);
-
-
-
-//        fputc('\n', fp);
-//        ++printed;
 
         /* XXX for now just skip these */
         if (tag_pos->tag == DW_TAG_inheritance)
@@ -1074,22 +860,14 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 
         if (is_power_of_2(size) && class->padding > cu->addr_size) {
             int added_padding;
-            int bit_size = size * 8;
-
-            printf("\n%.*s/* Force padding: */\n", cconf.indent, tabs);
+//            int bit_size = size * 8;
 
             for (added_padding = 0; added_padding < class->padding; added_padding += size) {
-//                printed += fprintf(fp, "%.*s", cconf.indent, tabs);
-                printf(" print type");
                 parse_type(tag_pos, cu, NULL, node);
-                printf(":%u;\n", bit_size);
             }
         }
     }
 
-//    if (!cconf.show_only_data_members)
-//        class__vtable_fprintf(class, &cconf, fp);
-    printf("\n<<<");
     indent--;
 }
 

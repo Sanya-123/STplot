@@ -16,11 +16,11 @@
 /* Exported includes ---------------------------------------------------------*/
 #include <stdint.h>
 /* Exported types ------------------------------------------------------------*/
- typedef struct{
-     uint32_t base;
-     uint32_t offset_bits;
-     uint32_t size_bits;
- }varloc_address_t;
+ typedef enum{
+     VARLOC_UNSIGNED,
+     VARLOC_SIGNED,
+     VARLOC_FLOAT,
+ }varloc_loc_type_e;
 
  typedef enum{
      BASE,
@@ -30,6 +30,18 @@
      UNION,
      ARRAY,
  }varloc_node_type_t;
+
+ typedef struct{
+     uint32_t base;
+     uint32_t offset_bits;
+     uint32_t size_bits;
+ }varloc_address_t;
+
+ typedef struct {
+     varloc_loc_type_e  type;
+     varloc_address_t   address;
+ }varloc_location_t;
+
 
  typedef struct varloc_s{
      struct varloc_s*   next;
@@ -41,9 +53,9 @@
      varloc_node_type_t var_type;
      varloc_address_t   address;
      uint32_t           n_items;
-     uint8_t            type_size;
-     uint8_t            is_signed;
-     uint8_t            is_anon;
+     uint8_t            is_anon   :1;
+     uint8_t            is_signed   :1;
+     uint8_t            is_float   :1;
  }varloc_node_t;
 
 /* Exported constants --------------------------------------------------------*/
@@ -64,6 +76,8 @@
  varloc_node_t* var_node_get_child_at_index(varloc_node_t* parent, uint32_t index);
 
  uint32_t var_node_get_address(varloc_node_t* node);
+
+ varloc_location_t var_node_get_load_location(varloc_node_t* node);
 
  void varloc_delete_tree(varloc_node_t* root);
 

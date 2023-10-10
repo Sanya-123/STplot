@@ -1,6 +1,8 @@
 #include "varmodel.h"
 #include <QStringList>
 
+#define DEBUG_VIEW 1
+
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -23,7 +25,11 @@ varloc_node_t* VarModel::getModelRoot(){
 
 int VarModel::columnCount(const QModelIndex &parent) const
 {
+#if DEBUG_VIEW == 1
+    return 8;
+#else
     return 5;
+#endif
 }
 
 void VarModel::select_node(varloc_node_t* node)
@@ -37,17 +43,19 @@ void VarModel::deselect_node(varloc_node_t* node)
 }
 
 void VarModel::apply_for_each_child(varloc_node_t* root,
-                                    void (VarModel::*func)(varloc_node_t*))
+                                    void (VarModel::*func)(varloc_node_t*), bool first = true)
 {
     if (root == NULL){
         return;
     }
-    (this->*(func))(root);
+    if (!first){
+        (this->*(func))(root);
+    }
      if (root->child != NULL){
-         this->apply_for_each_child(root->child, func);
+         this->apply_for_each_child(root->child, func, false);
      }
-     if (root->next != NULL){
-         this->apply_for_each_child(root->next, func);
+     if (root->next != NULL && !first){
+         this->apply_for_each_child(root->next, func, false);
      }
 }
 
@@ -62,11 +70,11 @@ bool VarModel::setData(const QModelIndex &index, const QVariant &value, int role
     if (index.column() == 0){
         if(value.toBool()){
             this->select_node(item);
-            this->apply_for_each_child(item->child, &VarModel::select_node);
+            this->apply_for_each_child(item, &VarModel::select_node);
         }
         else{
             this->deselect_node(item);
-            this->apply_for_each_child(item->child, &VarModel::deselect_node);
+            this->apply_for_each_child(item, &VarModel::deselect_node);
         }
        emit dataChanged(index, this->index(index.row()+1, index.column(), this->parent(index)), {Qt::DisplayRole, Qt::EditRole});
         return true;
@@ -115,7 +123,7 @@ QVariant VarModel::data(const QModelIndex &index, int role) const
             res = QString("???");
         }
         else{
-            res = QString("0x%1").arg(var_node_get_address(item), 8, 16, QLatin1Char( '0' ));
+            res = QString("0x%1").arg(address, 8, 16, QLatin1Char( '0' ));
         }
         return QVariant(res);
     }
@@ -125,6 +133,19 @@ QVariant VarModel::data(const QModelIndex &index, int role) const
     else if (index.column() == 4){
         return QVariant(var_node_get_type_name(item));
     }
+#if DEBUG_VIEW == 1
+    else if (index.column() == 5){
+        return QVariant(item->address.offset_bits);
+    }
+    else if (index.column() == 6){
+        return QVariant(var_node_get_load_location(item).address.offset_bits);
+//        return QVariant(item->is_signed);
+    }
+    else if (index.column() == 7){
+        return QString("0x%1").arg(var_node_get_load_location(item).address.base, 8, 16, QLatin1Char( '0' ));;
+//        return QVariant(item->is_float);
+    }
+#endif
     return QVariant();
 
 }
@@ -168,6 +189,17 @@ QVariant VarModel::headerData(int section, Qt::Orientation orientation,
         if (section == 4){
             return QVariant("Type");
         }
+#if DEBUG_VIEW == 1
+        if (section == 5){
+            return QVariant("Offset");
+        }
+        if (section == 6){
+            return QVariant("Signed");
+        }
+        if (section == 7){
+            return QVariant("Float");
+        }
+#endif
     }
     return QVariant();
 }
@@ -191,7 +223,7 @@ QMap<varloc_node_t*, bool> & VarModel::get_selected_nodes(){
 //}
 
 void VarModel::deselect_all(){
-    this->apply_for_each_child(rootItem->child, &VarModel::deselect_node);
+    this->apply_for_each_child(rootItem, &VarModel::deselect_node);
     emit dataChanged(QModelIndex(), QModelIndex(), {Qt::DisplayRole, Qt::EditRole});
 }
 

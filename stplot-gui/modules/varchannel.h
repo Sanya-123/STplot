@@ -30,11 +30,13 @@ class VarChannel : public QObject
 public:
     VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();
-    void push_value(float value);
-    QString name();
-    float value();
-    bool has_var_node(varloc_node_t* node);
-    uint32_t addres();
+    void pushValue(float value);
+    void pushValueRaw(uint32_t value);
+    QString getName();
+    float getValue();
+    varloc_location_t getLocation();
+    uint32_t getMask();
+    bool hasLocation(varloc_location_t loc);
 
     QVector<bool> getPlotList();
     int getTotalSizePlot();
@@ -46,7 +48,6 @@ public:
     VarValue getValue(int numberElement);
     QVector<VarValue> getBuffer();
     int getBufferSize();
-
     int dotStyle() const;
     void setDotStyle(int newDotStyle);
 
@@ -59,7 +60,9 @@ public:
 private:
     float                   m_value;
     QString                 m_name;
-    varloc_node_t*          m_var_node;
+    varloc_location_t       m_location;
+    uint32_t                m_mask;
+//    varloc_node_t*          m_var_node;
     QVector<VarValue>       m_buffer;
     //list for each plot gruph
     QVector<bool>           m_plotListl;

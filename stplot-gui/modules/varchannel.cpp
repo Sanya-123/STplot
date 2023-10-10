@@ -1,21 +1,17 @@
 #include "varchannel.h"
+#include <cmath>
 
 using namespace std::chrono;
 
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) : tmpDesc(0), m_lineColor(lineColor)
 {
     if (node != NULL){
-        m_var_node = node;
+        m_location = var_node_get_load_location(node);
         m_name = QString(node->name);
         varloc_node_t * parent = var_node_get_parent(node);
         while (parent != NULL){
             if (!parent->is_anon){
-                if(parent->var_type == POINTER){
-                    m_name.prepend("->");
-                }
-                else{
-                    m_name.prepend(".");
-                }
+                m_name.prepend(".");
                 m_name.prepend(parent->name);
             }
             parent = var_node_get_parent(parent);
@@ -27,13 +23,16 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) : tm
     m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
 
     setDotStyle(dotStyle);
+
+    m_mask = pow(2, m_location.address.size_bits) - 1;
+    m_mask = m_mask << m_location.address.offset_bits;
 }
 
 VarChannel::~VarChannel(){
 
 }
 
-void VarChannel::push_value(float value){
+void VarChannel::pushValue(float value){
     m_value = value;
     VarValue var = {
         .value = value,
@@ -51,21 +50,85 @@ void VarChannel::push_value(float value){
     }
 }
 
-bool VarChannel::has_var_node(varloc_node_t* node){
-    return (m_var_node == node);
+void VarChannel::pushValueRaw(uint32_t value){
+
+    union {
+        _Float32    _f;
+        uint8_t     _u8;
+        int8_t      _i8;
+        uint16_t    _u16;
+        int16_t     _i16;
+        uint32_t    _u32;
+        int32_t     _i32;
+    }combiner;
+    combiner._u32 = (value & m_mask) >> m_location.address.offset_bits;
+    if(m_location.address.size_bits <= 8){
+        if (m_location.type == VARLOC_SIGNED){
+            m_value = combiner._i8;
+        } else{
+            m_value = combiner._u8;
+        }
+    }
+    else if(m_location.address.size_bits <= 16){
+        if (m_location.type == VARLOC_SIGNED){
+            m_value = combiner._i16;
+        } else{
+            m_value = combiner._u16;
+        }
+    }
+    else {
+        if (m_location.type == VARLOC_SIGNED){
+            m_value = combiner._i32;
+        }
+        else if (m_location.type == VARLOC_FLOAT){
+            m_value = combiner._f;
+        } else{
+            m_value = combiner._u32;
+        }
+    }
+
+    VarValue var = {
+        .value = m_value,
+        //        .time = time_point_cast<microseconds>(system_clock::now()),
+        .qtime = QTime::currentTime(),
+    };
+    //    m_buffer.push_back(var);
+    m_buffer.append(var);
+
+    tmpDesc++;
+    if(tmpDesc == 100)
+    {
+        tmpDesc = 0;
+        emit updatePlot();
+    }
 }
 
-uint32_t VarChannel::addres()
+varloc_location_t VarChannel::getLocation()
 {
-    return var_node_get_address(m_var_node);
-//    return m_var_node->address.base;
+    return m_location;
 }
 
-QString VarChannel::name(){
+uint32_t VarChannel::getMask()
+{
+    return m_mask;
+}
+
+bool VarChannel::hasLocation(varloc_location_t loc){
+    if ((loc.address.base == this->m_location.address.base)
+    && (loc.address.offset_bits == this->m_location.address.offset_bits)
+    && (loc.address.size_bits == this->m_location.address.size_bits)
+    ){
+        return true;
+    }
+    return false;
+
+}
+
+QString VarChannel::getName(){
     return m_name;
 }
 
-float VarChannel::value(){
+float VarChannel::getValue(){
     return m_value;
 }
 

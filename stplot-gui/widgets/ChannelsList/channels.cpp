@@ -73,8 +73,10 @@ QVector<VarChannel *> *Channels::getListChanales() const
 
 
 void Channels::add_channel(varloc_node_t* node){
+
+    varloc_location_t load_loc = var_node_get_load_location(node);
     for (int i = 0; i < m_channels->size(); ++i) {
-        if (m_channels->at(i)->has_var_node(node)){
+        if (m_channels->at(i)->hasLocation(load_loc)){
             //already have node
             return;
         }
@@ -119,7 +121,7 @@ void Channels::on_pushButton_clicked()
     for(int i = 0; i < 100; i++)
     {
         usleep(1000);
-        plotChanale->push_value( qSin(i*1.0*2*M_PI*sinFreq/100.0) );
+        plotChanale->pushValue( qSin(i*1.0*2*M_PI*sinFreq/100.0) );
     }
 
 

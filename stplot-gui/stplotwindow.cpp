@@ -58,13 +58,13 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->menuView->addAction(dockWidgetVarLoader->toggleViewAction());
     ui->menuView->addAction(dockWidgetViwManager->toggleViewAction());
 
-
     ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
 //    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetVarLoader);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
     QObject::connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
+    QObject::connect(ui->menuRun, &QMenu::triggered, this, &STPlotWindow::startRead);
 
     viewManager->setDockContainer(ui->dockContainer);
     viewManager->setMenuView(ui->menuView);
@@ -117,6 +117,13 @@ STPlotWindow::~STPlotWindow()
 
 void STPlotWindow::startRead()
 {
+//    readLoop.setChannels(channelsView->getListChanales());
+//    readLoop.setReadDevicec(readDeviceces[0]);
+//    readLoop.readLoop();
+    QVector<VarChannel *> *channels =  channelsView->getListChanales();
+    for (int i = 0; i < channels->size(); ++i) {
+        channels->at(i)->pushValueRaw(0x755);
+    }
 
 }
 
