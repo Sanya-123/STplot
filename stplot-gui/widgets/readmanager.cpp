@@ -1,13 +1,20 @@
 #include "readmanager.h"
 
 ReadManager::ReadManager(QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, readDevicece(nullptr)
 {
-
+    loop = new ReadLoop;
+    loop->moveToThread(&readLoopThread);
+    connect(loop, SIGNAL(addressesReed(uint32_t,QList)), this, SLOT(addresRead(uint32_t,QList))/*, Qt::QueuedConnection*/);
+    connect(loop, SIGNAL(stopedLoop()), this, SLOT(stopReadLoop())/*, Qt::QueuedConnection*/);
+    connect(&readLoopThread, SIGNAL(started()), loop, SLOT(readLoop()));
 }
 
 int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
 {
+    if(readDevicece == nullptr)
+        return -1;
+
     this->channels = channels;
     readSeuqencs = calcReadSeuqence(channels);
     readSeuqencsMap.clear();
@@ -18,9 +25,18 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
         readSeuqencsMap[readSeuqencs[i].addres] = readSeuqencs[i];
     }
 
-    loop.setReadSequence(readSeuqencs);
+    loop->setReadSequence(readSeuqencs);
+    loop->setReadDevicec(readDevicece);
+    loop->setSaveDeviceces(&saveDeviceces);
 
-    return -1;
+
+    readDevicece->moveToThread(&readLoopThread);
+    for(int i = 0; i < saveDeviceces.size(); i++)
+        saveDeviceces[i]->moveToThread(&readLoopThread);
+
+    readLoopThread.start();
+
+    return 0;
 }
 
 QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarChannel *> *channels)
@@ -103,6 +119,20 @@ void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
         //TODO some logig base on type
         addresSequence.vectorChanales[j].chanale->pushValue(combiner._32*1.0);
     }
+}
+
+void ReadManager::stopReadLoop()
+{
+    readLoopThread.quit();
+    readLoopThread.wait();
+    readDevicece->moveToThread(this->thread());
+    for(int i = 0; i < saveDeviceces.size(); i++)
+        saveDeviceces[i]->moveToThread(this->thread());
+}
+
+void ReadManager::setReadDevicece(ReadDeviceObject *newReadDevicece)
+{
+    readDevicece = newReadDevicece;
 }
 
 //void ReadManager::startRead()

@@ -43,6 +43,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton_open_def_setings">
+       <property name="text">
+        <string>def setings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_open_selected_plot_setings">
+       <property name="text">
+        <string>selected plot setings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

@@ -6,6 +6,7 @@
 #include <QThread>
 #include "readloop.h"
 #include <QMap>
+#include "readwritedevice.h"
 
 class ReadManager : public QObject
 {
@@ -17,17 +18,20 @@ public:
 
     static QVector<ReadDeviceObject::ReadAddres> calcReadSeuqence(QVector<VarChannel*> *channels);
 
+    void setReadDevicece(ReadDeviceObject *newReadDevicece);
+
 private slots:
     void addresRead(uint32_t addres, QVector<uint8_t> data);
-
-signals:
+    void stopReadLoop();
 
 private:
     QVector<ReadDeviceObject::ReadAddres> readSeuqencs;
     QMap<uint32_t, ReadDeviceObject::ReadAddres> readSeuqencsMap;
     QVector<VarChannel*> *channels;
-    ReadLoop loop;
-
+    ReadLoop *loop;
+    QThread readLoopThread;
+    QVector<SaveDeviceObject*> saveDeviceces;
+    ReadDeviceObject *readDevicece;
 };
 
 #endif // READMANAGER_H

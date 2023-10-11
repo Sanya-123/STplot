@@ -9,18 +9,26 @@ namespace Ui {
 class SimpleGraph;
 }
 
+class SimpleGraphSettings : public PlotSettingsAbstract
+{
+    Q_OBJECT
+public:
+    SimpleGraphSettings(QObject *parent = nullptr);
+};
+
 class SimpleGraph : public PlotWidgetAbstract
 {
     Q_OBJECT
 
 public:
-    explicit SimpleGraph(QWidget *parent = nullptr);
+    explicit SimpleGraph(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
     ~SimpleGraph();
     void addPlot(VarChannel *varChanale);
     void deletePlot(VarChannel *varChanale);
 //    bool plotVar(QString plotName, QVector<VarValue> values);
 //    void setName(QString name);
 //    QString getName();
+    PlotSettingsAbstract* gedSettings() {return &settings; }
 
 private:
     QCPGraph* getGruph(QObject *sender, VarChannel **varChanale);
@@ -30,12 +38,14 @@ private slots:
     void updateColourPlot();
     void updateLineStyleGruph();
     void updateDotStyleGruph();
+    void settingsChanged();
 
 private:
     Ui::SimpleGraph *ui;
 //    QString name;
     QCustomPlot *plotWidget;
     QMap<VarChannel*,QCPGraph*> mapPlots;
+    SimpleGraphSettings settings;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin
@@ -47,9 +57,14 @@ class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin
 public:
     PlotWidgetAbstract* createWidgetPlot(QWidget *parent = nullptr)
     {
-        return new SimpleGraph(parent);
+        return new SimpleGraph(&defSettings, parent);
     }
     QString getName() { return QString("SimpleGraph"); }
+
+    PlotSettingsAbstract* gedDefauoldSettings() {return &defSettings;}
+
+private:
+    SimpleGraphSettings defSettings;
 };
 
 #endif // SIMPLEGRAPH_H

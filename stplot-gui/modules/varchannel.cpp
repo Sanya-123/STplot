@@ -87,20 +87,7 @@ void VarChannel::pushValueRaw(uint32_t value){
         }
     }
 
-    VarValue var = {
-        .value = m_value,
-        //        .time = time_point_cast<microseconds>(system_clock::now()),
-        .qtime = QTime::currentTime(),
-    };
-    //    m_buffer.push_back(var);
-    m_buffer.append(var);
-
-    tmpDesc++;
-    if(tmpDesc == 100)
-    {
-        tmpDesc = 0;
-        emit updatePlot();
-    }
+    pushValue(m_value);
 }
 
 varloc_location_t VarChannel::getLocation()

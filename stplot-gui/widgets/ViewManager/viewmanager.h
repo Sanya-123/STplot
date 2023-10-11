@@ -40,12 +40,16 @@ private:
 
 private slots:
     void addPotToPlot(VarChannel* var, int numPlot, bool en);
-    void addPlot(PlotWidgetInterfacePlugin* plotType, QString name);
+    PlotWidgetAbstract *addPlot(PlotWidgetInterfacePlugin* plotType, QString name);
     void on_tableWidget_availebleWidgets_cellChanged(int row, int column);
 
     void on_pushButton_addView_clicked();
 
     void on_pushButton_deleteViewes_clicked();
+
+    void on_pushButton_open_def_setings_clicked();
+
+    void on_pushButton_open_selected_plot_setings_clicked();
 
 private:
     Ui::ViewManager *ui;

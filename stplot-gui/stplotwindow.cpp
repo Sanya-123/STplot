@@ -57,6 +57,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->menuView->addAction(dockWidgetChanaleWivw->toggleViewAction());
     ui->menuView->addAction(dockWidgetVarLoader->toggleViewAction());
     ui->menuView->addAction(dockWidgetViwManager->toggleViewAction());
+    ui->menuView->addSeparator();
 
     ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
 //    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
@@ -71,13 +72,13 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     viewManager->setChanales(channelsView);
 
     //init devicec
-    readDeviceces.append(&stlinkDevice);
+//    readDeviceces.append(&stlinkDevice);
+    readManager.setReadDevicece(&stlinkDevice);
 
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
-    ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
 
     settings.beginGroup("channels");
     channelsView->restoreSettings(&settings);
@@ -91,6 +92,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     viewManager->restoreSettings(&settings);
     settings.endGroup();
 
+    ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
 }
 
 STPlotWindow::~STPlotWindow()
@@ -120,6 +122,7 @@ void STPlotWindow::startRead()
 //    readLoop.setChannels(channelsView->getListChanales());
 //    readLoop.setReadDevicec(readDeviceces[0]);
 //    readLoop.readLoop();
+//    readManager.runReadLoop(channelsView->getListChanales());
     QVector<VarChannel *> *channels =  channelsView->getListChanales();
     for (int i = 0; i < channels->size(); ++i) {
         channels->at(i)->pushValueRaw(0x755);

@@ -30,8 +30,6 @@ class VarChannel : public QObject
 public:
     VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();
-    void pushValue(float value);
-    void pushValueRaw(uint32_t value);
     QString getName();
     float getValue();
     varloc_location_t getLocation();
@@ -56,6 +54,10 @@ public:
 
     QColor lineColor() const;
     void setLineColor(const QColor &newLineColor);
+
+public slots:
+    void pushValue(float value);
+    void pushValueRaw(uint32_t value);
 
 private:
     float                   m_value;

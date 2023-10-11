@@ -4,7 +4,16 @@
 #include "initplot.h"
 #include <QDebug>
 
-SimpleGraph::SimpleGraph(QWidget *parent) :
+SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract(parent)
+{
+    mapSettings["varColor"] = QColor(Qt::white);
+    mapSettings["gridColor"] = QColor(140, 140, 140);
+    mapSettings["subGridColor"] = QColor(80, 80, 80);
+    mapSettings["bgColor1"] = QColor(80, 80, 80);
+    mapSettings["bgColor2"] = QColor(50, 50, 50);
+}
+
+SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
     ui(new Ui::SimpleGraph)
 {
@@ -22,6 +31,10 @@ SimpleGraph::SimpleGraph(QWidget *parent) :
     QGridLayout *loaout = new QGridLayout(this);
     loaout->addWidget(plotWidget,0, 0, 1, 1);
     this->setLayout(loaout);
+
+    //settings
+    connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
+    this->settings.setSettings(settings);
 }
 
 SimpleGraph::~SimpleGraph()
@@ -137,6 +150,42 @@ void SimpleGraph::updateDotStyleGruph()
 
     plotWidget->update();
     plotWidget->replot();
+}
+
+void SimpleGraph::settingsChanged()
+{
+    QMap<QString, QVariant> map = settings.getSettingsMap();
+
+
+    plotWidget->xAxis->setBasePen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis->setBasePen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis2->setBasePen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->xAxis->setTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis->setTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis2->setTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->xAxis->setSubTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis->setSubTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->yAxis2->setSubTickPen(QPen(map["varColor"].value<QColor>(), 1));
+    plotWidget->xAxis->setTickLabelColor(map["varColor"].value<QColor>());
+    plotWidget->yAxis->setTickLabelColor(map["varColor"].value<QColor>());
+    plotWidget->yAxis2->setTickLabelColor(map["varColor"].value<QColor>());
+    plotWidget->xAxis->grid()->setPen(QPen(map["gridColor"].value<QColor>(), 1, Qt::DotLine));
+    plotWidget->yAxis->grid()->setPen(QPen(map["gridColor"].value<QColor>(), 1, Qt::DotLine));
+    plotWidget->yAxis2->grid()->setPen(QPen(map["gridColor"].value<QColor>(), 1, Qt::DotLine));
+    plotWidget->xAxis->grid()->setSubGridPen(QPen(map["subGridColor"].value<QColor>(), 1, Qt::DotLine));
+    plotWidget->yAxis->grid()->setSubGridPen(QPen(map["subGridColor"].value<QColor>(), 1, Qt::DotLine));
+    plotWidget->yAxis2->grid()->setSubGridPen(QPen(map["subGridColor"].value<QColor>(), 1, Qt::DotLine));
+
+    QLinearGradient plotGradient;
+    plotGradient.setStart(0, 0);
+    plotGradient.setFinalStop(0, 350);
+    plotGradient.setColorAt(0, map["bgColor1"].value<QColor>());
+    plotGradient.setColorAt(1, map["bgColor2"].value<QColor>());
+    plotWidget->setBackground(plotGradient);
+
+    plotWidget->update();
+    plotWidget->replot();
+
 }
 
 //bool SimpleGraph::plotVar(QString plotName, QVector<VarValue> values)

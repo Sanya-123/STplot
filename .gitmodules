@@ -13,3 +13,6 @@
 [submodule "deps/commonQtLibs"]
 	path = deps/commonQtLibs
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/commonqtlibs.git
+[submodule "deps/QtnProperty"]
+	path = deps/QtnProperty
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qtnproperty.git

@@ -14,6 +14,7 @@ extern "C" {
 #include "stlinkdevice.h"
 #include "readloop.h"
 #include <QThread>
+#include "readmanager.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -39,10 +40,11 @@ private:
     VarLoader* varloader;
     ViewManager* viewManager;
     QVector<ReadDeviceObject*> readDeviceces;
-    QVector<SaveDeviceObject*> saveDeviceces;
+//    QVector<SaveDeviceObject*> saveDeviceces;
     STlinkDevice stlinkDevice;
-    ReadLoop readLoop;
-    QThread readLoopThread;
+//    ReadLoop readLoop;
+//    QThread readLoopThread;
+    ReadManager readManager;
 };
 
 

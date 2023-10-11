@@ -3,7 +3,6 @@
 ReadLoop::ReadLoop(QObject *parent)
     : QObject{parent}, readDevicec(nullptr), saveDeviceces(nullptr), channels(nullptr)
 {
-
 }
 
 void ReadLoop::readLoop()
@@ -14,6 +13,8 @@ void ReadLoop::readLoop()
         emit stopedLoop();
         return;
     }
+
+    connect(readDevicec, SIGNAL(addressesReed(uint32_t,QList)), this, SIGNAL(addressesReed(uint32_t,QList)));
 
     bool isFileDev = readDevicec->isFileDevice();
     try {
@@ -58,6 +59,7 @@ void ReadLoop::readLoop()
         for(int i = 0; i < saveDeviceces->size(); i++)
             saveDeviceces->at(i)->stopDev();
     }
+    disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QList)), this, SIGNAL(addressesReed(uint32_t,QList)));
     emit stopedLoop();
 }
 

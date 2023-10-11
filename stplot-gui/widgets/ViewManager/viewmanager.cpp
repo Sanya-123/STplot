@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QMenu>
+#include "plotsettingsviever.h"
 
 ViewManager::ViewManager(QWidget *parent) :
     QWidget(parent),
@@ -34,9 +35,18 @@ void ViewManager::saveSettings(QSettings *settings)
     for (int i = 0; i < listPlotParants.size(); i++) {
         settings->setArrayIndex(i);
         settings->setValue("pluginName", listPlotParants[i].second);
-        settings->setValue("plotName", listPlotParants[i].first->windowTitle());
+        settings->setValue("plotName", listPlotParants[i].first->windowTitle()/*objectName()*/);
+        settings->setValue("plotSettings", listPlotParants[i].first->gedSettings()->getSettingsMap());
     }
     settings->endArray();
+
+    //save deff settings
+    settings->beginGroup("plotPluginSettings");
+    for(int i = 0; i < pluginsPlot.size(); i++)
+    {
+        settings->setValue(pluginsPlot[i]->getName(), pluginsPlot[i]->gedDefauoldSettings()->getSettingsMap());
+    }
+    settings->endGroup();
 }
 
 void ViewManager::restoreSettings(QSettings *settings)
@@ -51,12 +61,23 @@ void ViewManager::restoreSettings(QSettings *settings)
         settings->setArrayIndex(i);
         QString pluginName = settings->value("pluginName").toString();
         QString plotName = settings->value("plotName").toString();
+        QMap<QString, QVariant> gruphSettings = settings->value("plotSettings").toMap();
+
         if(plotMap.contains(pluginName))
         {
-            addPlot(plotMap[pluginName], plotName);
+            addPlot(plotMap[pluginName], plotName)->gedSettings()->setSettings(gruphSettings);
         }
     }
     settings->endArray();
+
+    //restore deff settings
+    settings->beginGroup("plotPluginSettings");
+    for(int i = 0; i < pluginsPlot.size(); i++)
+    {
+        QMap<QString, QVariant> gruphSettings = settings->value(pluginsPlot[i]->getName()).toMap();
+        pluginsPlot[i]->gedDefauoldSettings()->setSettings(gruphSettings);
+    }
+    settings->endGroup();
 }
 
 void ViewManager::setDockContainer(ads::CDockManager *newDockContainer)
@@ -153,11 +174,11 @@ void ViewManager::addPotToPlot(VarChannel *var, int numPlot, bool en)
         listPlots[numPlot].first->deletePlot(var);
 }
 
-void ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, QString name)
+PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, QString name)
 {
     int numberRow = ui->tableWidget_availebleWidgets->rowCount();
     //create widgets for gui
-    ads::CDockWidget* widgetDocker = new ads::CDockWidget("_");
+    ads::CDockWidget* widgetDocker = new ads::CDockWidget(name);
     PlotWidgetAbstract *widgetPlot = plotType->createWidgetPlot(widgetDocker);
     widgetDocker->setWidget(widgetPlot);
     if(dockContainer != nullptr)
@@ -174,6 +195,8 @@ void ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, QString name)
 
     ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
     ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(name));
+
+    return widgetPlot;
 }
 
 void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int column)
@@ -182,7 +205,9 @@ void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int colum
     {
         QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
         listPlots[row].second->setWindowTitle(newName);
+        listPlots[row].second->setObjectName(newName);
         listPlots[row].first->setWindowTitle(newName);
+//        listPlots[row].second->setObjectName(newName);
 
         if(chanales != nullptr)
             chanales->setPlotName(row, newName);
@@ -240,6 +265,41 @@ void ViewManager::on_pushButton_deleteViewes_clicked()
         listPlots.removeAt(numberElement);
         listPlotParants.removeAt(numberElement);
         ui->tableWidget_availebleWidgets->removeRow(numberElement);
+    }
+}
+
+void ViewManager::on_pushButton_open_def_setings_clicked()
+{
+    if(ui->comboBox_typeView->currentIndex() >= 0)
+    {
+        PlotSettingsViever *sett = new PlotSettingsViever(pluginsPlot[ui->comboBox_typeView->currentIndex()]->gedDefauoldSettings());
+        sett->show();
+        sett->exec();
+    }
+}
+
+void ViewManager::on_pushButton_open_selected_plot_setings_clicked()
+{
+    QList<QTableWidgetItem*> iteams = ui->tableWidget_availebleWidgets->selectedItems();
+
+    if(iteams.size() > 0)
+    {
+        //open setings first elemetn
+        int numberFirstElement = ui->tableWidget_availebleWidgets->row(iteams[0]);
+
+        PlotSettingsAbstract* firstElementSettings = listPlots[numberFirstElement].first->gedSettings();
+
+        //show then edit
+        PlotSettingsViever *sett = new PlotSettingsViever(firstElementSettings);
+        sett->show();
+        sett->exec();
+
+        //apply setings for all next elements
+        for(int i = 1; i < iteams.size(); i++)
+        {
+            int numberElement = ui->tableWidget_availebleWidgets->row(iteams[i]);
+            listPlots[numberElement].first->gedSettings()->setSettings(firstElementSettings);
+        }
     }
 }
 

@@ -22,6 +22,7 @@ public slots:
 
 signals:
     void stopedLoop();
+    void addressesReed(uint32_t addres, QVector<uint8_t> data);
 
 private:
     QVector<SaveDeviceObject*> *saveDeviceces;

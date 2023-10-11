@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
         widgets/readloop.cpp
         widgets/readmanager.h
         widgets/readmanager.cpp
+        widgets/plotsettingsviever.h
+        widgets/plotsettingsviever.cpp
         modules/varchannel.h
         modules/varchannel.cpp
         modules/plotinterface.h
@@ -93,6 +95,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ChannelsList
     widgets/ViewManager/
     ${PATH_COMMON_QT_LIBS}
+    ${CMAKE_SOURCE_DIR}/deps/QtnProperty
+    ${CMAKE_SOURCE_DIR}/deps
   )
 
 add_subdirectory(PlotPluginsDir)
@@ -107,6 +111,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     xcb
     varloc
     stlink-static
+    QtnProperty
 )
 
 target_link_directories(${PROJECT_NAME} PRIVATE
