@@ -53,11 +53,9 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
     newGruph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
     newGruph->setPen(QPen(varChanale->lineColor()));
 
-
-
     connect(varChanale, SIGNAL(updatePlot()), this, SLOT(doUpdatePlot()));
-
-    connect(varChanale, SIGNAL(changePlotColor()), this, SLOT(updateColourPlot()));
+    connect(varChanale, SIGNAL(changePlotLineWidth()), this, SLOT(updateColourPlot()));
+    connect(varChanale, SIGNAL(changePlotLineWidth()), this, SLOT(updateLineWidthGruph()));
     connect(varChanale, SIGNAL(changePlotLineStyle()), this, SLOT(updateLineStyleGruph()));
     connect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     mapPlots[varChanale] = newGruph;
@@ -124,6 +122,18 @@ void SimpleGraph::updateColourPlot()
     QCPGraph* gpuh = getGruph(sender(), &varChanale);
 
     gpuh->setPen(QPen(varChanale->lineColor()));
+
+    plotWidget->update();
+    plotWidget->replot();
+}
+
+void SimpleGraph::updateLineWidthGruph()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+    QPen pen = QPen(varChanale->lineColor());
+    pen.setWidth(varChanale->lineWidth());
+    gpuh->setPen(pen);
 
     plotWidget->update();
     plotWidget->replot();

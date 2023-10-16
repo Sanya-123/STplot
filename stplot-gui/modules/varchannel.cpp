@@ -3,7 +3,8 @@
 
 using namespace std::chrono;
 
-VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) : tmpDesc(0), m_lineColor(lineColor)
+VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
 {
     if (node != NULL){
         m_location = var_node_get_load_location(node);
@@ -42,12 +43,12 @@ void VarChannel::pushValue(float value){
 //    m_buffer.push_back(var);
     m_buffer.append(var);
 
-    tmpDesc++;
-    if(tmpDesc == 100)
-    {
-        tmpDesc = 0;
+//    tmpDesc++;
+//    if(tmpDesc == 100)
+//    {
+//        tmpDesc = 0;
         emit updatePlot();
-    }
+//    }
 }
 
 void VarChannel::pushValueRaw(uint32_t value){
@@ -86,7 +87,6 @@ void VarChannel::pushValueRaw(uint32_t value){
             m_value = combiner._u32;
         }
     }
-
     pushValue(m_value);
 }
 
@@ -222,4 +222,15 @@ void VarChannel::setLineColor(const QColor &newLineColor)
 {
     m_lineColor = newLineColor;
     emit changePlotColor();
+}
+
+unsigned int VarChannel::lineWidth() const
+{
+    return m_lineWidth;
+}
+
+void VarChannel::setLineWidth(unsigned int newWidth)
+{
+    m_lineWidth = newWidth;
+    emit changePlotLineWidth();
 }

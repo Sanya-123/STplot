@@ -47,6 +47,8 @@ set(PROJECT_SOURCES
         modules/plotinterface.h
         modules/plotwidgetabstract.h
         modules/readwritedevice.h
+        modules/SimpleReader/simplereader.cpp
+        modules/SimpleReader/simplereader.h
 
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
@@ -71,6 +73,7 @@ else()
     else()
         add_executable(stplot-gui
             ${PROJECT_SOURCES}
+            modules/SimpleReader/simplereader.h modules/SimpleReader/simplereader.cpp
         )
     endif()
 endif()
@@ -90,6 +93,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules
+    modules/SimpleReader
     widgets
     widgets/VarLoader
     widgets/ChannelsList

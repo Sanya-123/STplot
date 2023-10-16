@@ -15,6 +15,7 @@ extern "C" {
 #include "readloop.h"
 #include <QThread>
 #include "readmanager.h"
+#include "simplereader.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -31,6 +32,7 @@ public:
 
 public slots:
     void startRead();
+    void read();
 //    void connect();
 
 private:
@@ -45,6 +47,7 @@ private:
 //    ReadLoop readLoop;
 //    QThread readLoopThread;
     ReadManager readManager;
+    SimpleReader simpleReader;
 };
 
 

@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "qcustomplot.h"
 
-#define GRUPH_FERST_COLUMN          5
+#define GRUPH_FERST_COLUMN          6
 
 ChannelModel::ChannelModel( QVector<VarChannel*> *channels, QObject *parent)
     : QAbstractTableModel{parent}, numberGraph(0)
@@ -10,6 +10,7 @@ ChannelModel::ChannelModel( QVector<VarChannel*> *channels, QObject *parent)
     m_channels = channels;
     dotStyles = getDotStyle();
     lineStyles = getLineStyle();
+    lineWidths = getLineWidth();
 }
 
 //Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const{
@@ -40,13 +41,17 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
         else if(index.column() == 1){
             return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
         }
-        else if(index.column() == 2)
+        else if(index.column() == 2){
             return QVariant(m_channels->at(index.row())->lineColor().name());
+        }
         else if(index.column() == 3){
             return QVariant(dotStyles[m_channels->at(index.row())->dotStyle()]);
         }
         else if(index.column() == 4){
             return QVariant(lineStyles[m_channels->at(index.row())->lineStyle()]);
+        }
+        else if(index.column() == 5){
+            return QVariant(lineWidths[m_channels->at(index.row())->lineWidth()]);
         }
         else
             return QVariant("");
@@ -101,6 +106,10 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
         {
             return QVariant("LineStyle");
         }
+        else if(section == 5)
+        {
+            return QVariant("LineWidth");
+        }
         else if((section - GRUPH_FERST_COLUMN) <  numberGraph)
         {
             return QVariant(graphNames[section - GRUPH_FERST_COLUMN]);
@@ -143,6 +152,11 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
             m_channels->at(index.row())->setLineStyle(value.toInt());
             return true;
         }
+        else if(index.column() == 5)
+        {
+            m_channels->at(index.row())->setLineWidth(value.toInt());
+            return true;
+        }
     }
 
     return QAbstractTableModel::setData(index, value, role);
@@ -157,7 +171,7 @@ Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const
 
     if (index.column() >= GRUPH_FERST_COLUMN)
         return /*flags | */Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    else if(index.column() == 2 || index.column() == 3 || index.column() == 4)
+    else if(index.column() == 2 || index.column() == 3 || index.column() == 4 || index.column() == 5)
         return /*flags | */Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;
@@ -167,6 +181,12 @@ ComboBoxDelegate *ChannelModel::makeIteamLineStye(QObject *parent)
 {
 
     return new ComboBoxDelegate(getLineStyle(), parent);
+}
+
+ComboBoxDelegate *ChannelModel::makeIteamLineWidth(QObject *parent)
+{
+
+    return new ComboBoxDelegate(getLineWidth(), parent);
 }
 
 ComboBoxDelegate *ChannelModel::makeIteamDotStye(QObject *parent)
@@ -208,6 +228,12 @@ QStringList ChannelModel::getDotStyle()
     }
 
     return dotStyles;
+}
+
+QStringList ChannelModel::getLineWidth()
+{
+    QStringList options = {"0", "1", "2", "3", "4", "5"};
+    return options;
 }
 
 QStringList ChannelModel::getLineStyle()

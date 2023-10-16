@@ -122,8 +122,11 @@ uint32_t var_node_get_address(varloc_node_t* node){
 
 varloc_location_t var_node_get_load_location(varloc_node_t* node){
     varloc_location_t loc = {0};
-    varloc_node_t* parent = var_node_get_parent(node);
-    if (parent){
+    if (node){
+        varloc_node_t* parent = var_node_get_parent(node);
+        if (!parent){
+            parent = node;
+        }
         uint32_t byte_address = var_node_get_address(parent);
         loc.address.base = (byte_address + (node->address.offset_bits / 8)) & 0xFFFFFFFC;
         loc.address.offset_bits = node->address.offset_bits % 32;

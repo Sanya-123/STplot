@@ -37,6 +37,7 @@ private slots:
     void doUpdatePlot();
     void updateColourPlot();
     void updateLineStyleGruph();
+    void updateLineWidthGruph();
     void updateDotStyleGruph();
     void settingsChanged();
 

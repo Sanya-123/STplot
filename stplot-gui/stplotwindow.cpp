@@ -93,6 +93,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     settings.endGroup();
 
     ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
+
 }
 
 STPlotWindow::~STPlotWindow()
@@ -117,16 +118,34 @@ STPlotWindow::~STPlotWindow()
     delete ui;
 }
 
+void STPlotWindow::read(){
+    if (!simpleReader.isConnected()){
+        if (simpleReader.connect() < 0){
+            qInfo( "Error connecting stlink" );
+        }
+        simpleReader.loadChannels(channelsView->getListChanales());
+    }
+    else{
+        if(simpleReader.readData() < 0){
+            qInfo( "Error getting data" );
+        }
+    }
+
+}
+
 void STPlotWindow::startRead()
 {
-//    readLoop.setChannels(channelsView->getListChanales());
-//    readLoop.setReadDevicec(readDeviceces[0]);
-//    readLoop.readLoop();
+
 //    readManager.runReadLoop(channelsView->getListChanales());
-    QVector<VarChannel *> *channels =  channelsView->getListChanales();
-    for (int i = 0; i < channels->size(); ++i) {
-        channels->at(i)->pushValueRaw(0x755);
-    }
+//    simpleReader.readChannels(channelsView->getListChanales());
+//    QVector<VarChannel *> *channels =  channelsView->getListChanales();
+//    for (int i = 0; i < channels->size(); ++i) {
+//        channels->at(i)->pushValueRaw(0x755);
+//    }
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &STPlotWindow::read);
+    timer->start(10);
 
 }
 

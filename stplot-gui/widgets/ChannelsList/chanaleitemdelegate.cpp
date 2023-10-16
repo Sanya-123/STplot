@@ -20,7 +20,7 @@ void ChanaleItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 //    qDebug() << "createEditor";
-    if((index.column() == 3) || (index.column() == 4))
+    if((index.column() == 3) || (index.column() == 4) || (index.column() == 5))
     {
 
         QComboBox *editor = new QComboBox(parent);
@@ -28,6 +28,8 @@ QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
             editor->addItems(ChannelModel::getDotStyle());
         else if(index.column() == 4)
             editor->addItems(ChannelModel::getLineStyle());
+        else if(index.column() == 5)
+            editor->addItems(ChannelModel::getLineWidth());
         return editor;
 
     }
@@ -52,7 +54,7 @@ void ChanaleItemDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
         QColorDialog *colorDialog = qobject_cast<QColorDialog *>(editor);
         colorDialog->setCurrentColor(QColor(index.data().toString()));
     }
-    else if((index.column() == 3) || (index.column() == 4))
+    else if((index.column() == 3) || (index.column() == 4) || (index.column() == 5))
     {
         QComboBox *dotStyleEditor = qobject_cast<QComboBox *>(editor);
         dotStyleEditor->setCurrentText(index.data().toString());
@@ -68,7 +70,7 @@ void ChanaleItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
         QColorDialog *colorDialog = qobject_cast<QColorDialog *>(editor);
         model->setData(index, colorDialog->currentColor().name());
     }
-    else if((index.column() == 3) || (index.column() == 4))
+    else if((index.column() == 3) || (index.column() == 4) || (index.column() == 4))
     {
         QComboBox *comboBoxEditor = qobject_cast<QComboBox *>(editor);
         model->setData(index, comboBoxEditor->currentIndex());

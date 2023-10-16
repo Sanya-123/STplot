@@ -55,6 +55,9 @@ public:
     QColor lineColor() const;
     void setLineColor(const QColor &newLineColor);
 
+    void setLineWidth(unsigned int newWidth);
+    unsigned int lineWidth() const;
+
 public slots:
     void pushValue(float value);
     void pushValueRaw(uint32_t value);
@@ -71,6 +74,7 @@ private:
 
     //graph styles
     QColor                  m_lineColor;
+    unsigned int            m_lineWidth;
 //    QCPGraph::LineStyle     m_lineStyle;
 //    QCPScatterStyle::ScatterShape m_dotStyle;
     int                     m_dotStyle;
@@ -80,6 +84,7 @@ private:
 
 signals:
     void changePlotColor();
+    void changePlotLineWidth();
     void changePlotLineStyle();
     void changePlotDotStyle();
     void changeName();

@@ -21,9 +21,10 @@ public:
 
     static ComboBoxDelegate* makeIteamLineStye(QObject *parent = nullptr);
     static ComboBoxDelegate* makeIteamDotStye(QObject *parent = nullptr);
-
+    static ComboBoxDelegate* makeIteamLineWidth(QObject *parent = nullptr);
     static QStringList getDotStyle();
     static QStringList getLineStyle();
+    static QStringList getLineWidth();
 
 public slots:
     void addPlot();
@@ -41,6 +42,7 @@ private:
 
     QStringList dotStyles;
     QStringList lineStyles;
+    QStringList lineWidths;
 
 };
 
