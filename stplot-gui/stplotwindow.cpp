@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QSettings>
 #include <QDebug>
+#include <QToolBar>
 
 //#include <iostream>
 //#include <format>
@@ -30,6 +31,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::STPlotWindow)
 {
+    qApp;
     ui->setupUi(this);
 //    proxyModel = new QSortFilterProxyModel(this);
 
@@ -39,6 +41,9 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 //    Layout->setContentsMargins(QMargins(0, 0, 0, 0));
 //    m_DockManager = new ads::CDockManager(ui->dockContainer);
 //    Layout->addWidget(m_DockManager);
+
+    ui->dockContainer->setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+
 
     ads::CDockWidget* dockWidgetChanaleWivw = new ads::CDockWidget("Channels");
     channelsView = new Channels(dockWidgetChanaleWivw);
@@ -57,6 +62,16 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->menuView->addAction(dockWidgetChanaleWivw->toggleViewAction());
     ui->menuView->addAction(dockWidgetVarLoader->toggleViewAction());
     ui->menuView->addAction(dockWidgetViwManager->toggleViewAction());
+
+    //toolbar and menu
+    ui->actionStart->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+
+    QToolBar *runToolBar = addToolBar("Run");
+    runToolBar->addAction(ui->actionStart);
+    runToolBar->setObjectName("runToolBar");
+
+    ui->menuView->addAction(runToolBar->toggleViewAction());
+
     ui->menuView->addSeparator();
 
     ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
@@ -64,8 +79,10 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetVarLoader);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
-    QObject::connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
-    QObject::connect(ui->menuRun, &QMenu::triggered, this, &STPlotWindow::startRead);
+
+    connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
+    connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
+
 
     viewManager->setDockContainer(ui->dockContainer);
     viewManager->setMenuView(ui->menuView);
@@ -135,17 +152,19 @@ void STPlotWindow::read(){
 
 void STPlotWindow::startRead()
 {
+    readManager.runReadLoop(channelsView->getListChanales());
 
 //    readManager.runReadLoop(channelsView->getListChanales());
 //    simpleReader.readChannels(channelsView->getListChanales());
-//    QVector<VarChannel *> *channels =  channelsView->getListChanales();
-//    for (int i = 0; i < channels->size(); ++i) {
-//        channels->at(i)->pushValueRaw(0x755);
-//    }
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &STPlotWindow::read);
-    timer->start(10);
+//    readLoop.setChannels(channelsView->getListChanales());
+//    readLoop.setReadDevicec(readDeviceces[0]);
+//    readLoop.readLoop();
+//    readManager.runReadLoop(channelsView->getListChanales());
+
+//    QTimer *timer = new QTimer(this);
+//    connect(timer, &QTimer::timeout, this, &STPlotWindow::read);
+//    timer->start(10);
 
 }
 

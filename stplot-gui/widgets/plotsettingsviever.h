@@ -14,6 +14,9 @@ public:
     explicit PlotSettingsViever(PlotSettingsAbstract *settings, QWidget *parent = nullptr);
     ~PlotSettingsViever();
 
+private:
+    QtnPropertySet *findParentProperty(QString propertyName, QString *displayName, QtnPropertySet *propertySets);
+
 private slots:
     void changeValue(QtnPropertyChangeReason reson);
 

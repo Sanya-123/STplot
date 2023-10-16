@@ -22,17 +22,21 @@ PlotSettingsViever::PlotSettingsViever(PlotSettingsAbstract *settings, QWidget *
         foreach (QString name, names) {
             QtnPropertyBase *propBase = nullptr;
             QVariant var = map[name];
+
+            QString displayName;
+            QtnPropertySet* parentProp = findParentProperty(name, &displayName, propertySets);
+
             switch (var.type()) {
                 case QVariant::Color:
                 {
-                    QtnPropertyQColor* prop = qtnCreateProperty<QtnPropertyQColor>(propertySets);
+                    QtnPropertyQColor* prop = qtnCreateProperty<QtnPropertyQColor>(parentProp);
                     prop->setValue(var.value<QColor>());
                     propBase = prop;
                     break;
                 }
                 default:
                 {
-                    QtnPropertyQString* prop = qtnCreateProperty<QtnPropertyQString>(propertySets);
+                    QtnPropertyQString* prop = qtnCreateProperty<QtnPropertyQString>(parentProp);
                     prop->setValue(QString("unnoun type"));
                     propBase = prop;
                     break;
@@ -42,6 +46,7 @@ PlotSettingsViever::PlotSettingsViever(PlotSettingsAbstract *settings, QWidget *
             if(propBase != nullptr)
             {
                 propBase->setName(name);
+                propBase->setDisplayName(displayName);
                 connect(propBase, SIGNAL(propertyDidChange(QtnPropertyChangeReason)), this, SLOT(changeValue(QtnPropertyChangeReason)));
             }
         }
@@ -55,6 +60,62 @@ PlotSettingsViever::PlotSettingsViever(PlotSettingsAbstract *settings, QWidget *
 PlotSettingsViever::~PlotSettingsViever()
 {
 
+}
+
+QtnPropertySet * PlotSettingsViever::findParentProperty(QString propertyName, QString *displayName, QtnPropertySet *propertySets)
+{
+    QList<QString> tree = propertyName.split('.');
+
+    QtnPropertySet *findProperty = propertySets;
+//    QtnPropertyBase *res = nullptr;
+
+    if(tree.size() == 0)
+        tree.append(propertyName);
+
+    for(int i = 0; i < tree.size(); i++)
+    {
+        if(i != (tree.size() - 1))
+        {
+            QList<QtnPropertyBase *> list = findProperty->findChildProperties(tree[i]);
+            if(list.size() != 0)//it should be 1
+            {
+                findProperty = (QtnPropertySet *)list[0];
+            }
+            else//else mean than no current property
+            {
+                findProperty = qtnCreateProperty<QtnPropertySet>(findProperty);
+                findProperty->setName(tree[i]);
+            }
+
+            if(list.size() > 1)
+            {
+                qDebug() << "Warninig: value" << tree[i] << "more than 1";
+            }
+        }
+        else
+        {
+//            QList<QtnPropertyBase *> list = findProperty->findChildProperties(propertyName);
+//            if(list.size() != 0)//it should be 1
+//            {
+//                res = list[0];
+//            }
+//            else
+//            {
+//                res = qtnCreateProperty<QtnPropertyFloat>(findProperty);
+//                res->setDisplayName(tree[i]);
+//                res->setName(tree[i]);
+//            }
+
+//            if(list.size() > 1)
+//            {
+//                qDebug() << "Warninig: value" << tree[i] << "more than 1";
+//            }
+        }
+    }
+
+    *displayName = tree.last();
+
+    return findProperty;
 }
 
 void PlotSettingsViever::changeValue(QtnPropertyChangeReason reson)

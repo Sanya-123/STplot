@@ -19,7 +19,6 @@ public:
 class SimpleGraph : public PlotWidgetAbstract
 {
     Q_OBJECT
-
 public:
     explicit SimpleGraph(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
     ~SimpleGraph();

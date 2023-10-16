@@ -1,5 +1,5 @@
 #include "varchannel.h"
-#include <cmath>
+#include <QtMath>
 
 using namespace std::chrono;
 
@@ -25,7 +25,10 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 
     setDotStyle(dotStyle);
 
-    m_mask = pow(2, m_location.address.size_bits) - 1;
+    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
+    if(m_location.address.size_bits == 32)
+        m_mask = 0xFFFFFFFF;
+
     m_mask = m_mask << m_location.address.offset_bits;
 }
 
@@ -42,13 +45,12 @@ void VarChannel::pushValue(float value){
     };
 //    m_buffer.push_back(var);
     m_buffer.append(var);
-
-//    tmpDesc++;
-//    if(tmpDesc == 100)
-//    {
-//        tmpDesc = 0;
+    tmpDesc++;
+    if(tmpDesc == 10)
+    {
+        tmpDesc = 0;
         emit updatePlot();
-//    }
+    }
 }
 
 void VarChannel::pushValueRaw(uint32_t value){

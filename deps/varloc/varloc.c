@@ -294,7 +294,7 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         var_node->address.base = gvar->ip.addr;
         parse_type(type_tag, cu, NULL, var_node);
 
-        strlcpy(var_node->name, name, sizeof(var_node->name));
+        strncpy(var_node->name, name, sizeof(var_node->name));
         var_node->is_anon = 0;
     }
 }
@@ -459,7 +459,7 @@ static void parse_member(struct class_member *member, bool union_member,
     {
         parse_type(type, cu, NULL, child);
         if (cm_name) {
-            strlcpy(child->name, cm_name, sizeof(child->name));
+            strncpy(child->name, cm_name, sizeof(child->name));
         }
     } else {
         parse_type(type, cu, cm_name, child);
@@ -519,7 +519,7 @@ static void parse_type(struct tag *type, const struct cu *cu, const char* name, 
             namebf[len + nr_indirections] = '\0';
             node->var_type = POINTER;
             name = namebf;
-            strlcpy(node->name, name, sizeof(node->name));
+            strncpy(node->name, name, sizeof(node->name));
 //            printf("POINTER! ");
         }
         else{
@@ -544,7 +544,7 @@ static void parse_type(struct tag *type, const struct cu *cu, const char* name, 
 
             ctype = tag__type(type);
             if(!typedef_expanded){
-                strlcpy(node->ctype_name, type__name(ctype), sizeof(node->ctype_name));
+                strncpy(node->ctype_name, type__name(ctype), sizeof(node->ctype_name));
 //                printf("%s ", type__name(ctype));
             }
             typedef_expanded++;
@@ -600,7 +600,7 @@ next_type:
     print_default:
         if ((node->var_type != POINTER)
         ){
-            strlcpy(node->name, name, sizeof(node->name));
+            strncpy(node->name, name, sizeof(node->name));
         }
         if(!(*node->ctype_name)){
            tag__name(type, cu, node->ctype_name, sizeof(node->ctype_name), &tconf);
@@ -648,7 +648,7 @@ next_type:
         if (node->var_type != POINTER){
             node->var_type = UNION;
             if(*name){
-                strlcpy(node->name, name, sizeof(node->name));
+                strncpy(node->name, name, sizeof(node->name));
             }
             else{
                 sprintf(node->name, "union ...");
@@ -660,7 +660,7 @@ next_type:
         break;
     case DW_TAG_base_type:
         node->var_type = BASE;
-        strlcpy(node->name, name, sizeof(node->name));
+        strncpy(node->name, name, sizeof(node->name));
         if(!(*node->ctype_name)){
             tag__name(type, cu, node->ctype_name, sizeof(node->ctype_name), &tconf);
         }
@@ -680,7 +680,7 @@ next_type:
         else{
 //            printed += enumeration__fprintf(type, &tconf, fp);
 //            printf("%s ", name);
-            strlcpy(node->name, name, sizeof(node->name));
+            strncpy(node->name, name, sizeof(node->name));
 //            node->name = name;
 //            printf("enumeration__fprintf");
 
@@ -739,7 +739,7 @@ void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 
         struct tag *pos_type = cu__type(cu, tag_pos->type);
         if (pos_type != NULL){
-            strlcpy(node->name, type__name(tag__type(pos_type)), sizeof(node->name));
+            strncpy(node->name, type__name(tag__type(pos_type)), sizeof(node->name));
         }
     }
 

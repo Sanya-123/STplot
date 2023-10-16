@@ -9,7 +9,6 @@ class ReadLoop : public QObject
     Q_OBJECT
 public:
     explicit ReadLoop(QObject *parent = nullptr);
-    void readLoop();
 
     void setSaveDeviceces(QVector<SaveDeviceObject *> *newSaveDeviceces);
     void setReadDevicec(ReadDeviceObject *newReadDevicec);
@@ -18,6 +17,7 @@ public:
     void setReadSequence(const QVector<ReadDeviceObject::ReadAddres> &newReadSequence);
 
 public slots:
+    void readLoop();
     void stopLoop();
 
 signals:

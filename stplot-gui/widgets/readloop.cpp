@@ -1,4 +1,6 @@
 #include "readloop.h"
+#include <QDebug>
+#include <QThread>
 
 ReadLoop::ReadLoop(QObject *parent)
     : QObject{parent}, readDevicec(nullptr), saveDeviceces(nullptr), channels(nullptr)
@@ -8,13 +10,17 @@ ReadLoop::ReadLoop(QObject *parent)
 void ReadLoop::readLoop()
 {
     stopSignal = false;
-    if(readDevicec == nullptr || channels == nullptr)
+    if(readDevicec == nullptr/* || channels == nullptr*/)
     {
         emit stopedLoop();
         return;
     }
 
-    connect(readDevicec, SIGNAL(addressesReed(uint32_t,QList)), this, SIGNAL(addressesReed(uint32_t,QList)));
+//    readDevicec->moveToThread(this->thread());
+//    for(int i = 0; i < saveDeviceces->size(); i++)
+//        saveDeviceces->at(i)->moveToThread(this->thread());
+
+    connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
 
     bool isFileDev = readDevicec->isFileDevice();
     try {
@@ -45,10 +51,13 @@ void ReadLoop::readLoop()
             if(tmp_i == 1000)
                 stopSignal = true;
 
+            QThread::msleep(2);
+
         }while(stopSignal == false);
 
     } catch (int err) {
         Q_UNUSED(err);
+        qDebug() << err;
     }
     //stop
     //stop read
@@ -59,7 +68,7 @@ void ReadLoop::readLoop()
         for(int i = 0; i < saveDeviceces->size(); i++)
             saveDeviceces->at(i)->stopDev();
     }
-    disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QList)), this, SIGNAL(addressesReed(uint32_t,QList)));
+    disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
     emit stopedLoop();
 }
 

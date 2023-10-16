@@ -13,8 +13,7 @@ public:
     //addres and waribels with curent addres
     struct ReadChanale {
         VarChannel* chanale;
-        uint8_t offset;
-        uint8_t varSize;
+        uint32_t offset;
     };
     struct ReadAddres {
         QVector<struct ReadChanale> vectorChanales;//varivels with offset for this addres

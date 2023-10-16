@@ -6,11 +6,14 @@
 
 SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract(parent)
 {
-    mapSettings["varColor"] = QColor(Qt::white);
-    mapSettings["gridColor"] = QColor(140, 140, 140);
-    mapSettings["subGridColor"] = QColor(80, 80, 80);
-    mapSettings["bgColor1"] = QColor(80, 80, 80);
-    mapSettings["bgColor2"] = QColor(50, 50, 50);
+    mapSettingsDefauold["varColor"] = QColor(Qt::white);
+    mapSettingsDefauold["gridColor"] = QColor(140, 140, 140);
+    mapSettingsDefauold["subGridColor"] = QColor(80, 80, 80);
+    mapSettingsDefauold["bgColor1"] = QColor(80, 80, 80);
+    mapSettingsDefauold["bgColor2"] = QColor(50, 50, 50);
+
+//    mapSettings = mapSettingsDefauold;
+    restoreDefoultSetings();
 }
 
 SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :

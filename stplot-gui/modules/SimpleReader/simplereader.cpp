@@ -36,6 +36,8 @@ int SimpleReader::readData(){
         }
         return 0;
     }
+
+    return 0;
 }
 
 bool SimpleReader::isConnected(){

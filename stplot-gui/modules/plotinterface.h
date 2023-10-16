@@ -45,9 +45,10 @@ class PlotSettingsAbstract : public QObject
     Q_OBJECT
 public:
     //int constructor I should fill mapSettings
-    PlotSettingsAbstract (QObject *parent = nullptr) : QObject(parent){}
+    PlotSettingsAbstract (QObject *parent = nullptr) : QObject(parent){mapSettings = mapSettingsDefauold;}
     QMap<QString, QVariant> getSettingsMap() {return mapSettings;}
 
+public slots:
     /**
      * @brief setSettings - metod copy form setting to mapSettings
      * @param settings
@@ -77,12 +78,18 @@ public:
         }
     }
 
+    virtual void restoreDefoultSetings() {mapSettings = mapSettingsDefauold; emit settingsUpdated();}
+
 
 signals:
     void settingsUpdated();
 
 protected:
     //map settings mname and values
+    QMap<QString, QVariant> mapSettingsDefauold;
+//    friend class PlotWidgetAbstract;
+//    friend class PlotWidgetInterfacePlugin;
+private:
     QMap<QString, QVariant> mapSettings;
 };
 
