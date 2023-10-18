@@ -310,3 +310,14 @@ void ChannelModel::setPlotName(int number, QString name)
         emit layoutChanged();
     }
 }
+
+void ChannelModel::selectChanale(QModelIndex index)
+{
+    if(index.isValid())
+    {
+        if(index.row() < m_channels->size())
+        {
+            m_channels->at(index.row())->selectCurentPlot();
+        }
+    }
+}

@@ -217,11 +217,18 @@ void ReadManager::stopReadLoop()
     readDevicece->moveToThread(nullptr);
     for(int i = 0; i < saveDeviceces.size(); i++)
         saveDeviceces[i]->moveToThread(this->thread());
+
+    emit stopingRead();
 }
 
 void ReadManager::setReadDevicece(ReadDeviceObject *newReadDevicece)
 {
     readDevicece = newReadDevicece;
+}
+
+void ReadManager::stopRead()
+{
+    loop->stopLoop();
 }
 
 //void ReadManager::startRead()

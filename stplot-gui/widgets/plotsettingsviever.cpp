@@ -34,6 +34,13 @@ PlotSettingsViever::PlotSettingsViever(PlotSettingsAbstract *settings, QWidget *
                     propBase = prop;
                     break;
                 }
+                case QVariant::Bool:
+                {
+                    QtnPropertyBool* prop = qtnCreateProperty<QtnPropertyBool>(parentProp);
+                    prop->setValue(var.value<bool>());
+                    propBase = prop;
+                    break;
+                }
                 default:
                 {
                     QtnPropertyQString* prop = qtnCreateProperty<QtnPropertyQString>(parentProp);
@@ -132,6 +139,11 @@ void PlotSettingsViever::changeValue(QtnPropertyChangeReason reson)
         {
 //            qDebug() << "QtnPropertyQColor";
             settings->setValues(propBase->name(), (QColor)((QtnPropertyQColor*)propBase)->value());
+        }
+
+        if(typeid(*propBase) == typeid(QtnPropertyBool))
+        {
+            settings->setValues(propBase->name(), (bool)((QtnPropertyBool*)propBase)->value());
         }
 
         if(typeid(*propBase) == typeid(QtnPropertyQString))

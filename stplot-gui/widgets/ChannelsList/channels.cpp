@@ -22,6 +22,8 @@ Channels::Channels(QWidget *parent) :
 
     connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 
+    connect(ui->treeView, SIGNAL(clicked(QModelIndex)), m_channelModel, SLOT(selectChanale(QModelIndex)));
+
     //init colur sequnce
     colorSetSequese.append(QColor(40, 110, 255));
     colorSetSequese.append(QColor(255, 110, 40));
@@ -58,12 +60,48 @@ Channels::~Channels()
 
 void Channels::saveSettings(QSettings *settings)
 {
+    settings->beginWriteArray("chanales");
+    for (int i = 0; i < m_channels->size(); i++)
+    {
+        settings->setArrayIndex(i);
+        settings->setValue("chanaleName", m_channels->at(i)->getName());
+        settings->setValue("displayName", m_channels->at(i)->displayName());
+        settings->setValue("dotStyle", m_channels->at(i)->dotStyle());
+        settings->setValue("lineStyle", m_channels->at(i)->lineStyle());
+        settings->setValue("lineColor", m_channels->at(i)->lineColor());
+        settings->setValue("lineWidth", m_channels->at(i)->lineWidth());
 
+        settings->beginGroup("location");
+        varloc_location_t loc = m_channels->at(i)->getLocation();
+        settings->setValue("type", (int)loc.type);
+        settings->setValue("base", loc.address.base);
+        settings->setValue("offset_bits", loc.address.offset_bits);
+        settings->setValue("size_bits", loc.address.size_bits);
+        settings->endGroup();
+
+
+        settings->setValue("getTotalSizePlot", m_channels->at(i)->getTotalSizePlot());
+        settings->beginWriteArray("plotList");
+        QVector<bool> listPlot = m_channels->at(i)->getPlotList();
+        for(int j = 0; j < listPlot.size(); j++)
+        {
+            settings->setArrayIndex(j);
+            settings->setValue("enPlot", listPlot[j]);
+        }
+        settings->endArray();
+
+    }
+    settings->endArray();
 }
 
 void Channels::restoreSettings(QSettings *settings)
 {
-
+//    int size = settings->beginReadArray("chanales");
+//    for (int i = 0; i < size; ++i)
+//    {
+//        settings->setArrayIndex(i);
+//    }
+//    settings->endArray();
 }
 
 QVector<VarChannel *> *Channels::getListChanales() const

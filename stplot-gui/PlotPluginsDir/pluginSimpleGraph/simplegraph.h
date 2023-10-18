@@ -34,18 +34,26 @@ private:
 
 private slots:
     void doUpdatePlot();
+    void doUpdatePlot(VarChannel* varChanale, QCPGraph *gpuh);
     void updateColourPlot();
     void updateLineStyleGruph();
     void updateLineWidthGruph();
     void updateDotStyleGruph();
     void settingsChanged();
+    void plotSelecting();
+
+    void showPointToolTip(QMouseEvent *event);
 
 private:
     Ui::SimpleGraph *ui;
 //    QString name;
     QCustomPlot *plotWidget;
+    QCPLayoutGrid *subLayout;
+//    QCPTextElement *legendValues;
     QMap<VarChannel*,QCPGraph*> mapPlots;
+    QMap<VarChannel*,QCPItemTracer*> mapTrackers;
     SimpleGraphSettings settings;
+    bool emptyGraphs;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

@@ -20,6 +20,12 @@ public:
 
     void setReadDevicece(ReadDeviceObject *newReadDevicece);
 
+public slots:
+    void stopRead();
+
+signals:
+    void stopingRead();
+
 private slots:
     void addresRead(uint32_t addres, QVector<uint8_t> data);
     void stopReadLoop();

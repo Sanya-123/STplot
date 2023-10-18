@@ -22,6 +22,26 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 
     m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
     m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
+    m_displayName = m_name;
+
+    setDotStyle(dotStyle);
+
+    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
+    if(m_location.address.size_bits == 32)
+        m_mask = 0xFFFFFFFF;
+
+    m_mask = m_mask << m_location.address.offset_bits;
+}
+
+VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
+{
+    m_location = location;
+    m_name = name;
+    m_displayName = m_name;
+
+    m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
+    m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
 
     setDotStyle(dotStyle);
 
@@ -90,6 +110,21 @@ void VarChannel::pushValueRaw(uint32_t value){
         }
     }
     pushValue(m_value);
+}
+
+void VarChannel::selectCurentPlot()
+{
+    emit selectPlot();
+}
+
+QString VarChannel::displayName() const
+{
+    return m_displayName;
+}
+
+void VarChannel::setDisplayName(const QString &newDisplayName)
+{
+    m_displayName = newDisplayName;
 }
 
 varloc_location_t VarChannel::getLocation()

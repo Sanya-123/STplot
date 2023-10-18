@@ -32,6 +32,7 @@ public:
 
 public slots:
     void startRead();
+    void stopedRead();
     void read();
 //    void connect();
 

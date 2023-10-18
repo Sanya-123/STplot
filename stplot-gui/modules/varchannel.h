@@ -29,6 +29,7 @@ class VarChannel : public QObject
     Q_OBJECT
 public:
     VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
+    VarChannel(varloc_location_t location, QString name, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();
     QString getName();
     float getValue();
@@ -58,13 +59,18 @@ public:
     void setLineWidth(unsigned int newWidth);
     unsigned int lineWidth() const;
 
+    QString displayName() const;
+    void setDisplayName(const QString &newDisplayName);
+
 public slots:
     void pushValue(float value);
     void pushValueRaw(uint32_t value);
+    void selectCurentPlot();
 
 private:
     float                   m_value;
     QString                 m_name;
+    QString                 m_displayName;
     varloc_location_t       m_location;
     uint32_t                m_mask;
 //    varloc_node_t*          m_var_node;
@@ -89,6 +95,7 @@ signals:
     void changePlotDotStyle();
     void changeName();
     void updatePlot();
+    void selectPlot();
 };
 
 #endif // VARCHANNEL_H

@@ -30,6 +30,7 @@ public slots:
     void addPlot();
     void deletePlot(int number);
     void setPlotName(int number, QString name);
+    void selectChanale(QModelIndex index);
 
 signals:
     void updateViewport();

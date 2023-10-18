@@ -65,9 +65,12 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     //toolbar and menu
     ui->actionStart->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+    ui->actionStop->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+    ui->actionStop->setDisabled(true);
 
     QToolBar *runToolBar = addToolBar("Run");
     runToolBar->addAction(ui->actionStart);
+    runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
 
     ui->menuView->addAction(runToolBar->toggleViewAction());
@@ -82,6 +85,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
+    connect(&readManager, SIGNAL(stopingRead()), this, SLOT(stopedRead()));
+    connect(ui->actionStop, SIGNAL(triggered(bool)), &readManager, SLOT(stopRead()));
 
 
     viewManager->setDockContainer(ui->dockContainer);
@@ -97,16 +102,16 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
 
-    settings.beginGroup("channels");
-    channelsView->restoreSettings(&settings);
-    settings.endGroup();
-
     settings.beginGroup("varloader");
     varloader->restoreSettings(&settings);
     settings.endGroup();
 
     settings.beginGroup("viewmanager");
     viewManager->restoreSettings(&settings);
+    settings.endGroup();
+
+    settings.beginGroup("channels");
+    channelsView->restoreSettings(&settings);
     settings.endGroup();
 
     ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
@@ -124,13 +129,13 @@ STPlotWindow::~STPlotWindow()
     settings.beginGroup("channels");
     channelsView->saveSettings(&settings);
     settings.endGroup();
-    //varloader
-    settings.beginGroup("varloader");
-    varloader->saveSettings(&settings);
-    settings.endGroup();
     //
     settings.beginGroup("viewmanager");
     viewManager->saveSettings(&settings);
+    settings.endGroup();
+    //varloader
+    settings.beginGroup("varloader");
+    varloader->saveSettings(&settings);
     settings.endGroup();
     delete ui;
 }
@@ -152,6 +157,8 @@ void STPlotWindow::read(){
 
 void STPlotWindow::startRead()
 {
+    ui->actionStart->setEnabled(false);
+    ui->actionStop->setEnabled(true);
     readManager.runReadLoop(channelsView->getListChanales());
 
 //    readManager.runReadLoop(channelsView->getListChanales());
@@ -166,6 +173,12 @@ void STPlotWindow::startRead()
 //    connect(timer, &QTimer::timeout, this, &STPlotWindow::read);
 //    timer->start(10);
 
+}
+
+void STPlotWindow::stopedRead()
+{
+    ui->actionStart->setEnabled(true);
+    ui->actionStop->setEnabled(false);
 }
 
 
