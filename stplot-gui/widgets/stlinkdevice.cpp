@@ -125,15 +125,6 @@ int STlinkDevice::execReadDevice()
         QVector<uint8_t> reedData(readSeuqence[i].readSize);
         memcpy(reedData.data(), sl->q_buf, readSeuqence[i].readSize);
         emit addressesReed(readSeuqence[i].addres, reedData);
-
-//        for(int j = 0 ; j < readSeuqence[i].vectorChanales.size(); j++)
-//        {
-//            combiner._32 = 0;
-//            memcpy(combiner._8, sl->q_buf + readSeuqence[i].vectorChanales[j].offset, readSeuqence[i].vectorChanales[j].varSize);
-
-//            //TODO some logig base on type
-//            readSeuqence[i].vectorChanales[j].chanale->push_value(combiner._32*1.0);
-//        }
     }
 
     return 0;

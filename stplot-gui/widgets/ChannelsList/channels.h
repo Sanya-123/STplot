@@ -34,7 +34,9 @@ signals:
     void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
 
 private slots:
-    void on_pushButton_clicked();
+//    void on_pushButton_clicked();
+
+    void on_pushButton_deleteChanale_clicked();
 
 private:
     Ui::Channels *ui;

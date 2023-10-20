@@ -8,15 +8,7 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 {
     if (node != NULL){
         m_location = var_node_get_load_location(node);
-        m_name = QString(node->name);
-        varloc_node_t * parent = var_node_get_parent(node);
-        while (parent != NULL){
-            if (!parent->is_anon){
-                m_name.prepend(".");
-                m_name.prepend(parent->name);
-            }
-            parent = var_node_get_parent(parent);
-        }
+        m_name = getFullNmaeNode(node);
 //        m_buffer.reserve(100);
     }
 
@@ -125,6 +117,7 @@ QString VarChannel::displayName() const
 void VarChannel::setDisplayName(const QString &newDisplayName)
 {
     m_displayName = newDisplayName;
+    emit changeDisplayName();
 }
 
 varloc_location_t VarChannel::getLocation()
@@ -146,6 +139,25 @@ bool VarChannel::hasLocation(varloc_location_t loc){
     }
     return false;
 
+}
+
+QString VarChannel::getFullNmaeNode(varloc_node_t *node)
+{
+    if(node == nullptr)
+        return QString();
+
+
+    QString name = QString(node->name);
+    varloc_node_t * parent = var_node_get_parent(node);
+    while (parent != NULL){
+        if (!parent->is_anon){
+            name.prepend(".");
+            name.prepend(parent->name);
+        }
+        parent = var_node_get_parent(parent);
+    }
+
+    return name;
 }
 
 QString VarChannel::getName(){

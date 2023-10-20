@@ -80,7 +80,7 @@ void Channels::saveSettings(QSettings *settings)
         settings->endGroup();
 
 
-        settings->setValue("getTotalSizePlot", m_channels->at(i)->getTotalSizePlot());
+        settings->setValue("totalSizePlot", m_channels->at(i)->getTotalSizePlot());
         settings->beginWriteArray("plotList");
         QVector<bool> listPlot = m_channels->at(i)->getPlotList();
         for(int j = 0; j < listPlot.size(); j++)
@@ -96,12 +96,90 @@ void Channels::saveSettings(QSettings *settings)
 
 void Channels::restoreSettings(QSettings *settings)
 {
-//    int size = settings->beginReadArray("chanales");
-//    for (int i = 0; i < size; ++i)
-//    {
-//        settings->setArrayIndex(i);
-//    }
-//    settings->endArray();
+    //eset states
+    for (int i = 0; i < m_channels->size(); ++i) {
+        delete m_channels->at(i);
+    }
+    curentColorSet = 0;
+    curentDotStyle = 0;
+    emit m_channelModel->layoutChanged();
+
+    int size = settings->beginReadArray("chanales");
+    for (int i = 0; i < size; ++i)
+    {
+        settings->setArrayIndex(i);
+        //read all setings
+        QString chanaleName = settings->value("chanaleName").toString();
+        QString displayName = settings->value("displayName").toString();
+        int dotStyle = settings->value("dotStyle").toUInt();
+        int lineStyle = settings->value("lineStyle").toUInt();
+        QColor lineColor = settings->value("lineColor").value<QColor>();
+        int lineWidth = settings->value("lineWidth").toUInt();
+
+        settings->beginGroup("location");
+        varloc_location_t loc;
+        loc.type = (varloc_loc_type_e)settings->value("type").toUInt();
+        loc.address.base = settings->value("base").toUInt();
+        loc.address.offset_bits = settings->value("offset_bits").toUInt();
+        loc.address.size_bits = settings->value("size_bits").toUInt();
+        settings->endGroup();
+
+        int totalSizePlot = settings->value("totalSizePlot").toUInt();
+
+        int sizePlotList = settings->beginReadArray("plotList");
+        QVector<bool> listPlot;
+        for(int j = 0; j < sizePlotList; j++)
+        {
+            settings->setArrayIndex(j);
+            listPlot.append(settings->value("enPlot").toBool());
+//            settings->setValue("enPlot", listPlot[j]);
+        }
+        settings->endArray();
+
+        //now create var
+        VarChannel *chanale = new VarChannel(loc, chanaleName, lineColor, dotStyle);
+        chanale->setDisplayName(displayName);
+        chanale->setLineStyle(lineStyle);
+        chanale->setLineWidth(lineWidth);
+        chanale->setTotalSizePlot(totalSizePlot);
+        m_channels->push_back(chanale);
+        for(int j = 0; j < sizePlotList; j++)
+        {//TODO add signal to ViewManager
+            if(listPlot[j])
+            {
+//                chanale->setEnableOnPlot(j, listPlot[j]);
+                m_channelModel->setEnablePlot(chanale, j, listPlot[j]);
+            }
+//            qDebug() << "plotLisi:" << displayName << j << listPlot[j];
+        }
+    }
+    settings->endArray();
+
+    //update next elements
+    curentColorSet = m_channels->size()%colorSetSequese.size();
+    curentDotStyle = m_channels->size()%(MAX_NUMBER_DOT_STYLE - 1);
+
+    //if I remove some meadle element an so color is offsetings So I check colors ans set next
+    if(m_channels->size())
+    {
+        //color
+        int indexColor = colorSetSequese.indexOf(m_channels->last()->lineColor());
+        if(indexColor >= 0)
+        {
+            curentColorSet = indexColor + 1;
+            if(curentColorSet >= colorSetSequese.size())
+                curentColorSet = 0;
+        }
+
+//        line style
+        curentDotStyle = m_channels->last()->dotStyle() + 1;
+
+        if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
+            curentDotStyle = 1;//1 becouse 0 is none style
+    }
+
+    emit m_channelModel->layoutChanged();
+//    ui->treeView->update();
 }
 
 QVector<VarChannel *> *Channels::getListChanales() const
@@ -146,22 +224,30 @@ void Channels::setPlotName(int number, QString name)
     m_channelModel->setPlotName(number, name);
 }
 
-void Channels::on_pushButton_clicked()
+//void Channels::on_pushButton_clicked()
+//{
+//    int curentElement = ui->treeView->currentIndex().row();
+
+//    VarChannel* plotChanale = m_channels->at(curentElement);
+
+//    static int sinFreq = 0;
+//    sinFreq++;
+
+
+//    for(int i = 0; i < 100; i++)
+//    {
+//        usleep(1000);
+//        plotChanale->pushValue( qSin(i*1.0*2*M_PI*sinFreq/100.0) );
+//    }
+//}
+
+void Channels::on_pushButton_deleteChanale_clicked()
 {
     int curentElement = ui->treeView->currentIndex().row();
-
-    VarChannel* plotChanale = m_channels->at(curentElement);
-
-    static int sinFreq = 0;
-    sinFreq++;
-
-
-    for(int i = 0; i < 100; i++)
+    if((curentElement >= 0) && (curentElement < m_channels->size()))
     {
-        usleep(1000);
-        plotChanale->pushValue( qSin(i*1.0*2*M_PI*sinFreq/100.0) );
+        m_channels->remove(curentElement);
+        emit m_channelModel->layoutChanged();
     }
-
-
 }
 

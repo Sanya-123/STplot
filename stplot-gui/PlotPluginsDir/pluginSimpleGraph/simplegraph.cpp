@@ -77,7 +77,7 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
     QColor trackColor = QColor(255 - lineColor.red(), 255 - lineColor.green(), 255 - lineColor.blue());
 
     QCPGraph* newGruph = plotWidget->addGraph();
-    newGruph->setName(varChanale->getName() + "\n0");
+    newGruph->setName(varChanale->displayName() + "\n0");
     newGruph->setLineStyle((QCPGraph::LineStyle)varChanale->lineStyle());
     newGruph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
     newGruph->setPen(QPen(varChanale->lineColor()));
@@ -97,7 +97,9 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
     connect(varChanale, SIGNAL(changePlotLineWidth()), this, SLOT(updateLineWidthGruph()));
     connect(varChanale, SIGNAL(changePlotLineStyle()), this, SLOT(updateLineStyleGruph()));
     connect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
+    connect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     connect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
+
     mapPlots[varChanale] = newGruph;
     mapTrackers[varChanale] = newTracker;
 
@@ -114,12 +116,17 @@ void SimpleGraph::deletePlot(VarChannel *varChanale)
     disconnect(varChanale, SIGNAL(changePlotLineWidth()), this, SLOT(updateLineWidthGruph()));
     disconnect(varChanale, SIGNAL(changePlotLineStyle()), this, SLOT(updateLineStyleGruph()));
     disconnect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
+    disconnect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
+    disconnect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
 
     QCPGraph* gruph = mapPlots[varChanale];
+    QCPItemTracer* tracker = mapTrackers[varChanale];
 
     mapPlots.remove(varChanale);
+    mapTrackers.remove(varChanale);
 
     plotWidget->removeGraph(gruph);
+    plotWidget->removeItem(tracker);
     plotWidget->update();
     plotWidget->replot();
 }
@@ -190,7 +197,7 @@ void SimpleGraph::updateColourPlot()
 
     gpuh->setPen(QPen(lineColor));
 
-    mapTrackers[varChanale]->setPen(QPen(trackColor));
+//    mapTrackers[varChanale]->setPen(QPen(trackColor));
 
     plotWidget->update();
     plotWidget->replot();
@@ -234,6 +241,18 @@ void SimpleGraph::updateDotStyleGruph()
 
     gpuh->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
 
+    plotWidget->update();
+    plotWidget->replot();
+}
+
+void SimpleGraph::updateDisplayNameGruph()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+    if(gpuh == nullptr || varChanale == nullptr)
+        return;
+
+    gpuh->setName(varChanale->displayName() + "\n0");
     plotWidget->update();
     plotWidget->replot();
 }
@@ -298,7 +317,7 @@ void SimpleGraph::plotSelecting()
 
     plotWidget->selectedGraphs();
 
-//    qDebug() << varChanale->getName();
+//    qDebug() << varChanale->displayName();
     //TODO
 
     plotWidget->update();
@@ -321,7 +340,7 @@ void SimpleGraph::showPointToolTip(QMouseEvent *event)
 //        double _x = x;
         mapTrackers[plots[i]]->setGraphKey(x);
         mapTrackers[plots[i]]->updatePosition();
-        mapPlots[plots[i]]->setName(plots[i]->getName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
+        mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
     }
 
     plotWidget->update();

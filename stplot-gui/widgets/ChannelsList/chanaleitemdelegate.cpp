@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <channelmodel.h>
 #include <QColorDialog>
+#include <QLineEdit>
 
 //ChanaleItemDelegate::ChanaleItemDelegate(QObject *parent)
 //    : QStyledItemDelegate{parent}
@@ -38,6 +39,11 @@ QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         QColorDialog *colorDialog = new QColorDialog(parent);
         return colorDialog;
     }
+    else if(index.column() == 0)
+    {//defoult line edit is nite set curent display name in editor
+        QLineEdit *lineEdit = new QLineEdit(parent);
+        return lineEdit;
+    }
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
@@ -52,12 +58,23 @@ void ChanaleItemDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     if(index.column() == 2)
     {
         QColorDialog *colorDialog = qobject_cast<QColorDialog *>(editor);
-        colorDialog->setCurrentColor(QColor(index.data().toString()));
+        if(colorDialog != nullptr)
+            colorDialog->setCurrentColor(QColor(index.data().toString()));
     }
     else if((index.column() == 3) || (index.column() == 4) || (index.column() == 5))
     {
         QComboBox *dotStyleEditor = qobject_cast<QComboBox *>(editor);
-        dotStyleEditor->setCurrentText(index.data().toString());
+        if(dotStyleEditor != nullptr)
+        {
+            dotStyleEditor->setCurrentText(index.data().toString());
+            dotStyleEditor->showPopup();
+        }
+    }
+    else if(index.column() == 0)
+    {
+        QLineEdit *lineEdit = qobject_cast<QLineEdit *>(editor);
+        if(lineEdit != nullptr)
+            lineEdit->setText(index.data().toString());//this is main different beatwen defoult editor and this
     }
     else
         return QStyledItemDelegate::setEditorData(editor, index);
@@ -68,12 +85,20 @@ void ChanaleItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
     if(index.column() == 2)
     {
         QColorDialog *colorDialog = qobject_cast<QColorDialog *>(editor);
-        model->setData(index, colorDialog->currentColor().name());
+        if(colorDialog != nullptr)
+            model->setData(index, colorDialog->currentColor().name());
     }
     else if((index.column() == 3) || (index.column() == 4) || (index.column() == 4))
     {
         QComboBox *comboBoxEditor = qobject_cast<QComboBox *>(editor);
-        model->setData(index, comboBoxEditor->currentIndex());
+        if(comboBoxEditor != nullptr)
+            model->setData(index, comboBoxEditor->currentIndex());
+    }
+    else if(index.column() == 0)
+    {
+        QLineEdit *lineEdit = qobject_cast<QLineEdit *>(editor);
+        if(lineEdit != nullptr)
+            model->setData(index, lineEdit->text());
     }
     else
         return QStyledItemDelegate::setModelData(editor, model, index);

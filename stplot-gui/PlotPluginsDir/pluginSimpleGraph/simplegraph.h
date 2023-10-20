@@ -39,6 +39,7 @@ private slots:
     void updateLineStyleGruph();
     void updateLineWidthGruph();
     void updateDotStyleGruph();
+    void updateDisplayNameGruph();
     void settingsChanged();
     void plotSelecting();
 

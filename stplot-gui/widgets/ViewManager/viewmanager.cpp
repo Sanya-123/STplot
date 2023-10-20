@@ -51,6 +51,10 @@ void ViewManager::saveSettings(QSettings *settings)
 
 void ViewManager::restoreSettings(QSettings *settings)
 {
+    //clean states
+    ui->tableWidget_availebleWidgets->selectAll();
+    on_pushButton_deleteViewes_clicked();
+
     QMap<QString,PlotWidgetInterfacePlugin*> plotMap;
 
     for(int i = 0; i < pluginsPlot.size(); i++)

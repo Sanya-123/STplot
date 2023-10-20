@@ -40,6 +40,7 @@ void VarLoader::saveSettings(QSettings *settings)
 
 void VarLoader::restoreSettings(QSettings *settings)
 {
+    //maybe clean some stuff
     ui->lineEdit_file->setText(settings->value("elffile").toString());
 }
 
@@ -72,7 +73,7 @@ void VarLoader::add_variables()
         ++i;
     }
     varModel->deselect_all();
-
+    ui->treeView->viewport()->update();
 }
 
 void VarLoader::open_elf()

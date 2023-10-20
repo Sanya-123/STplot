@@ -34,7 +34,15 @@ public slots:
     void startRead();
     void stopedRead();
     void read();
+    void loadSettings();
+    void saveSettings();
+    void saveSettingsAs();
 //    void connect();
+
+private:
+    void applySettings(QSettings &settings);
+    void readSettings(QSettings &settings);
+    void saveSettingsByile(QString fileName);
 
 private:
     Ui::STPlotWindow *ui;
@@ -49,6 +57,7 @@ private:
 //    QThread readLoopThread;
     ReadManager readManager;
     SimpleReader simpleReader;
+    QString curentSettingsPath;
 };
 
 

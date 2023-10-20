@@ -124,70 +124,12 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
     res.append(readAdd);
 
     return res;
-
-
-//    //NOTE this is very importatn stuff for make sequence for readn with optimized addres reads
-//    QMap<uint32_t, VarChannel *> addresVarMap;
-//    //TODO var with same add reses
-//    for(int i = 0 ; i < channels->size(); i++)
-//    {
-//        qDebug("addres:0x%08X;0x%08X", channels->at(i)->getLocation().address.base, channels->at(i)->getMask());
-//        addresVarMap[channels->at(i)->getLocation().address.base] = channels->at(i);
-//    }
-
-//    QList<uint32_t> addresses = addresVarMap.keys();
-
-//    qDebug() << addresses;
-
-//    return QVector<ReadDeviceObject::ReadAddres>();
-
-//    struct ReadDeviceObject::ReadAddres readAdd;
-//    struct ReadDeviceObject::ReadChanale readChan;
-//    readChan.chanale = addresVarMap[addresses[0]];
-//    readChan.offset = addresses[0]%4;
-//    readChan.varSize = 4;
-
-//    readAdd.vectorChanales.append(readChan);
-//    readAdd.addres = (addresses[0]/4)*4;
-//    readAdd.readSize = 4;
-//    for(int i = 1; i < addresses.size(); i++)
-//    {
-//        readChan.chanale = addresVarMap[addresses[i]];
-//        readChan.offset = addresses[i]%4;
-//        readChan.varSize = 4;
-
-
-//        uint32_t addresVaribel = (addresses[i]/4)*4;
-//        if(addresVaribel == readAdd.addres)
-//        {
-////            readChan.chanale = addresVarMap[addresses[i]];
-////            readChan.offset = addresses[i]%4;
-////            readChan.varSize = 4;
-//            readAdd.vectorChanales.append(readChan);
-//        }
-//        else
-//        {
-//            res.append(readAdd);
-//            readAdd.vectorChanales.clear();
-
-//            readAdd.addres = addresVaribel;
-//            readAdd.vectorChanales.append(readChan);
-//        }
-//    }
-
-
-//    res.append(readAdd);
-
-//    return res;
-
 }
 
 void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
 {
     union __attribute__((packed)){
-        float _f;
         uint8_t _8[4];
-        uint16_t _16[2];
         uint32_t _32;
     }combiner;
 
@@ -198,8 +140,6 @@ void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
         combiner._32 = 0;
         memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 
-        //TODO some logig base on type
-//        addresSequence.vectorChanales[j].chanale->pushValue(combiner._32*1.0);
         addresSequence.vectorChanales[j].chanale->pushValueRaw(combiner._32);
     }
 }
@@ -230,24 +170,3 @@ void ReadManager::stopRead()
 {
     loop->stopLoop();
 }
-
-//void ReadManager::startRead()
-//{
-//    //TODO total remeke work with thread
-//    ReadDeviceObject* readObj = readDeviceces[0];
-
-//    loop.setChannels(channelsView->getListChanales());
-//    loop.setReadDevicec(readObj);
-//    loop.setSaveDeviceces(&saveDeviceces);
-
-////    //move all object to thread
-////    readObj->moveToThread(&readLoopThread);
-////    for(int i = 0; i < saveDeviceces.size(); i++)
-////        saveDeviceces[i]->moveToThread(&readLoopThread);
-////    readLoop.moveToThread(&readLoopThread);
-//    //TODO check and reimplement read this stuff in thread mode
-
-
-//    loop.readLoop();
-
-//}

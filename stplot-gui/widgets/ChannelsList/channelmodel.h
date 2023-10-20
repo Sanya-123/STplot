@@ -31,6 +31,7 @@ public slots:
     void deletePlot(int number);
     void setPlotName(int number, QString name);
     void selectChanale(QModelIndex index);
+    void setEnablePlot(VarChannel* chanale, int numGruph, bool en);
 
 signals:
     void updateViewport();

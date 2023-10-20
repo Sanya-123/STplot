@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QDebug>
 #include <QToolBar>
+#include <QFileDialog>
 
 //#include <iostream>
 //#include <format>
@@ -87,6 +88,9 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
     connect(&readManager, SIGNAL(stopingRead()), this, SLOT(stopedRead()));
     connect(ui->actionStop, SIGNAL(triggered(bool)), &readManager, SLOT(stopRead()));
+    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(loadSettings()));
+    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(saveSettings()));
+    connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
 
 
     viewManager->setDockContainer(ui->dockContainer);
@@ -99,44 +103,14 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");
-    restoreGeometry(settings.value("windows/geometry").toByteArray());
-    restoreState(settings.value("windows/state").toByteArray());
-
-    settings.beginGroup("varloader");
-    varloader->restoreSettings(&settings);
-    settings.endGroup();
-
-    settings.beginGroup("viewmanager");
-    viewManager->restoreSettings(&settings);
-    settings.endGroup();
-
-    settings.beginGroup("channels");
-    channelsView->restoreSettings(&settings);
-    settings.endGroup();
-
-    ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
-
+    applySettings(settings);
 }
 
 STPlotWindow::~STPlotWindow()
 {
     //save settings
     QSettings settings("STdebuger", "STplotDebuger");
-    settings.setValue("windows/state", saveState());
-    settings.setValue("windows/geometry", saveGeometry());
-    settings.setValue("windows/docker/state", ui->dockContainer->saveState());
-    //chanale
-    settings.beginGroup("channels");
-    channelsView->saveSettings(&settings);
-    settings.endGroup();
-    //
-    settings.beginGroup("viewmanager");
-    viewManager->saveSettings(&settings);
-    settings.endGroup();
-    //varloader
-    settings.beginGroup("varloader");
-    varloader->saveSettings(&settings);
-    settings.endGroup();
+    readSettings(settings);
     delete ui;
 }
 
@@ -179,6 +153,92 @@ void STPlotWindow::stopedRead()
 {
     ui->actionStart->setEnabled(true);
     ui->actionStop->setEnabled(false);
+}
+
+void STPlotWindow::loadSettings()
+{
+    QString newSettings = QFileDialog::getOpenFileName(this, "Load settings", curentSettingsPath, "Configs(*.conf);;All(*)");
+    if(!newSettings.isEmpty())
+    {
+        curentSettingsPath = newSettings;
+        QSettings settings(curentSettingsPath, QSettings::IniFormat);
+        if(settings.status() == QSettings::NoError)
+        {
+            applySettings(settings);
+        }
+    }
+}
+
+void STPlotWindow::saveSettings()
+{
+    if(curentSettingsPath.isEmpty())
+        return saveSettingsAs();
+
+    saveSettingsByile(curentSettingsPath);
+}
+
+void STPlotWindow::saveSettingsAs()
+{
+    QString newSettings = QFileDialog::getSaveFileName(this, "Load settings", curentSettingsPath, "Configs(*.conf);;All(*)");
+    if(!newSettings.isEmpty())
+    {
+        //check syfix
+        if(((QStringList)newSettings.split("/")).last().indexOf('.') == -1)
+            newSettings.append(".conf");
+
+        curentSettingsPath = newSettings;
+        saveSettingsByile(curentSettingsPath);
+    }
+}
+
+void STPlotWindow::applySettings(QSettings &settings)
+{
+    //NOTE do not forget clean some stuff like gruphs that should me implementer in restore settings
+
+    restoreGeometry(settings.value("windows/geometry").toByteArray());
+    restoreState(settings.value("windows/state").toByteArray());
+
+    settings.beginGroup("varloader");
+    varloader->restoreSettings(&settings);
+    settings.endGroup();
+
+    settings.beginGroup("viewmanager");
+    viewManager->restoreSettings(&settings);
+    settings.endGroup();
+
+    settings.beginGroup("channels");
+    channelsView->restoreSettings(&settings);
+    settings.endGroup();
+
+    ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
+}
+
+void STPlotWindow::readSettings(QSettings &settings)
+{
+    settings.setValue("windows/state", saveState());
+    settings.setValue("windows/geometry", saveGeometry());
+    settings.setValue("windows/docker/state", ui->dockContainer->saveState());
+    //chanale
+    settings.beginGroup("channels");
+    channelsView->saveSettings(&settings);
+    settings.endGroup();
+    //
+    settings.beginGroup("viewmanager");
+    viewManager->saveSettings(&settings);
+    settings.endGroup();
+    //varloader
+    settings.beginGroup("varloader");
+    varloader->saveSettings(&settings);
+    settings.endGroup();
+}
+
+void STPlotWindow::saveSettingsByile(QString fileName)
+{
+    QSettings settings(fileName, QSettings::IniFormat);
+    if(settings.isWritable())
+    {
+        readSettings(settings);
+    }
 }
 
 

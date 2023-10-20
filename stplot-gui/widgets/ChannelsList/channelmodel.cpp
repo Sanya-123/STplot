@@ -36,7 +36,7 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
     {
         if (index.column() == 0){
-            return QVariant( m_channels->at(index.row())->getName());
+            return QVariant( m_channels->at(index.row())->displayName());
         }
         else if(index.column() == 1){
             return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
@@ -125,8 +125,7 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
         if(index.column() >= GRUPH_FERST_COLUMN)
         {
 //            qDebug() << index.column() << index.row() << value;
-            m_channels->at(index.row())->setEnableOnPlot(index.column() - GRUPH_FERST_COLUMN, value.toInt());
-            emit changeEnablePlo(m_channels->at(index.row()), index.column() - GRUPH_FERST_COLUMN, value.toInt());
+            setEnablePlot(m_channels->at(index.row()), index.column() - GRUPH_FERST_COLUMN, value.toInt());
 
             QModelIndex topLeft = index;
             QModelIndex bottomRight = index;
@@ -137,6 +136,11 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
     }
     else if(role == Qt::EditRole && index.isValid())
     {
+        if(index.column() == 0)
+        {
+            m_channels->at(index.row())->setDisplayName(value.toString());
+            return true;
+        }
         if(index.column() == 2)
         {
             m_channels->at(index.row())->setLineColor(QColor(value.toString()));
@@ -171,7 +175,7 @@ Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const
 
     if (index.column() >= GRUPH_FERST_COLUMN)
         return /*flags | */Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    else if(index.column() == 2 || index.column() == 3 || index.column() == 4 || index.column() == 5)
+    else if(index.column() != 1)
         return /*flags | */Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;
@@ -320,4 +324,10 @@ void ChannelModel::selectChanale(QModelIndex index)
             m_channels->at(index.row())->selectCurentPlot();
         }
     }
+}
+
+void ChannelModel::setEnablePlot(VarChannel *chanale, int numGruph, bool en)
+{
+    chanale->setEnableOnPlot(numGruph, en);
+    emit changeEnablePlo(chanale, numGruph, en);
 }

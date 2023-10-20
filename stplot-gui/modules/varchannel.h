@@ -37,6 +37,8 @@ public:
     uint32_t getMask();
     bool hasLocation(varloc_location_t loc);
 
+    static QString getFullNmaeNode(varloc_node_t* node);
+
     QVector<bool> getPlotList();
     int getTotalSizePlot();
     void setTotalSizePlot(int size);
@@ -93,7 +95,7 @@ signals:
     void changePlotLineWidth();
     void changePlotLineStyle();
     void changePlotDotStyle();
-    void changeName();
+    void changeDisplayName();
     void updatePlot();
     void selectPlot();
 };
