@@ -14,6 +14,7 @@ class STlinkDevice : public ReadDeviceObject
     Q_OBJECT
 public:
     STlinkDevice();
+    ~STlinkDevice();
     bool isFileDevice() {return false;}
 //    int initDevise(QVector<VarChannel*> *channels);
     int initDevise(QVector<struct ReadAddres> readSeuqence);

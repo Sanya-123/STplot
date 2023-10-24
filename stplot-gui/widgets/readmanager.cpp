@@ -40,6 +40,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
     for(int i = 0; i < saveDeviceces.size(); i++)
         saveDeviceces[i]->moveToThread(&readLoopThread);
 
+    startTime = QDateTime::currentDateTime();
     readLoopThread.start();
 
     return 0;
@@ -146,7 +147,6 @@ void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
 
 void ReadManager::stopReadLoop()
 {
-    qDebug() << "stopReadLoop()";
 //    return ;
     readLoopThread.quit();
     readLoopThread.wait();
@@ -157,6 +157,8 @@ void ReadManager::stopReadLoop()
     readDevicece->moveToThread(nullptr);
     for(int i = 0; i < saveDeviceces.size(); i++)
         saveDeviceces[i]->moveToThread(this->thread());
+
+    saveLoader.saveChanalesData(channels, startTime);
 
     emit stopingRead();
 }

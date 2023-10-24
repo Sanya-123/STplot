@@ -42,6 +42,10 @@ set(PROJECT_SOURCES
         widgets/readmanager.cpp
         widgets/plotsettingsviever.h
         widgets/plotsettingsviever.cpp
+        widgets/stmstudiofiledevice.h
+        widgets/stmstudiofiledevice.cpp
+        widgets/fimesavereaddevice.h
+        widgets/fimesavereaddevice.cpp
         modules/varchannel.h
         modules/varchannel.cpp
         modules/plotinterface.h

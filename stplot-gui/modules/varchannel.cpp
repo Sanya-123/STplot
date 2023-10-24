@@ -214,7 +214,7 @@ VarValue VarChannel::getValue(int numberElement)
         return m_buffer[numberElement];
 
 
-    return (VarValue){0, QTime::currentTime()};
+    return (VarValue){0, QTime::currentTime()};//NOTE could be paroblem in save files
 }
 
 QVector<VarValue> VarChannel::getBuffer()

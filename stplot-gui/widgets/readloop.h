@@ -20,6 +20,9 @@ public slots:
     void readLoop();
     void stopLoop();
 
+private slots:
+    void saveReedSequence(uint32_t addres, QVector<uint8_t> data);
+
 signals:
     void stopedLoop();
     void addressesReed(uint32_t addres, QVector<uint8_t> data);
@@ -30,6 +33,7 @@ private:
     QVector<VarChannel*> *channels;
     bool stopSignal;
     QVector<ReadDeviceObject::ReadAddres> readSequence;
+    QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence;
 
 };
 

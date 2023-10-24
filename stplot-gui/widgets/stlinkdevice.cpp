@@ -5,6 +5,11 @@ STlinkDevice::STlinkDevice() : configWidget(nullptr)
 
 }
 
+STlinkDevice::~STlinkDevice()
+{
+
+}
+
 //int STlinkDevice::initDevise(QVector<VarChannel *> *channels)
 //{
 //    if(channels == nullptr)

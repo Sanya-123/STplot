@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "varchannel.h"
+#include <QPair>
 
 #define READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION              0x00000000
 
@@ -33,7 +34,7 @@ public:
      * @return - 0 if OK else return error code
      */
 //    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
-    virtual int initDevise(QVector<struct ReadAddres> readSeuqence) = 0;
+    virtual int initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence) = 0;
 
     /**
      * @brief stopDev - disconnect from device
@@ -54,6 +55,7 @@ public:
 
 signals:
     void addressesReed(uint32_t addres, QVector<uint8_t> data);
+    void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);
 };
 
 class SaveDeviceObject : public QObject
@@ -65,7 +67,8 @@ public:
      * @param channels - list of varibels
      * @return - 0 if OK else return error code
      */
-    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+//    virtual int initDevise(QVector<VarChannel*> *channels) = 0;
+    virtual int initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence) = 0;
 
     /**
      * @brief stopDev - disconnect from device
@@ -76,7 +79,7 @@ public:
      * @brief execSaveDevice - do save varibels should exec after read waribels and append just last value
      * @return - 0 if OK else return error code
      */
-    virtual int execSaveDevice() = 0;
+    virtual int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence) = 0;
 
     /**
      * @brief getSaveDevConfigWidget - get configure widget

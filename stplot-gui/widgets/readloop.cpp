@@ -1,6 +1,7 @@
 #include "readloop.h"
 #include <QDebug>
 #include <QThread>
+#include <QElapsedTimer>
 
 ReadLoop::ReadLoop(QObject *parent)
     : QObject{parent}, readDevicec(nullptr), saveDeviceces(nullptr), channels(nullptr)
@@ -16,13 +17,18 @@ void ReadLoop::readLoop()
         return;
     }
 
+    saveSequence.clear();
+
+    bool isFileDev = readDevicec->isFileDevice();
+
 //    readDevicec->moveToThread(this->thread());
 //    for(int i = 0; i < saveDeviceces->size(); i++)
 //        saveDeviceces->at(i)->moveToThread(this->thread());
 
     connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
+    if(!isFileDev)
+        connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
 
-    bool isFileDev = readDevicec->isFileDevice();
     try {
 
         //try init dev
@@ -30,6 +36,15 @@ void ReadLoop::readLoop()
         int res = readDevicec->initDevise(readSequence);
         if(res != 0)//error read device
             throw res;
+
+        if(!isFileDev && saveDeviceces != nullptr)
+        {
+            for(int i = 0; i < saveDeviceces->size(); i++)
+                saveDeviceces->at(i)->initDevise(readSequence);
+        }
+
+//        QElapsedTimer timer;
+//        timer.start();
 
         //main loop of read data
         int tmp_i = 0;//TODO temporary for check withput thread
@@ -43,17 +58,21 @@ void ReadLoop::readLoop()
             if(!isFileDev && saveDeviceces != nullptr)
             {
                 for(int i = 0; i < saveDeviceces->size(); i++)
-                    saveDeviceces->at(i)->execSaveDevice();
+                    saveDeviceces->at(i)->execSaveDevice(saveSequence);
             }
+
+            saveSequence.clear();
 
             //TODO temporary for check withput thread
             tmp_i++;
             if(tmp_i == 1000)
                 stopSignal = true;
 
-            QThread::msleep(2);
+//            QThread::msleep(2);
 
         }while(stopSignal == false);
+
+//        qDebug () << "spendTime:" << timer.elapsed();
 
     } catch (int err) {
         Q_UNUSED(err);
@@ -69,6 +88,9 @@ void ReadLoop::readLoop()
             saveDeviceces->at(i)->stopDev();
     }
     disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
+    if(!isFileDev)
+        disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
+    saveSequence.clear();
     emit stopedLoop();
 }
 
@@ -84,6 +106,11 @@ void ReadLoop::setReadDevicec(ReadDeviceObject *newReadDevicec)
 void ReadLoop::stopLoop()
 {
     stopSignal = true;
+}
+
+void ReadLoop::saveReedSequence(uint32_t addres, QVector<uint8_t> data)
+{
+    saveSequence.append(qMakePair(addres, data));
 }
 
 void ReadLoop::setReadSequence(const QVector<ReadDeviceObject::ReadAddres> &newReadSequence)
