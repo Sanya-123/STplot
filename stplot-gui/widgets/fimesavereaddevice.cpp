@@ -76,7 +76,25 @@ int FimeSaveReadDevice::saveChanalesData(QVector<VarChannel *> *channels, QDateT
 
 }
 
-int FimeSaveReadDevice::loadChanalesData(QVector<VarChannel *> *channels)
+int FimeSaveReadDevice::loadChanalesData(QVector<VarChannel *> *channels, QString fileName)
 {
+
+    QFile readFile;
+    readFile.setFileName(fileName);
+    if(!readFile.open(QIODevice::ReadOnly))
+        return -1;
+
+    //read header
+    readFile.readLine();
+    QByteArray dateTime = readFile.readLine();
+    readFile.readLine();
+    readFile.readLine();
+    readFile.readLine();
+    readFile.readLine();
+    QByteArray names = readFile.readLine();
+    QByteArray addresses = readFile.readLine();
+
+
     return -1;
+    return 0;
 }

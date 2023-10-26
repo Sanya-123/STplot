@@ -13,7 +13,7 @@ public:
 
 public slots:
     int saveChanalesData(QVector<VarChannel*> *channels, QDateTime startTime = QDateTime::currentDateTime());
-    int loadChanalesData(QVector<VarChannel*> *channels);
+    int loadChanalesData(QVector<VarChannel*> *channels, QString fileName);
 
 signals:
 
