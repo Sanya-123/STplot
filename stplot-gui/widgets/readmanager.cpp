@@ -172,3 +172,8 @@ void ReadManager::stopRead()
 {
     loop->stopLoop();
 }
+
+void ReadManager::requestWriteData(uint32_t data, varloc_location_t location)
+{
+    loop->requestWriteData(data, location);
+}

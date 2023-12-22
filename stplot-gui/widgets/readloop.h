@@ -19,6 +19,7 @@ public:
 public slots:
     void readLoop();
     void stopLoop();
+    void requestWriteData(uint32_t data, varloc_location_t location);
 
 private slots:
     void saveReedSequence(uint32_t addres, QVector<uint8_t> data);
@@ -34,6 +35,8 @@ private:
     bool stopSignal;
     QVector<ReadDeviceObject::ReadAddres> readSequence;
     QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence;
+    QVector<QPair<uint32_t,varloc_location_t>> requestedWriteData;
+
 
 };
 

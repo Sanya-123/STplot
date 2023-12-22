@@ -135,6 +135,16 @@ int STlinkDevice::execReadDevice()
     return 0;
 }
 
+int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
+{
+    if(!sl)
+        return -1;
+
+    memcpy(sl->q_buf, &data, location.address.size_bits/8);
+
+    return stlink_write_mem8(sl, location.address.base + location.address.offset_bits/8, location.address.size_bits/8);
+}
+
 QWidget *STlinkDevice::getReadDevConfigWidget()
 {
     return configWidget;

@@ -20,6 +20,7 @@ public:
     int initDevise(QVector<struct ReadAddres> readSeuqence);
     void stopDev();
     int execReadDevice();
+    int writeDataDevice(uint32_t data, varloc_location_t location);
     QWidget *getReadDevConfigWidget();
 
 private:

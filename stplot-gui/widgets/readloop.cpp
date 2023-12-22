@@ -18,6 +18,7 @@ void ReadLoop::readLoop()
     }
 
     saveSequence.clear();
+    requestedWriteData.clear();
 
     bool isFileDev = readDevicec->isFileDevice();
 
@@ -61,6 +62,13 @@ void ReadLoop::readLoop()
             }
 
             saveSequence.clear();
+
+            //write data
+            while(requestedWriteData.size())
+            {
+                readDevicec->writeDataDevice(requestedWriteData[0].first, requestedWriteData[0].second);
+                requestedWriteData.removeFirst();
+            }
 //            QThread::msleep(2);
 
         }while(stopSignal == false);
@@ -99,6 +107,11 @@ void ReadLoop::setReadDevicec(ReadDeviceObject *newReadDevicec)
 void ReadLoop::stopLoop()
 {
     stopSignal = true;
+}
+
+void ReadLoop::requestWriteData(uint32_t data, varloc_location_t location)
+{
+    requestedWriteData.append(qMakePair(data, location));
 }
 
 void ReadLoop::saveReedSequence(uint32_t addres, QVector<uint8_t> data)

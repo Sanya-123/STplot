@@ -48,6 +48,14 @@ public:
     virtual int execReadDevice() = 0;
 
     /**
+     * @brief writeDataDevice - write raw data into memory
+     * @param data - raw data values
+     * @param location - addres located varibles
+     * @return - 0 if OK else return error code
+     */
+    virtual int writeDataDevice(uint32_t data, varloc_location_t location) {return -1;}
+
+    /**
      * @brief getReadDevConfigWidget - get configure widget
      * @return - configure widget for curent device
      */
