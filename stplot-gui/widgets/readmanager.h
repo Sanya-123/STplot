@@ -25,6 +25,7 @@ public slots:
 
 signals:
     void stopingRead();
+    void beginStopRead();
 
 private slots:
     void addresRead(uint32_t addres, QVector<uint8_t> data);

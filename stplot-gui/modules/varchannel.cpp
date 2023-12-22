@@ -58,7 +58,7 @@ void VarChannel::pushValue(float value){
 //    m_buffer.push_back(var);
     m_buffer.append(var);
     tmpDesc++;
-    if(tmpDesc == 10)
+    if(tmpDesc == 100)
     {
         tmpDesc = 0;
         emit updatePlot();

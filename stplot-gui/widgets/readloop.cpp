@@ -47,7 +47,6 @@ void ReadLoop::readLoop()
 //        timer.start();
 
         //main loop of read data
-        int tmp_i = 0;//TODO temporary for check withput thread
         do{
             //read value
             int resRead = readDevicec->execReadDevice();
@@ -62,12 +61,6 @@ void ReadLoop::readLoop()
             }
 
             saveSequence.clear();
-
-            //TODO temporary for check withput thread
-            tmp_i++;
-            if(tmp_i == 1000)
-                stopSignal = true;
-
 //            QThread::msleep(2);
 
         }while(stopSignal == false);

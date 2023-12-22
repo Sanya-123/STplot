@@ -56,7 +56,7 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     loaout->addWidget(plotWidget,0, 0, 1, 1);
     this->setLayout(loaout);
 
-    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
+//    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
 
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
