@@ -28,6 +28,7 @@ int SimpleReader::readData(){
         if(res != 0){
             return -1;
         }
+        QTime read_time = QTime::currentTime();
         uint32_t data;
         memcpy(&data, stlink->q_buf, 4);
         QVector<VarChannel*>* channels = iter.value();

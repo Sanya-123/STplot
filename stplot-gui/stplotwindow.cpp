@@ -165,6 +165,7 @@ void STPlotWindow::loadSettings()
         if(settings.status() == QSettings::NoError)
         {
             applySettings(settings);
+            varloader->load_elf();
         }
     }
 }
@@ -174,7 +175,7 @@ void STPlotWindow::saveSettings()
     if(curentSettingsPath.isEmpty())
         return saveSettingsAs();
 
-    saveSettingsByile(curentSettingsPath);
+    saveSettingsToFile(curentSettingsPath);
 }
 
 void STPlotWindow::saveSettingsAs()
@@ -187,7 +188,7 @@ void STPlotWindow::saveSettingsAs()
             newSettings.append(".conf");
 
         curentSettingsPath = newSettings;
-        saveSettingsByile(curentSettingsPath);
+        saveSettingsToFile(curentSettingsPath);
     }
 }
 
@@ -232,7 +233,7 @@ void STPlotWindow::readSettings(QSettings &settings)
     settings.endGroup();
 }
 
-void STPlotWindow::saveSettingsByile(QString fileName)
+void STPlotWindow::saveSettingsToFile(QString fileName)
 {
     QSettings settings(fileName, QSettings::IniFormat);
     if(settings.isWritable())

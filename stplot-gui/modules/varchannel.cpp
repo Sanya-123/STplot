@@ -48,25 +48,24 @@ VarChannel::~VarChannel(){
 
 }
 
-void VarChannel::pushValue(float value){
+void VarChannel::pushValue(float value, QTime record_time){
     m_value = value;
     VarValue var = {
         .value = value,
 //        .time = time_point_cast<microseconds>(system_clock::now()),
-        .qtime = QTime::currentTime(),
+        .qtime = record_time, //QTime::currentTime(),
     };
 //    m_buffer.push_back(var);
     m_buffer.append(var);
     tmpDesc++;
-    if(tmpDesc == 100)
+    if(tmpDesc == 20)
     {
         tmpDesc = 0;
         emit updatePlot();
     }
 }
-
-void VarChannel::pushValueRaw(uint32_t value){
-
+float VarChannel::decode_value(uint32_t value){
+    float ret = 0;
     union {
         _Float32    _f;
         uint8_t     _u8;
@@ -79,29 +78,39 @@ void VarChannel::pushValueRaw(uint32_t value){
     combiner._u32 = (value & m_mask) >> m_location.address.offset_bits;
     if(m_location.address.size_bits <= 8){
         if (m_location.type == VARLOC_SIGNED){
-            m_value = combiner._i8;
+            ret = combiner._i8;
         } else{
-            m_value = combiner._u8;
+            ret = combiner._u8;
         }
     }
     else if(m_location.address.size_bits <= 16){
         if (m_location.type == VARLOC_SIGNED){
-            m_value = combiner._i16;
+            ret = combiner._i16;
         } else{
-            m_value = combiner._u16;
+            ret = combiner._u16;
         }
     }
     else {
         if (m_location.type == VARLOC_SIGNED){
-            m_value = combiner._i32;
+            ret = combiner._i32;
         }
         else if (m_location.type == VARLOC_FLOAT){
-            m_value = combiner._f;
+            ret = combiner._f;
         } else{
-            m_value = combiner._u32;
+            ret = combiner._u32;
         }
     }
-    pushValue(m_value);
+    return ret;
+}
+
+void VarChannel::pushValueRawWithTime(uint32_t value, QDateTime date_time){
+    pushValue(decode_value(value), date_time.time());
+}
+
+void VarChannel::pushValueRaw(uint32_t value){
+
+    QTime time = QTime::currentTime();
+    pushValue(decode_value(value), time);
 }
 
 void VarChannel::selectCurentPlot()

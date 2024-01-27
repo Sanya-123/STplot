@@ -35,6 +35,7 @@ public:
     float getValue();
     varloc_location_t getLocation();
     uint32_t getMask();
+    float decode_value(uint32_t value);
     bool hasLocation(varloc_location_t loc);
 
     static QString getFullNmaeNode(varloc_node_t* node);
@@ -65,8 +66,9 @@ public:
     void setDisplayName(const QString &newDisplayName);
 
 public slots:
-    void pushValue(float value);
+    void pushValue(float value, QTime record_time);
     void pushValueRaw(uint32_t value);
+    void pushValueRawWithTime(uint32_t value, QDateTime date_time);
     void selectCurentPlot();
 
 private:

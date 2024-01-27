@@ -26,7 +26,7 @@ void ReadLoop::readLoop()
 //    for(int i = 0; i < saveDeviceces->size(); i++)
 //        saveDeviceces->at(i)->moveToThread(this->thread());
 
-    connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
+    connect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
     if(!isFileDev)
         connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
 
@@ -69,7 +69,7 @@ void ReadLoop::readLoop()
                 readDevicec->writeDataDevice(requestedWriteData[0].first, requestedWriteData[0].second);
                 requestedWriteData.removeFirst();
             }
-//            QThread::msleep(2);
+           QThread::msleep(2);
 
         }while(stopSignal == false);
 

@@ -27,6 +27,7 @@ private slots:
 signals:
     void stopedLoop();
     void addressesReed(uint32_t addres, QVector<uint8_t> data);
+    void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);
 
 private:
     QVector<SaveDeviceObject*> *saveDeviceces;

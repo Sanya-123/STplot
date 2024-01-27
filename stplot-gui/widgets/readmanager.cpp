@@ -7,7 +7,7 @@ ReadManager::ReadManager(QObject *parent)
 {
     loop = new ReadLoop;
     loop->moveToThread(&readLoopThread);
-    connect(loop, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(addresRead(uint32_t,QVector<uint8_t>)), Qt::QueuedConnection);
+    connect(loop, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>, QDateTime)), this, SLOT(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), Qt::QueuedConnection);
     connect(loop, SIGNAL(stopedLoop()), this, SLOT(stopReadLoop()), Qt::QueuedConnection);
     connect(&readLoopThread, SIGNAL(started()), loop, SLOT(readLoop()));
 }
@@ -125,6 +125,22 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
     res.append(readAdd);
 
     return res;
+}
+void ReadManager::addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time){
+    union __attribute__((packed)){
+        uint8_t _8[4];
+        uint32_t _32;
+    }combiner;
+
+    ReadDeviceObject::ReadAddres addresSequence = readSeuqencsMap[addres];
+
+    for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
+    {
+        combiner._32 = 0;
+        memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
+
+        addresSequence.vectorChanales[j].chanale->pushValueRawWithTime(combiner._32, time);
+    }
 }
 
 void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)

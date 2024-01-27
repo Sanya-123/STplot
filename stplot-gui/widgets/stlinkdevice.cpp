@@ -126,10 +126,11 @@ int STlinkDevice::execReadDevice()
         int32_t res = stlink_read_mem32(sl, readSeuqence[i].addres, readSeuqence[i].readSize);
         if(res != 0)
             return -1;
-
+        QDateTime dt = QDateTime::currentDateTime();
         QVector<uint8_t> reedData(readSeuqence[i].readSize);
         memcpy(reedData.data(), sl->q_buf, readSeuqence[i].readSize);
-        emit addressesReed(readSeuqence[i].addres, reedData);
+        // emit addressesReed(readSeuqence[i].addres, reedData);
+        emit addressesReedWithTime(readSeuqence[i].addres, reedData, dt);
     }
 
     return 0;

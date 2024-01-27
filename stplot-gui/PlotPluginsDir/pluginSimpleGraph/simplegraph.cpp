@@ -178,8 +178,8 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
 
 
     gpuh->rescaleAxes(!emptyGraphs);
-    plotWidget->update();
-    plotWidget->replot();
+    // plotWidget->update();
+    plotWidget->replot(QCustomPlot::rpQueuedReplot);
 
     if(varChanale->getBufferSize())
         emptyGraphs = false;

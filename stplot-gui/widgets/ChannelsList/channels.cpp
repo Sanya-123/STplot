@@ -98,8 +98,10 @@ void Channels::restoreSettings(QSettings *settings)
 {
     //eset states
     for (int i = 0; i < m_channels->size(); ++i) {
-        delete m_channels->at(i);
+        delete m_channels->at(i);;
     }
+    m_channels->clear();
+
     curentColorSet = 0;
     curentDotStyle = 0;
     emit m_channelModel->layoutChanged();
@@ -150,7 +152,7 @@ void Channels::restoreSettings(QSettings *settings)
 //                chanale->setEnableOnPlot(j, listPlot[j]);
                 m_channelModel->setEnablePlot(chanale, j, listPlot[j]);
             }
-//            qDebug() << "plotLisi:" << displayName << j << listPlot[j];
+           qDebug() << "plotLisi:" << displayName << j << listPlot[j];
         }
     }
     settings->endArray();

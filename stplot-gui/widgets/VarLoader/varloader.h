@@ -26,7 +26,7 @@ public:
 
     void load_variables(const QString &);
 
-private slots:
+public slots:
     void open_elf();
     void load_elf();
     void add_variables();

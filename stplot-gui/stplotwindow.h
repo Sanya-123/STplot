@@ -42,7 +42,7 @@ public slots:
 private:
     void applySettings(QSettings &settings);
     void readSettings(QSettings &settings);
-    void saveSettingsByile(QString fileName);
+    void saveSettingsToFile(QString fileName);
 
 private:
     Ui::STPlotWindow *ui;
