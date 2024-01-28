@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <iostream>
 #include <QFileDialog>
+#include <QMessageBox>
 
 VarLoader::VarLoader(QWidget *parent) :
     QWidget(parent),
@@ -13,12 +14,12 @@ VarLoader::VarLoader(QWidget *parent) :
     ui->setupUi(this);
     proxyModel = new QSortFilterProxyModel(this);
     varModel = new VarModel(this);
-    connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::open_elf);
-    connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::load_elf);
-    connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::add_variables);
-    connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expand_tree);
-    connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapse_tree);
-    connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::apply_filter);
+    connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::openElf);
+    connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::loadElf);
+    connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::addVariables);
+    connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expandTree);
+    connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapseTree);
+    connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::applyFilter);
 }
 
 VarLoader::~VarLoader()
@@ -44,24 +45,23 @@ void VarLoader::restoreSettings(QSettings *settings)
     ui->lineEdit_file->setText(settings->value("elffile").toString());
 }
 
-void VarLoader::expand_tree(){
+void VarLoader::expandTree(){
     ui->treeView->expandAll();
 }
 
-void VarLoader::collapse_tree(){
+void VarLoader::collapseTree(){
     ui->treeView->collapseAll();
 }
 
-varloc_node_t* VarLoader::get_tree_root(){
-    return varModel->getModelRoot();
-}
-
-void VarLoader::apply_filter(const QString & text){
+void VarLoader::applyFilter(const QString & text){
     proxyModel->setFilterFixedString(text);
 }
+bool VarLoader::isElfLoaded(){
+    return (varModel->getModelRoot() != NULL);
+}
 
 
-void VarLoader::add_variables()
+void VarLoader::addVariables()
 {
     QMap<varloc_node_t*, bool> &selection_map = varModel->get_selected_nodes();
     QMap<varloc_node_t*, bool>::const_iterator i = selection_map.constBegin();
@@ -71,7 +71,7 @@ void VarLoader::add_variables()
             if ((node->var_type == BASE)
                 || (node->var_type == ENUM)
             ){
-                emit variable_added(node);
+                emit variableAdded(node);
             }
         }
         ++i;
@@ -80,22 +80,37 @@ void VarLoader::add_variables()
     ui->treeView->viewport()->update();
 }
 
-void VarLoader::open_elf()
+void VarLoader::openElf()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                     tr("ELF file"), ui->lineEdit_file->text(), tr("ELF Files (*.elf)"));
     if (!fileName.isEmpty())
     {
+        watcher.removePath(ui->lineEdit_file->text());
         ui->lineEdit_file->setText(fileName);
     }
 }
 
-void VarLoader::load_elf()
+void VarLoader::loadElf()
 {
-    load_variables(ui->lineEdit_file->text());
+    loadVariables(ui->lineEdit_file->text());
 }
 
-void VarLoader::load_variables(const QString & fileName)
+void VarLoader::updateElf(const QString& path)
+{
+    QMessageBox msgBox;
+    msgBox.setText("The ELF file was modified.");
+    msgBox.setInformativeText("Do you want to reload variables?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::Ok){
+        watcher.removePath(ui->lineEdit_file->text());
+        loadVariables(ui->lineEdit_file->text());
+    }
+}
+
+void VarLoader::loadVariables(const QString & fileName)
 {
     QByteArray ba = fileName.toLocal8Bit();
     char *filepath = ba.data();
@@ -116,4 +131,9 @@ void VarLoader::load_variables(const QString & fileName)
     proxyModel->setRecursiveFilteringEnabled(true);
     ui->treeView->setModel(proxyModel);
     ui->treeView->show();
+
+    watcher.addPath(fileName);
+    QObject::connect(&watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(updateElf(const QString&)));
+
+    emit variablesUpdated(tree_root);
 }

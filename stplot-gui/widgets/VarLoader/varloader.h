@@ -2,8 +2,10 @@
 #define VARLOADER_H
 
 #include <QWidget>
+#include <QFileSystemWatcher>
 #include <QSortFilterProxyModel>
 #include "varmodel.h"
+
 extern "C" {
 #include "varloc.h"
 }
@@ -20,28 +22,29 @@ class VarLoader : public QWidget
 public:
     explicit VarLoader(QWidget *parent = nullptr);
     ~VarLoader();
-
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
-
-    void load_variables(const QString &);
+    bool isElfLoaded();
 
 public slots:
-    void open_elf();
-    void load_elf();
-    void add_variables();
-    void apply_filter(const QString &);
-    void collapse_tree();
-    void expand_tree();
-    varloc_node_t* get_tree_root();
+    void openElf();
+    void updateElf(const QString &);
+    void loadElf();
+    void addVariables();
+    void applyFilter(const QString &);
+    void collapseTree();
+    void expandTree();
 
 signals:
-    void variable_added(varloc_node_t*);
+    void variableAdded(varloc_node_t*);
+    void variablesUpdated(varloc_node_t*);
 
 private:
+    void loadVariables(const QString &);
     Ui::VarLoader *ui;
     QSortFilterProxyModel *proxyModel;
     VarModel *varModel;
+    QFileSystemWatcher watcher;
 };
 
 #endif // VARLOADER_H

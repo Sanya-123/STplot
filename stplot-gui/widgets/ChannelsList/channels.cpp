@@ -1,6 +1,7 @@
 #include "channels.h"
 #include "ui_channels.h"
 #include <QDebug>
+#include <QMessageBox>
 #include <qmath.h>
 #include <unistd.h>
 
@@ -190,12 +191,33 @@ QVector<VarChannel *> *Channels::getListChanales() const
 }
 
 void Channels::reloadChannels(varloc_node_t* root){
+
+    bool update_allowed = false;
     for (int i = 0; i < m_channels->size(); ++i) {
         varloc_node_t* node = var_node_get_by_name(root, m_channels->at(i)->getName().toLocal8Bit().data());
         if (node){
-            varloc_location_t load_loc = var_node_get_load_location(node);
-            qDebug("found node %s %x", node->name, load_loc.address.base);
-            m_channels->at(i)->setLocation(load_loc);
+            varloc_location_t new_load_loc = var_node_get_load_location(node);
+            qDebug("found node %s %x", node->name, new_load_loc.address.base);
+            if (!m_channels->at(i)->hasLocation(new_load_loc)){
+                if (!update_allowed){
+                    QMessageBox msgBox;
+                    msgBox.setText("Addresses of variables changed!");
+                    msgBox.setInformativeText("Do you want to update all channels?");
+                    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                    msgBox.setDefaultButton(QMessageBox::Yes);
+                    int ret = msgBox.exec();
+                    if (ret == QMessageBox::Yes){
+                        m_channels->at(i)->setLocation(new_load_loc);
+                        update_allowed = true;
+                    }
+                    else{
+                        break;
+                    }
+                }
+                else{
+                    m_channels->at(i)->setLocation(new_load_loc);
+                }
+            }
         }
     }
 }

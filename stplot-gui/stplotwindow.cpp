@@ -84,7 +84,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
 
-    connect(varloader, &VarLoader::variable_added, channelsView, &Channels::add_channel);
+    connect(varloader, &VarLoader::variableAdded, channelsView, &Channels::add_channel);
+    connect(varloader, SIGNAL(variablesUpdated(varloc_node_t*)), channelsView, SLOT(reloadChannels(varloc_node_t*)));
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
     connect(&readManager, SIGNAL(stopingRead()), this, SLOT(stopedRead()));
     connect(ui->actionStop, SIGNAL(triggered(bool)), &readManager, SLOT(stopRead()));
@@ -166,9 +167,7 @@ void STPlotWindow::loadSettings()
         {
             applySettings(settings);
             // Try to load elf file and update channel addresses
-            varloader->load_elf();
-            channelsView->reloadChannels(varloader->get_tree_root());
-
+            varloader->loadElf();
         }
     }
 }
