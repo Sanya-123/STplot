@@ -6,29 +6,23 @@ using namespace std::chrono;
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
     m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
 {
-    if (node != NULL){
-        m_location = var_node_get_load_location(node);
-        m_name = getFullNmaeNode(node);
-//        m_buffer.reserve(100);
+    if (node == NULL){
+        return;
     }
+    setLocation(var_node_get_load_location(node));
+    m_name = getFullNmaeNode(node);
 
     m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
     m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
     m_displayName = m_name;
 
     setDotStyle(dotStyle);
-
-    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
-    if(m_location.address.size_bits == 32)
-        m_mask = 0xFFFFFFFF;
-
-    m_mask = m_mask << m_location.address.offset_bits;
 }
 
 VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
     m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
 {
-    m_location = location;
+    setLocation(location);
     m_name = name;
     m_displayName = m_name;
 
@@ -36,12 +30,6 @@ VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColo
     m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
 
     setDotStyle(dotStyle);
-
-    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
-    if(m_location.address.size_bits == 32)
-        m_mask = 0xFFFFFFFF;
-
-    m_mask = m_mask << m_location.address.offset_bits;
 }
 
 VarChannel::~VarChannel(){
@@ -150,6 +138,16 @@ bool VarChannel::hasLocation(varloc_location_t loc){
 
 }
 
+void VarChannel::setLocation(varloc_location_t loc){
+    m_location = loc;
+    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
+    if(m_location.address.size_bits == 32)
+        m_mask = 0xFFFFFFFF;
+
+    m_mask = m_mask << m_location.address.offset_bits;
+
+}
+
 QString VarChannel::getFullNmaeNode(varloc_node_t *node)
 {
     if(node == nullptr)
@@ -159,10 +157,10 @@ QString VarChannel::getFullNmaeNode(varloc_node_t *node)
     QString name = QString(node->name);
     varloc_node_t * parent = var_node_get_parent(node);
     while (parent != NULL){
-        if (!parent->is_anon){
+        // if (!parent->is_anon){
             name.prepend(".");
             name.prepend(parent->name);
-        }
+        // }
         parent = var_node_get_parent(parent);
     }
 

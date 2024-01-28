@@ -41,7 +41,7 @@ public slots:
 
 private:
     void applySettings(QSettings &settings);
-    void readSettings(QSettings &settings);
+    void writeSettings(QSettings &settings);
     void saveSettingsToFile(QString fileName);
 
 private:

@@ -52,7 +52,7 @@ public:
     int getBufferSize();
     int dotStyle() const;
     void setDotStyle(int newDotStyle);
-
+    void setLocation(varloc_location_t loc);
     int lineStyle() const;
     void setLineStyle(int newLineStyle);
 

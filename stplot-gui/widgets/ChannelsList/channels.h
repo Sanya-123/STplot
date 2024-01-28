@@ -21,7 +21,7 @@ public:
 
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
-
+    void reloadChannels(varloc_node_t* root);
     QVector<VarChannel*> *getListChanales() const;
 
 public slots:

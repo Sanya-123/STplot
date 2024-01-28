@@ -102,15 +102,15 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     readManager.setReadDevicece(&stlinkDevice);
 
     //restore settings
-    QSettings settings("STdebuger", "STplotDebuger");
-    applySettings(settings);
+    // QSettings settings("STdebuger", "STplotDebuger");
+    // applySettings(settings);
 }
 
 STPlotWindow::~STPlotWindow()
 {
     //save settings
-    QSettings settings("STdebuger", "STplotDebuger");
-    readSettings(settings);
+    // QSettings settings("STdebuger", "STplotDebuger");
+    // writeSettings(settings);
     delete ui;
 }
 
@@ -165,7 +165,10 @@ void STPlotWindow::loadSettings()
         if(settings.status() == QSettings::NoError)
         {
             applySettings(settings);
+            // Try to load elf file and update channel addresses
             varloader->load_elf();
+            channelsView->reloadChannels(varloader->get_tree_root());
+
         }
     }
 }
@@ -214,7 +217,7 @@ void STPlotWindow::applySettings(QSettings &settings)
     ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
 }
 
-void STPlotWindow::readSettings(QSettings &settings)
+void STPlotWindow::writeSettings(QSettings &settings)
 {
     settings.setValue("windows/state", saveState());
     settings.setValue("windows/geometry", saveGeometry());
@@ -238,7 +241,7 @@ void STPlotWindow::saveSettingsToFile(QString fileName)
     QSettings settings(fileName, QSettings::IniFormat);
     if(settings.isWritable())
     {
-        readSettings(settings);
+        writeSettings(settings);
     }
 }
 

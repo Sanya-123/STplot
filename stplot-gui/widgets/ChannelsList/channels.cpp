@@ -189,6 +189,17 @@ QVector<VarChannel *> *Channels::getListChanales() const
     return m_channels;
 }
 
+void Channels::reloadChannels(varloc_node_t* root){
+    for (int i = 0; i < m_channels->size(); ++i) {
+        varloc_node_t* node = var_node_get_by_name(root, m_channels->at(i)->getName().toLocal8Bit().data());
+        if (node){
+            varloc_location_t load_loc = var_node_get_load_location(node);
+            qDebug("found node %s %x", node->name, load_loc.address.base);
+            m_channels->at(i)->setLocation(load_loc);
+        }
+    }
+}
+
 
 void Channels::add_channel(varloc_node_t* node){
 
@@ -196,6 +207,7 @@ void Channels::add_channel(varloc_node_t* node){
     for (int i = 0; i < m_channels->size(); ++i) {
         if (m_channels->at(i)->hasLocation(load_loc)){
             //already have node
+            qDebug("Error: %s Channel already exists.", node->name);
             return;
         }
     }

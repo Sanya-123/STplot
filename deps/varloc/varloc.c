@@ -74,6 +74,50 @@ varloc_node_t* var_node_get_parent(varloc_node_t* child){
     return child->parent;
 }
 
+
+
+int get_char_index(char* string, char c) {
+    char *e = strchr(string, c);
+    if (e == NULL) {
+        return -1;
+    }
+    return (int)(e - string);
+}
+
+
+/*
+ * Given variable name "a.b.c.d" composed of node names finds and
+ * returns "d" node pointer or NULL if not found.
+ * Any node in the link chain ("a", "b", "c") can be provided as root parameter
+ *
+ * Will also work if there are two nodes with the same name on one or multiple levels
+ * (case of anonymous structs with "_")
+ *
+ * Creates one recursive call for each level ("." symbol in name)
+ *
+*/
+varloc_node_t* var_node_get_by_name(varloc_node_t* root, char* name){
+    int idx = get_char_index(name, '.');
+    while(root != NULL){
+        if (idx < 0){
+            if(strcmp(name, root->name) == 0){
+                return root;
+            }
+        }
+        else{
+            if(strncmp(name, root->name, idx) == 0){
+                varloc_node_t* res = var_node_get_by_name(root->child, name+idx+1);
+                if (res != NULL){
+                    return res;
+                }
+            }
+        }
+        root = root->next;
+    }
+    return NULL;
+}
+
+
 varloc_node_t* var_node_get_child_at_index(varloc_node_t* parent, uint32_t index){
     varloc_node_t* child = parent->child;
     for (uint_fast32_t i = 0; i < index; i++){
@@ -129,7 +173,8 @@ varloc_location_t var_node_get_load_location(varloc_node_t* node){
         }
         uint32_t byte_address = var_node_get_address(parent);
         loc.address.base = (byte_address + (node->address.offset_bits / 8)) & 0xFFFFFFFC;
-        loc.address.offset_bits = node->address.offset_bits % 32;
+        loc.address.offset_bits = (((byte_address - loc.address.base) * 8) + node->address.offset_bits ) % 32;
+        // loc.address.offset_bits = node->address.offset_bits % 32;
         loc.address.size_bits = node->address.size_bits;
         if (node->is_float){
             loc.type =  VARLOC_FLOAT;
@@ -155,37 +200,25 @@ varloc_node_t* new_var_node(){
 
 varloc_node_t* new_child(varloc_node_t* parent){
     varloc_node_t* child = new_var_node();
-    if (child == NULL){
-        printf("varloc_node_t malloc failed! exiting...\n");
-        exit(1);
+    // if parent already has child link to child next
+    if (parent->child == NULL){
+        parent->child = child;
+        child->parent = parent;
     }
-    else{
-        // if parent already has child link to child next
-        if (parent->child == NULL){
-            parent->child = child;
-            child->parent = parent;
+    else {
+        varloc_node_t* node = parent->child;
+        while(node->next != NULL){
+            node = node->next;
         }
-        else {
-            varloc_node_t* node = parent->child;
-            while(node->next != NULL){
-                node = node->next;
-            }
-            node->next = child;
-            child->previous = node;
-        }
+        node->next = child;
+        child->previous = node;
     }
     return child;
 }
 
 varloc_node_t* new_sibling(varloc_node_t* var){
     varloc_node_t* sibling = new_var_node();
-    if (sibling == NULL){
-        printf("varloc_node_t malloc failed! exiting...\n");
-        exit(1);
-    }
-    else{
-        var->next = sibling;
-    }
+    var->next = sibling;
     return sibling;
 }
 
@@ -638,7 +671,7 @@ next_type:
                 strcpy(node->name, name);
             }
             else{
-                sprintf(node->name, "struct ...");
+                sprintf(node->name, "_");
                 node->is_anon = 1;
             }
         }

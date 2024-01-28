@@ -33,6 +33,7 @@ public slots:
     void apply_filter(const QString &);
     void collapse_tree();
     void expand_tree();
+    varloc_node_t* get_tree_root();
 
 signals:
     void variable_added(varloc_node_t*);

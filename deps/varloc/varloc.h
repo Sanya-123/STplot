@@ -43,7 +43,7 @@
  }varloc_location_t;
 
 
- typedef struct varloc_s{
+typedef struct varloc_s{
      struct varloc_s*   next;
      struct varloc_s*   previous;
      struct varloc_s*   child;
@@ -76,6 +76,8 @@
  varloc_node_t* var_node_get_child_at_index(varloc_node_t* parent, uint32_t index);
 
  uint32_t var_node_get_address(varloc_node_t* node);
+
+ varloc_node_t* var_node_get_by_name(varloc_node_t* root, char* name);
 
  varloc_location_t var_node_get_load_location(varloc_node_t* node);
 

@@ -52,6 +52,10 @@ void VarLoader::collapse_tree(){
     ui->treeView->collapseAll();
 }
 
+varloc_node_t* VarLoader::get_tree_root(){
+    return varModel->getModelRoot();
+}
+
 void VarLoader::apply_filter(const QString & text){
     proxyModel->setFilterFixedString(text);
 }
