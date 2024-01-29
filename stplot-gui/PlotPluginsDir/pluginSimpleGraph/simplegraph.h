@@ -42,7 +42,7 @@ private slots:
     void updateDisplayNameGruph();
     void settingsChanged();
     void plotSelecting();
-
+    void limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange);
     void showPointToolTip(QMouseEvent *event);
 
 private:

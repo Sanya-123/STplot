@@ -219,6 +219,7 @@ varloc_node_t* new_child(varloc_node_t* parent){
 varloc_node_t* new_sibling(varloc_node_t* var){
     varloc_node_t* sibling = new_var_node();
     var->next = sibling;
+    sibling->previous = var;
     return sibling;
 }
 
@@ -328,6 +329,30 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         parse_type(type_tag, cu, NULL, var_node);
 
         strncpy(var_node->name, name, sizeof(var_node->name));
+        // array expansion
+        if (var_node->var_type == ARRAY){
+            // rename
+            char buf[20] = {};
+            sprintf(buf, "[%d]", var_node->n_items);
+            strcat(var_node->name, buf);
+            strcpy(var_node->child->name, name);
+            sprintf(buf, "[0]");
+            strcat(var_node->child->name, buf);
+            varloc_node_t* member = var_node->child;
+            for (int i = 0; i < var_node->n_items; i++){
+                // multiply child
+                member = new_sibling(member);
+                // set address
+                member->address = var_node->child->address;
+                member->address.offset_bits += (member->address.size_bits * (i + 1));
+                member->is_float = var_node->child->is_float;
+                member->is_signed = var_node->child->is_signed;
+                // rename
+                strcpy(member->name, name);
+                sprintf(buf, "[%d]", i+1);
+                strcat(member->name, buf);
+            }
+        }
         var_node->is_anon = 0;
     }
 }
@@ -406,7 +431,9 @@ static void parse_array(const struct tag *tag,
     if (at->dimensions >= 1 && at->nr_entries[0] == 0 && tag__is_const(type))
         type = cu__type(cu, type->type);
 
-    parse_type(type, cu, name, node);
+    varloc_node_t* member = new_child(node);
+    parse_type(type, cu, name, member);
+
     for (i = 0; i < at->dimensions; ++i) {
         if (conf->flat_arrays || at->is_vector) {
             /*

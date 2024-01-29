@@ -57,6 +57,7 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     this->setLayout(loaout);
 
 //    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
+    connect(plotWidget->xAxis, SIGNAL(rangeChanged(const QCPRange&,const QCPRange&)), this, SLOT(limitAxisRange(const QCPRange&,const QCPRange&)));
 
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
@@ -177,6 +178,7 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
     }
 
 
+
     gpuh->rescaleAxes(!emptyGraphs);
     // plotWidget->update();
     plotWidget->replot(QCustomPlot::rpQueuedReplot);
@@ -184,6 +186,17 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
     if(varChanale->getBufferSize())
         emptyGraphs = false;
 }
+
+
+void SimpleGraph::limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange){
+    // qDebug("Axis updated");
+    QCPRange fixedRange(newRange);
+    if (newRange.upper - newRange.lower > 5){
+        fixedRange.lower = newRange.upper - 5;
+    }
+    plotWidget->xAxis->setRange(fixedRange);
+}
+
 
 void SimpleGraph::updateColourPlot()
 {

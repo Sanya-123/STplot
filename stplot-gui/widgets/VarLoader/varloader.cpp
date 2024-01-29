@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QFileInfo>
 
 VarLoader::VarLoader(QWidget *parent) :
     QWidget(parent),
@@ -104,7 +105,7 @@ void VarLoader::updateElf(const QString& path)
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
     int ret = msgBox.exec();
-    if (ret == QMessageBox::Ok){
+    if (ret == QMessageBox::Yes){
         watcher.removePath(ui->lineEdit_file->text());
         loadVariables(ui->lineEdit_file->text());
     }
@@ -112,6 +113,14 @@ void VarLoader::updateElf(const QString& path)
 
 void VarLoader::loadVariables(const QString & fileName)
 {
+    QFileInfo file_info(fileName);
+    if(!file_info.exists(fileName)){
+        QMessageBox msgBox;
+        msgBox.setText("ELF file not found");
+        msgBox.exec();
+        return;
+    }
+
     QByteArray ba = fileName.toLocal8Bit();
     char *filepath = ba.data();
     if (varModel->getModelRoot() != NULL){

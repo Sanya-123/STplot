@@ -210,18 +210,6 @@ QMap<varloc_node_t*, bool> & VarModel::get_selected_nodes(){
     return ref;
 }
 
-
-//QString* VarModel::get_node_uniqe_name(varloc_node_t *node){
-//    QString *name = new QString(node->name);
-//    varloc_node_t * parent = var_node_get_parent(node);
-//    while (parent != NULL){
-//        name->prepend(".");
-//        name->prepend(parent->name);
-//        parent = var_node_get_parent(parent);
-//    }
-//    return name;
-//}
-
 void VarModel::deselect_all(){
     this->apply_for_each_child(rootItem, &VarModel::deselect_node);
     emit dataChanged(QModelIndex(), QModelIndex(), {Qt::DisplayRole, Qt::EditRole});

@@ -135,19 +135,6 @@ void STPlotWindow::startRead()
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);
     readManager.runReadLoop(channelsView->getListChanales());
-
-//    readManager.runReadLoop(channelsView->getListChanales());
-//    simpleReader.readChannels(channelsView->getListChanales());
-
-//    readLoop.setChannels(channelsView->getListChanales());
-//    readLoop.setReadDevicec(readDeviceces[0]);
-//    readLoop.readLoop();
-//    readManager.runReadLoop(channelsView->getListChanales());
-
-//    QTimer *timer = new QTimer(this);
-//    connect(timer, &QTimer::timeout, this, &STPlotWindow::read);
-//    timer->start(10);
-
 }
 
 void STPlotWindow::stopedRead()
