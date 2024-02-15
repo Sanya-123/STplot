@@ -98,6 +98,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     viewManager->setMenuView(ui->menuView);
     viewManager->setChanales(channelsView);
 
+    connect(&redrawTimer, &QTimer::timeout, viewManager, &ViewManager::updateAllViews);
+
     //init devicec
 //    readDeviceces.append(&stlinkDevice);
     readManager.setReadDevicece(&stlinkDevice);
@@ -134,6 +136,7 @@ void STPlotWindow::startRead()
 {
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);
+    redrawTimer.start(100);
     readManager.runReadLoop(channelsView->getListChanales());
 }
 
@@ -141,6 +144,7 @@ void STPlotWindow::stopedRead()
 {
     ui->actionStart->setEnabled(true);
     ui->actionStop->setEnabled(false);
+    redrawTimer.stop();
 }
 
 void STPlotWindow::loadSettings()

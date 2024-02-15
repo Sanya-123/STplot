@@ -113,6 +113,10 @@ public:
     PlotWidgetAbstract(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr) :QWidget(parent) {}
     PlotWidgetAbstract(QWidget *parent = nullptr) :QWidget(parent) {}
     /**
+     * @brief addPlot - redraw plot graphics
+     */
+    virtual void redraw() = 0;
+    /**
      * @brief addPlot - add new plot(graph)
      * @param plotName - plot name
      */

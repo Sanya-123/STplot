@@ -12,6 +12,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract
     mapSettingsDefauold["gColor.bgColor1"] = QColor(80, 80, 80);
     mapSettingsDefauold["gColor.bgColor2"] = QColor(50, 50, 50);
     mapSettingsDefauold["legend.enLegend"] = false;
+    mapSettingsDefauold["scale.windowSec"] = 5.0;
 
 //    mapSettings = mapSettingsDefauold;
     restoreDefoultSetings();
@@ -51,13 +52,18 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     timeTicker->setTimeFormat("%h:%m:%s:%z");
     plotWidget->xAxis->setTicker(timeTicker);
 
+    cursor = new QCPItemLine(plotWidget);
+    cursor->setVisible(false);
+    cursor->setPen(QPen(QColor(111,111,111)));
 
     QGridLayout *loaout = new QGridLayout(this);
     loaout->addWidget(plotWidget,0, 0, 1, 1);
     this->setLayout(loaout);
 
-//    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
+    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
+    connect(plotWidget, SIGNAL(mouseWheel(QWheelEvent*)), this,SLOT(setTimescale(QWheelEvent*)));
     connect(plotWidget->xAxis, SIGNAL(rangeChanged(const QCPRange&,const QCPRange&)), this, SLOT(limitAxisRange(const QCPRange&,const QCPRange&)));
+
 
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
@@ -67,6 +73,12 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
 SimpleGraph::~SimpleGraph()
 {
     delete ui;
+}
+
+void SimpleGraph::redraw(){
+    plotWidget->rescaleAxes(!emptyGraphs);
+    // plotWidget->update();
+    plotWidget->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void SimpleGraph::addPlot(VarChannel *varChanale)
@@ -87,11 +99,11 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
 //    plotWidget->addItem(newTracker);
     newTracker->setGraph(newGruph);
 //    newTracker->setGraphKey(7);
-    newTracker->setInterpolating(true);
+    newTracker->setInterpolating(false);
     newTracker->setStyle(QCPItemTracer::tsCircle);
     newTracker->setPen(QPen(trackColor));
 //    newTracker->setBrush(Qt::red);
-    newTracker->setSize(7);
+    newTracker->setSize(15);
 
     connect(varChanale, SIGNAL(updatePlot()), this, SLOT(doUpdatePlot()));
     connect(varChanale, SIGNAL(changePlotColor()), this, SLOT(updateColourPlot()));
@@ -177,12 +189,6 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
         gpuh->addData(val.qtime.msecsSinceStartOfDay()*1.0/1000.0, val.value);
     }
 
-
-
-    gpuh->rescaleAxes(!emptyGraphs);
-    // plotWidget->update();
-    plotWidget->replot(QCustomPlot::rpQueuedReplot);
-
     if(varChanale->getBufferSize())
         emptyGraphs = false;
 }
@@ -191,8 +197,8 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
 void SimpleGraph::limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange){
     // qDebug("Axis updated");
     QCPRange fixedRange(newRange);
-    if (newRange.upper - newRange.lower > 5){
-        fixedRange.lower = newRange.upper - 5;
+    if (newRange.upper - newRange.lower > timescaleSec){
+        fixedRange.lower = newRange.upper - timescaleSec;
     }
     plotWidget->xAxis->setRange(fixedRange);
 }
@@ -293,13 +299,14 @@ void SimpleGraph::settingsChanged()
     plotWidget->xAxis->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
     plotWidget->yAxis->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
     plotWidget->yAxis2->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
-
     QLinearGradient plotGradient;
     plotGradient.setStart(0, 0);
     plotGradient.setFinalStop(0, 350);
     plotGradient.setColorAt(0, map["gColor.bgColor1"].value<QColor>());
     plotGradient.setColorAt(1, map["gColor.bgColor2"].value<QColor>());
     plotWidget->setBackground(plotGradient);
+
+    timescaleSec = map["scale.windowSec"].toFloat();
 
     if(map["legend.enLegend"].toBool() != subLayout->visible())
     {
@@ -337,6 +344,27 @@ void SimpleGraph::plotSelecting()
     plotWidget->replot();
 }
 
+void SimpleGraph::setTimescale(QWheelEvent *event)
+{
+    // double coord = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
+    // qDebug() << coord << event->position().y();
+    // if (event->position().y() > abs(coord)){
+    //     return;
+    // }
+    if (event->angleDelta().y() > 0){
+        timescaleSec -= 0.1;
+    }
+    else if (event->angleDelta().y() < 0){
+        timescaleSec += 0.1;
+    }
+    if (timescaleSec < 0.1){
+        timescaleSec = 0.1;
+    }
+    qDebug() << "Wheel angle: " << event->angleDelta() << "Timescale" << timescaleSec;
+    plotWidget->update();
+    plotWidget->replot();
+}
+
 void SimpleGraph::showPointToolTip(QMouseEvent *event)
 {
 //    return;
@@ -345,6 +373,12 @@ void SimpleGraph::showPointToolTip(QMouseEvent *event)
 
     double x = plotWidget->xAxis->pixelToCoord(event->pos().x());
 //    double y = plotWidget->yAxis->pixelToCoord(event->pos().y());
+    double startPos = plotWidget->yAxis->pixelToCoord(0);
+    double endPos = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
+
+    cursor->setVisible(true);
+    cursor->start->setCoords(x, startPos);
+    cursor->end->setCoords(x, endPos);
 
     QList<VarChannel*> plots = mapPlots.keys();
 //    QList<QCPItemTracer*> trackers = mapTrackers.values();

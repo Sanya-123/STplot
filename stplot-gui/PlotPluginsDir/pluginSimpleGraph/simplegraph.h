@@ -24,6 +24,7 @@ public:
     ~SimpleGraph();
     void addPlot(VarChannel *varChanale);
     void deletePlot(VarChannel *varChanale);
+    void redraw();
 //    bool plotVar(QString plotName, QVector<VarValue> values);
 //    void setName(QString name);
 //    QString getName();
@@ -44,6 +45,7 @@ private slots:
     void plotSelecting();
     void limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange);
     void showPointToolTip(QMouseEvent *event);
+    void setTimescale(QWheelEvent *event);
 
 private:
     Ui::SimpleGraph *ui;
@@ -55,6 +57,8 @@ private:
     QMap<VarChannel*,QCPItemTracer*> mapTrackers;
     SimpleGraphSettings settings;
     bool emptyGraphs;
+    float timescaleSec;
+    QCPItemLine *cursor;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

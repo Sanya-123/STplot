@@ -53,6 +53,8 @@ set(PROJECT_SOURCES
         modules/readwritedevice.h
         modules/SimpleReader/simplereader.cpp
         modules/SimpleReader/simplereader.h
+        widgets/shnet_socket_device.h
+        widgets/shnet_socket_device.cpp
 
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
@@ -77,7 +79,6 @@ else()
     else()
         add_executable(stplot-gui
             ${PROJECT_SOURCES}
-            modules/SimpleReader/simplereader.h modules/SimpleReader/simplereader.cpp
         )
     endif()
 endif()

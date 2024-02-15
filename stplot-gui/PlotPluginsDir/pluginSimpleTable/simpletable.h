@@ -21,6 +21,7 @@ class SimpleTable : public PlotWidgetAbstract
 public:
     explicit SimpleTable(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
     ~SimpleTable();
+    void redraw();
     void addPlot(VarChannel *varChanale);
     void deletePlot(VarChannel *varChanale);
 //    bool plotVar(QString plotName, QVector<VarValue> values);

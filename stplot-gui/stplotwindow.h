@@ -14,6 +14,7 @@ extern "C" {
 #include "stlinkdevice.h"
 #include "readloop.h"
 #include <QThread>
+#include <QTimer>
 #include "readmanager.h"
 #include "simplereader.h"
 
@@ -58,6 +59,7 @@ private:
     ReadManager readManager;
     SimpleReader simpleReader;
     QString curentSettingsPath;
+    QTimer redrawTimer;
 };
 
 

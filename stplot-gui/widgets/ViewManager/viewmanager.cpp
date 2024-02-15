@@ -24,6 +24,14 @@ ViewManager::~ViewManager()
     delete ui;
 }
 
+void ViewManager::updateAllViews()
+{
+    QPair<PlotWidgetAbstract*, ads::CDockWidget*> view;
+    foreach (view, listPlots){
+        view.first->redraw();
+    }
+}
+
 void ViewManager::saveSettings(QSettings *settings)
 {
     QMap<QString,PlotWidgetInterfacePlugin*> plotMap;

@@ -32,6 +32,9 @@ public:
     void setMenuView(QMenu *newMenuView);
     void setChanales(Channels *newChanales);
 
+public slots:
+    void updateAllViews();
+
 signals:
     //TODO add update list graphsignals
 
