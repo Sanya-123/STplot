@@ -13,7 +13,6 @@ public:
     SHnetUDPDevice();
     ~SHnetUDPDevice();
     bool isFileDevice() {return false;}
-    uint32_t getReadWidthBytes() {return 4;}
     int initDevise(QVector<struct ReadAddres> readSeuqence);
     void stopDev();
     int execReadDevice();

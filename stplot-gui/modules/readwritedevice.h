@@ -28,13 +28,6 @@ public:
      */
     virtual bool isFileDevice() = 0;
 
-
-    /**
-     * @brief getReadWidthBytes - get width of datatype the interface is using to return data
-     * @return
-     */
-    virtual uint32_t getReadWidthBytes() {return 1;}
-
     /**
      * @brief initDevise - init device (exec when push connect button) read var adresses and prepear read data
      * @param channels - list of varibels
@@ -71,7 +64,6 @@ public:
 signals:
     void addressesReed(uint32_t addres, QVector<uint8_t> data);
     void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);
-    void addressesReedWithTime32(uint32_t addres, QVector<uint32_t> data, QDateTime time);
 };
 
 class SaveDeviceObject : public QObject
