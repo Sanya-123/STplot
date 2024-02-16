@@ -48,6 +48,7 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
     // }
 
     uplink.net_id_0 = SHNET_ID_KPP;
+    uplink.protocol_id = SHNET_MSG_DEBUG;
     // connect(udpSocket, &QUdpSocket::readyRead,
     //              this, &SHnetUDPDevice::readPendingDatagrams);
 
@@ -84,12 +85,13 @@ bool SHnetUDPDevice::dataRecieved(){
             return true;
         }
     }
+    qDebug() << "No reply match";
     return false;
 
 }
 
 int SHnetUDPDevice::processRequest(debug_msg_t* req){
-    int timeoutTime = QTime::currentTime().msecsSinceStartOfDay() + 2000;
+    int timeoutTime = QTime::currentTime().msecsSinceStartOfDay() + 5000;
     memcpy(&downlink.data, req, SHNET_DATA_SIZE_BYTES);
     downlink.msg_id++;
     udpSocket->flush();
@@ -129,6 +131,7 @@ int SHnetUDPDevice::execReadDevice()
     };
     int address_cnt = 0;
     int serial_cnt = 0;
+    memset(&downlink.data, 0, SHNET_DATA_SIZE_BYTES);
     QVector<QVector<uint32_t>> emittList;
     for(int i = 0; i < readSeuqence.size(); i++){
         serial_cnt = 0;
@@ -144,9 +147,6 @@ int SHnetUDPDevice::execReadDevice()
                 if (ret == 0){
                     debug_msg_t* response = (debug_msg_t*)&uplink.data;
                     memcpy(readData.data(), response->read_reply.values, DEBUG_DATA_SIZE_WORDS);
-                    // for (int idx = 0; idx < DEBUG_DATA_SIZE_WORDS; idx++){
-                    //     readData[address_cnt] = response->read_reply.values[address_cnt];
-                    // }
                 }
                 else{
                     // error processing request
@@ -157,20 +157,14 @@ int SHnetUDPDevice::execReadDevice()
             }
         }
         emittList.append(readData);
-        // ret = processRequest(i);
-        // if (ret < 0){
-        //     break;
-        // }
     }
     if (address_cnt > 0){
+        memset(&downlink.data, 0, SHNET_DATA_SIZE_BYTES);
         QVector<uint32_t> &pData = emittList.last();
         int ret = processRequest(&req);
         if (ret == 0){
             debug_msg_t* response = (debug_msg_t*)&uplink.data;
             memcpy(pData.data(), response->read_reply.values, address_cnt);
-            // for (int idx = 0; idx < address_cnt; idx++){
-            //     pData[idx] = response->read_reply.values[idx];
-            // }
         }
         else{
             // error processing request
