@@ -4,6 +4,7 @@
 #include "readwritedevice.h"
 #include <QMap>
 #include <QUdpSocket>
+#include "PEK_debug.h"
 
 class SHnetUDPDevice : public ReadDeviceObject
 {
@@ -12,21 +13,29 @@ public:
     SHnetUDPDevice();
     ~SHnetUDPDevice();
     bool isFileDevice() {return false;}
+    uint32_t getReadWidthBytes() {return 4;}
     int initDevise(QVector<struct ReadAddres> readSeuqence);
     void stopDev();
     int execReadDevice();
     int writeDataDevice(uint32_t data, varloc_location_t location);
     QWidget *getReadDevConfigWidget();
 
-private slots:
-    void readPendingDatagrams();
+// private slots:
+    // void readPendingDatagrams();
 
 private:
+
+    int processRequest(debug_msg_t* req);
+    bool dataRecieved();
     QVector<struct ReadAddres> readSeuqence;
+    QVector<debug_msg_t> requestQueue;
     QWidget *configWidget;
     QHostAddress serverAddress;
     int serverPort;
     QUdpSocket* udpSocket;
+    SHnet_link_t uplink;
+    SHnet_link_t downlink;
+    int currentRequest;
 };
 
 #endif // SHNET_SOCKET_DEVICE_H

@@ -17,6 +17,7 @@ extern "C" {
 #include <QTimer>
 #include "readmanager.h"
 #include "simplereader.h"
+#include "shnet_socket_device.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -58,6 +59,7 @@ private:
 //    QThread readLoopThread;
     ReadManager readManager;
     SimpleReader simpleReader;
+    SHnetUDPDevice shnet;
     QString curentSettingsPath;
     QTimer redrawTimer;
 };

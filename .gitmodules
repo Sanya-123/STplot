@@ -16,3 +16,6 @@
 [submodule "deps/QtnProperty"]
 	path = deps/QtnProperty
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qtnproperty.git
+[submodule "deps/PEK_Libs"]
+	path = deps/PEK_Libs
+	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs

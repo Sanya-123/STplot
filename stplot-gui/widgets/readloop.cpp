@@ -26,7 +26,17 @@ void ReadLoop::readLoop()
 //    for(int i = 0; i < saveDeviceces->size(); i++)
 //        saveDeviceces->at(i)->moveToThread(this->thread());
 
-    connect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
+    // if (readDevicec->getReadWidthBytes() == 1){
+        connect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
+    // }
+    // else if (readDevicec->getReadWidthBytes() == 4){
+        connect(readDevicec, SIGNAL(addressesReedWithTime32(uint32_t,QVector<uint32_t>,QDateTime)), this, SIGNAL(addressesReedWithTime32(uint32_t,QVector<uint32_t>,QDateTime)));
+    // }
+    // else{
+    //     qDebug () << "Unsupported read width";
+    //     emit stopedLoop();
+    //     return;
+    // }
     if(!isFileDev)
         connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
 
@@ -88,7 +98,12 @@ void ReadLoop::readLoop()
         for(int i = 0; i < saveDeviceces->size(); i++)
             saveDeviceces->at(i)->stopDev();
     }
-    disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)));
+    // if (readDevicec->getReadWidthBytes() == 1){
+        disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
+    // }
+    // else{
+        disconnect(readDevicec, SIGNAL(addressesReedWithTime32(uint32_t,QVector<uint32_t>,QDateTime)), this, SIGNAL(addressesReedWithTime32(uint32_t,QVector<uint32_t>,QDateTime)));
+    // }
     if(!isFileDev)
         disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
     saveSequence.clear();

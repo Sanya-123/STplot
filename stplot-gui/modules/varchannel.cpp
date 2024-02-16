@@ -46,11 +46,11 @@ void VarChannel::pushValue(float value, QTime record_time){
 //    m_buffer.push_back(var);
     m_buffer.append(var);
     tmpDesc++;
-    if(tmpDesc == 20)
-    {
-        tmpDesc = 0;
+    // if(tmpDesc == 10)
+    // {
+    //     tmpDesc = 0;
         emit updatePlot();
-    }
+    // }
 }
 float VarChannel::decode_value(uint32_t value){
     float ret = 0;
