@@ -43,9 +43,10 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     plotWidget->legend->setSelectableParts(QCPLegend::spItems);
 
     subLayout->setVisible(false);
-
     plotWidget->plotLayout()->take(subLayout);
 
+    rightMousePressed = false;
+    firstRedraw = false;
 
     //time x axis
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
@@ -60,10 +61,10 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     loaout->addWidget(plotWidget,0, 0, 1, 1);
     this->setLayout(loaout);
 
-    connect(plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(showPointToolTip(QMouseEvent*)));
-    connect(plotWidget, SIGNAL(mouseWheel(QWheelEvent*)), this,SLOT(setTimescale(QWheelEvent*)));
-    connect(plotWidget->xAxis, SIGNAL(rangeChanged(const QCPRange&,const QCPRange&)), this, SLOT(limitAxisRange(const QCPRange&,const QCPRange&)));
-
+    connect(plotWidget, &QCustomPlot::mouseMove,    this, &SimpleGraph::handleMouseMove);
+    connect(plotWidget, &QCustomPlot::mouseRelease, this, &SimpleGraph::handleMouseRelease);
+    connect(plotWidget, &QCustomPlot::mousePress,   this, &SimpleGraph::handleMousePress);
+    connect(plotWidget->xAxis, SIGNAL(rangeChanged(const QCPRange&,const QCPRange&)), this, SLOT(limitTimeRange(const QCPRange&,const QCPRange&)));
 
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
@@ -76,7 +77,15 @@ SimpleGraph::~SimpleGraph()
 }
 
 void SimpleGraph::redraw(){
-    plotWidget->rescaleAxes(!emptyGraphs);
+    if (!firstRedraw){
+        plotWidget->rescaleAxes(!emptyGraphs);
+        if (!emptyGraphs){
+            firstRedraw = true;
+        }
+    }
+    else{
+        plotWidget->xAxis->rescale();
+    }
     // plotWidget->update();
     plotWidget->replot(QCustomPlot::rpQueuedReplot);
 }
@@ -194,13 +203,8 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
 }
 
 
-void SimpleGraph::limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange){
-    // qDebug("Axis updated");
-    QCPRange fixedRange(newRange);
-    if (newRange.upper - newRange.lower > timescaleSec){
-        fixedRange.lower = newRange.upper - timescaleSec;
-    }
-    plotWidget->xAxis->setRange(fixedRange);
+void SimpleGraph::limitTimeRange(const QCPRange & newRange, const QCPRange & oldRange){
+    plotWidget->xAxis->setRange(newRange.upper, scaleTime, Qt::AlignmentFlag::AlignRight);
 }
 
 
@@ -306,7 +310,7 @@ void SimpleGraph::settingsChanged()
     plotGradient.setColorAt(1, map["gColor.bgColor2"].value<QColor>());
     plotWidget->setBackground(plotGradient);
 
-    timescaleSec = map["scale.windowSec"].toFloat();
+    scaleTime = map["scale.windowSec"].toFloat();
 
     if(map["legend.enLegend"].toBool() != subLayout->visible())
     {
@@ -344,52 +348,75 @@ void SimpleGraph::plotSelecting()
     plotWidget->replot();
 }
 
-void SimpleGraph::setTimescale(QWheelEvent *event)
+void SimpleGraph::handleMouseRelease(QMouseEvent *event)
 {
-    // double coord = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
-    // qDebug() << coord << event->position().y();
-    // if (event->position().y() > abs(coord)){
-    //     return;
-    // }
-    if (event->angleDelta().y() > 0){
-        timescaleSec -= 0.1;
+    if (event->button() == Qt::RightButton){
+        rightMousePressed = false;
+        qDebug() << "RMB released";
     }
-    else if (event->angleDelta().y() < 0){
-        timescaleSec += 0.1;
-    }
-    if (timescaleSec < 0.1){
-        timescaleSec = 0.1;
-    }
-    qDebug() << "Wheel angle: " << event->angleDelta() << "Timescale" << timescaleSec;
-    plotWidget->update();
-    plotWidget->replot();
 }
 
-void SimpleGraph::showPointToolTip(QMouseEvent *event)
+void SimpleGraph::handleMousePress(QMouseEvent *event)
 {
-//    return;
-    if(!subLayout->visible())
-        return;
+    if (event->button() == Qt::RightButton){
+        qDebug() << "RMB pressed";
+        rightMousePressed = true;
+        lastClickPos = event->pos();
+        lastScaleTime = plotWidget->xAxis->range().size();
+        valueRangeLower = plotWidget->yAxis->range().lower;
+        valueRangeUpper = plotWidget->yAxis->range().upper;
+    }
+    else if (event->button() == Qt::LeftButton){
+        if (event->modifiers().testFlag(Qt::ControlModifier)){
+            qDebug() << "Ctrl+LMB pressed";
+            plotWidget->rescaleAxes();
+        }
+    }
+}
 
-    double x = plotWidget->xAxis->pixelToCoord(event->pos().x());
-//    double y = plotWidget->yAxis->pixelToCoord(event->pos().y());
-    double startPos = plotWidget->yAxis->pixelToCoord(0);
-    double endPos = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
 
-    cursor->setVisible(true);
-    cursor->start->setCoords(x, startPos);
-    cursor->end->setCoords(x, endPos);
 
-    QList<VarChannel*> plots = mapPlots.keys();
-//    QList<QCPItemTracer*> trackers = mapTrackers.values();
-    for(int i = 0 ; i < plots.size(); i++)
-    {
-//        double _x = x;
-        mapTrackers[plots[i]]->setGraphKey(x);
-        mapTrackers[plots[i]]->updatePosition();
-        mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
+void SimpleGraph::handleMouseMove(QMouseEvent *event)
+{
+    // handle right click scaling
+    if (rightMousePressed){
+        scaleTime = lastScaleTime  + ((lastClickPos.x() - event->pos().x()) * 0.1);
+        if (scaleTime < 0.1){
+            scaleTime = 0.1;
+        }
+        plotWidget->xAxis->rescale();
+
+        QCPRange newRange;
+        double last_y = plotWidget->yAxis->pixelToCoord(lastClickPos.y());
+        double new_y = plotWidget->yAxis->pixelToCoord(event->pos().y());
+        newRange.lower = valueRangeLower + ((last_y - new_y) * 1.0);
+        newRange.upper = valueRangeUpper - ((last_y - new_y) * 1.0);
+        plotWidget->yAxis->setRange(newRange);
+        qDebug() << "Val range: " << newRange;
     }
 
+    if(subLayout->visible()){
+        // legend enabled
+
+        double x = plotWidget->xAxis->pixelToCoord(event->pos().x());
+    //    double y = plotWidget->yAxis->pixelToCoord(event->pos().y());
+        double startPos = plotWidget->yAxis->pixelToCoord(0);
+        double endPos = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
+
+        cursor->setVisible(true);
+        cursor->start->setCoords(x, startPos);
+        cursor->end->setCoords(x, endPos);
+
+        QList<VarChannel*> plots = mapPlots.keys();
+    //    QList<QCPItemTracer*> trackers = mapTrackers.values();
+        for(int i = 0 ; i < plots.size(); i++)
+        {
+    //        double _x = x;
+            mapTrackers[plots[i]]->setGraphKey(x);
+            mapTrackers[plots[i]]->updatePosition();
+            mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
+        }
+    }
     plotWidget->update();
     plotWidget->replot();
 

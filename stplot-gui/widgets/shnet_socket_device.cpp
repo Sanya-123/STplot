@@ -110,7 +110,7 @@ int SHnetUDPDevice::processRequest(debug_msg_t* req){
 
         }
         if (dataRecieved()){
-            qDebug() << "Socket recieved data";
+            // qDebug() << "Socket recieved data";
             return 0;
         }
         if (QTime::currentTime().msecsSinceStartOfDay() > timeoutTime){

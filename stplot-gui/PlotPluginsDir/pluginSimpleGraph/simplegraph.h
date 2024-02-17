@@ -43,9 +43,10 @@ private slots:
     void updateDisplayNameGruph();
     void settingsChanged();
     void plotSelecting();
-    void limitAxisRange(const QCPRange & newRange, const QCPRange & oldRange);
-    void showPointToolTip(QMouseEvent *event);
-    void setTimescale(QWheelEvent *event);
+    void limitTimeRange(const QCPRange & newRange, const QCPRange & oldRange);
+    void handleMouseMove(QMouseEvent *event);
+    void handleMousePress(QMouseEvent *event);
+    void handleMouseRelease(QMouseEvent *event);
 
 private:
     Ui::SimpleGraph *ui;
@@ -57,8 +58,15 @@ private:
     QMap<VarChannel*,QCPItemTracer*> mapTrackers;
     SimpleGraphSettings settings;
     bool emptyGraphs;
-    float timescaleSec;
     QCPItemLine *cursor;
+
+    bool   firstRedraw;
+    bool   rightMousePressed;
+    QPoint lastClickPos;
+    double scaleTime;
+    double lastScaleTime;
+    double valueRangeLower;
+    double valueRangeUpper;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin
