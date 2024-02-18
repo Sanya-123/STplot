@@ -64,9 +64,8 @@ private:
     bool   rightMousePressed;
     QPoint lastClickPos;
     double scaleTime;
-    double lastScaleTime;
-    double valueRangeLower;
-    double valueRangeUpper;
+    QCPRange lastTimeRange;
+    QCPRange lastValueRange;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

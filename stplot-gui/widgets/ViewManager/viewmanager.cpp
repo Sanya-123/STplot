@@ -171,6 +171,9 @@ void ViewManager::loadPlugin()
                 pluginLoader.unload();
             }
         }
+        else{
+            qDebug() << "Failed loading plugin";
+        }
     }
 }
 

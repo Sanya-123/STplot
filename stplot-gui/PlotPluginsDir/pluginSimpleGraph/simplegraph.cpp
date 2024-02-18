@@ -46,7 +46,7 @@ SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
     plotWidget->plotLayout()->take(subLayout);
 
     rightMousePressed = false;
-    firstRedraw = false;
+    firstRedraw = true;
 
     //time x axis
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
@@ -77,16 +77,17 @@ SimpleGraph::~SimpleGraph()
 }
 
 void SimpleGraph::redraw(){
-    if (!firstRedraw){
+    if (firstRedraw){
+        // rescale both axis when first data arrives
         plotWidget->rescaleAxes(!emptyGraphs);
         if (!emptyGraphs){
-            firstRedraw = true;
+            firstRedraw = false;
         }
     }
     else{
+        // only track time axis when running
         plotWidget->xAxis->rescale();
     }
-    // plotWidget->update();
     plotWidget->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -362,9 +363,8 @@ void SimpleGraph::handleMousePress(QMouseEvent *event)
         qDebug() << "RMB pressed";
         rightMousePressed = true;
         lastClickPos = event->pos();
-        lastScaleTime = plotWidget->xAxis->range().size();
-        valueRangeLower = plotWidget->yAxis->range().lower;
-        valueRangeUpper = plotWidget->yAxis->range().upper;
+        lastTimeRange= plotWidget->xAxis->range();
+        lastValueRange = plotWidget->yAxis->range();
     }
     else if (event->button() == Qt::LeftButton){
         if (event->modifiers().testFlag(Qt::ControlModifier)){
@@ -380,19 +380,27 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
 {
     // handle right click scaling
     if (rightMousePressed){
-        scaleTime = lastScaleTime  + ((lastClickPos.x() - event->pos().x()) * 0.1);
-        if (scaleTime < 0.1){
-            scaleTime = 0.1;
-        }
-        plotWidget->xAxis->rescale();
+        // scaleTime = lastScaleTime  + ((lastClickPos.x() - event->pos().x()) * 0.1);
+        // if (scaleTime < 0.1){
+        //     scaleTime = 0.1;
+        // }
 
-        QCPRange newRange;
+        QCPRange timeRange;
+        double last_x = plotWidget->xAxis->pixelToCoord(lastClickPos.x());
+        double new_x = plotWidget->xAxis->pixelToCoord(event->pos().x());
+        timeRange.lower = lastTimeRange.lower + ((last_x - new_x) * 1.0);
+        timeRange.upper = lastTimeRange.upper - ((last_x - new_x) * 1.0);
+        plotWidget->xAxis->setRange(timeRange);
+        scaleTime = timeRange.size();
+        // plotWidget->xAxis->rescale();
+
+        QCPRange valueRange;
         double last_y = plotWidget->yAxis->pixelToCoord(lastClickPos.y());
         double new_y = plotWidget->yAxis->pixelToCoord(event->pos().y());
-        newRange.lower = valueRangeLower + ((last_y - new_y) * 1.0);
-        newRange.upper = valueRangeUpper - ((last_y - new_y) * 1.0);
-        plotWidget->yAxis->setRange(newRange);
-        qDebug() << "Val range: " << newRange;
+        valueRange.lower = lastValueRange.lower + ((last_y - new_y) * 1.0);
+        valueRange.upper = lastValueRange.upper - ((last_y - new_y) * 1.0);
+        plotWidget->yAxis->setRange(valueRange);
+        // qDebug() << "Val range: " << newRange;
     }
 
     if(subLayout->visible()){

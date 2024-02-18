@@ -3,8 +3,8 @@
 
 #include <QWidget>
 #include <QFileSystemWatcher>
-#include <QSortFilterProxyModel>
 #include "varmodel.h"
+#include "varfilter.h"
 
 extern "C" {
 #include "varloc.h"
@@ -42,6 +42,7 @@ signals:
 private:
     void loadVariables(const QString &);
     Ui::VarLoader *ui;
+    // VarFilter *proxyModel;
     QSortFilterProxyModel *proxyModel;
     VarModel *varModel;
     QFileSystemWatcher watcher;

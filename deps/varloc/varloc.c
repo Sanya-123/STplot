@@ -99,6 +99,12 @@ int get_char_index(char* string, char c) {
 varloc_node_t* var_node_get_by_name(varloc_node_t* root, char* name){
     int idx = get_char_index(name, '.');
     while(root != NULL){
+        if (root->var_type == ARRAY){
+            varloc_node_t* res = var_node_get_by_name(root->child, name+idx+1);
+            if (res != NULL){
+                return res;
+            }
+        }
         if (idx < 0){
             if(strcmp(name, root->name) == 0){
                 return root;
@@ -291,10 +297,11 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         return;
     }
     else if (gvar->declaration){
-        // refuse allready collected nodes
+        // get extern variables
         varloc_node_t *spec_node = last_var_node;
         while (spec_node){
             if (!strcmp(gvar->name, spec_node->name)){
+                // refuse allready collected nodes
                 return;
             }
             spec_node = spec_node->previous;
@@ -308,13 +315,17 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         varloc_node_t *var_node = new_var_node();
         const char *type_name = variable__type_name(gvar, cu, var_node->ctype_name, 100);
         struct tag *type_tag = cu__type(cu, gvar->ip.tag.type);
-//        int base_type = tag__is_base_type(type_tag, cu);
-//        printf("\n\ngot var %s %s %d %x %x: ",
-//               name,
-//               type_name,
-//               base_type,
-//               gvar->declaration,
-//               gvar->ip.addr);
+
+        var_node->address.base = gvar->ip.addr;
+        parse_type(type_tag, cu, name, var_node);
+        strncpy(var_node->name, name, sizeof(var_node->name));
+        // array rename
+        if (var_node->var_type == ARRAY){
+            char buf[20] = {};
+            strcpy(var_node->name, name);
+            sprintf(buf, "[%d]", var_node->n_items);
+            strcat(var_node->name, buf);
+        }
 
         if (last_var_node != NULL){
             last_var_node->next = var_node;
@@ -325,34 +336,7 @@ void parse_extvar(struct variable *gvar, struct cu *cu){
         }
         last_var_node = var_node;
 
-        var_node->address.base = gvar->ip.addr;
-        parse_type(type_tag, cu, NULL, var_node);
 
-        strncpy(var_node->name, name, sizeof(var_node->name));
-        // array expansion
-        if (var_node->var_type == ARRAY){
-            // rename
-            char buf[20] = {};
-            sprintf(buf, "[%d]", var_node->n_items);
-            strcat(var_node->name, buf);
-            strcpy(var_node->child->name, name);
-            sprintf(buf, "[0]");
-            strcat(var_node->child->name, buf);
-            varloc_node_t* member = var_node->child;
-            for (int i = 0; i < var_node->n_items; i++){
-                // multiply child
-                member = new_sibling(member);
-                // set address
-                member->address = var_node->child->address;
-                member->address.offset_bits += (member->address.size_bits * (i + 1));
-                member->is_float = var_node->child->is_float;
-                member->is_signed = var_node->child->is_signed;
-                // rename
-                strcpy(member->name, name);
-                sprintf(buf, "[%d]", i+1);
-                strcat(member->name, buf);
-            }
-        }
         var_node->is_anon = 0;
     }
 }
@@ -431,8 +415,8 @@ static void parse_array(const struct tag *tag,
     if (at->dimensions >= 1 && at->nr_entries[0] == 0 && tag__is_const(type))
         type = cu__type(cu, type->type);
 
-    varloc_node_t* member = new_child(node);
-    parse_type(type, cu, name, member);
+    // varloc_node_t* member = new_child(node);
+    // parse_type(type, cu, name, member);
 
     for (i = 0; i < at->dimensions; ++i) {
         if (conf->flat_arrays || at->is_vector) {
@@ -477,6 +461,34 @@ static void parse_array(const struct tag *tag,
 //        else
 //            printf("[]");
     }
+
+    // array expension and rename
+    char buf[20] = {};
+    strcpy(node->name, name);
+    sprintf(buf, "[%d]", node->n_items);
+    strcat(node->name, buf);
+
+    uint32_t remain_n = 0;
+    if (node->n_items > 100){
+        remain_n = 100;
+    }
+    else if(node->n_items > 1){
+        remain_n = node->n_items;
+    }
+    else{
+        remain_n = 1;
+    }
+    for (uint32_t i = 0; i < remain_n; i++){
+        varloc_node_t* member = new_child(node);
+        parse_type(type, cu, name, member);
+        member->address.offset_bits += (member->address.size_bits * (i));
+        strcpy(member->name, name);
+        sprintf(buf, "[%d]", i);
+        strcat(member->name, buf);
+        member = member->next;
+    };
+
+
 
     return;
 }
@@ -736,6 +748,7 @@ next_type:
         ctype = tag__type(type);
         if (type__name(ctype) != NULL){
 //            printf("enum %s", type__name(ctype), name ?: "");
+            strcpy(node->name, name);
         }
         else{
 //            printed += enumeration__fprintf(type, &tconf, fp);
@@ -965,5 +978,15 @@ out_cus_delete:
 out_dwarves_exit:
     dwarves__exit();
 out:
+    // "remove" top level nodes with no address
+    varloc_node_t* node = tree_base;
+    while(node){
+        if(node->address.base == 0){
+            node->previous->next = node->next;
+            node->next->previous = node->previous;
+        }
+        node = node->next;
+    }
+
     return tree_base;
 }

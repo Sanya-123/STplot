@@ -157,10 +157,10 @@ QString VarChannel::getFullNmaeNode(varloc_node_t *node)
     QString name = QString(node->name);
     varloc_node_t * parent = var_node_get_parent(node);
     while (parent != NULL){
-        // if (parent->var_type != ARRAY){
+        if (parent->var_type != ARRAY){
             name.prepend(".");
             name.prepend(parent->name);
-        // }
+        }
         parent = var_node_get_parent(parent);
     }
 

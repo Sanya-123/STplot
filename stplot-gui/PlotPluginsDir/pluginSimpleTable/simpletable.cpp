@@ -97,6 +97,10 @@ int SimpleTable::getGruph(QObject *_sender, VarChannel** varChanale)
     return mapPlots.indexOf(*varChanale);
 }
 
+void SimpleTable::redraw(){
+
+}
+
 void SimpleTable::doUpdatePlot()
 {
     VarChannel* varChanale;

@@ -1,7 +1,7 @@
 #include "varmodel.h"
 #include <QStringList>
 
-#define DEBUG_VIEW 1
+#define DEBUG_VIEW 0
 
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)

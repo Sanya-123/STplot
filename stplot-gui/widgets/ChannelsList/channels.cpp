@@ -193,6 +193,7 @@ QVector<VarChannel *> *Channels::getListChanales() const
 void Channels::reloadChannels(varloc_node_t* root){
 
     bool update_allowed = false;
+    bool not_found = false;
     for (int i = 0; i < m_channels->size(); ++i) {
         varloc_node_t* node = var_node_get_by_name(root, m_channels->at(i)->getName().toLocal8Bit().data());
         if (node){
@@ -219,6 +220,16 @@ void Channels::reloadChannels(varloc_node_t* root){
                 }
             }
         }
+        else{
+            not_found = true;
+        }
+    }
+    if (not_found){
+        QMessageBox msgBox;
+        msgBox.setText("Some variables could not be found in elf file!");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
     }
 }
 
