@@ -13,8 +13,8 @@ VarLoader::VarLoader(QWidget *parent) :
     ui(new Ui::VarLoader)
 {
     ui->setupUi(this);
-    // proxyModel = new VarFilter(this);
-    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel = new VarFilter(this);
+    // proxyModel = new QSortFilterProxyModel(this);
     varModel = new VarModel(this);
     connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::openElf);
     connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::loadElf);
@@ -56,6 +56,8 @@ void VarLoader::collapseTree(){
 }
 
 void VarLoader::applyFilter(const QString & text){
+    collapseTree();
+    proxyModel->invalidate();
     proxyModel->setFilterFixedString(text);
 }
 
@@ -141,8 +143,6 @@ void VarLoader::loadVariables(const QString & fileName)
     proxyModel->setSourceModel(varModel);
     proxyModel->setRecursiveFilteringEnabled(true);
     // proxyModel->setAutoAcceptChildRows(true);
-    // QObject *object = proxyModel;
-    // object->setProperty("autoAcceptChildRows", true);
     ui->treeView->setModel(proxyModel);
     ui->treeView->show();
 

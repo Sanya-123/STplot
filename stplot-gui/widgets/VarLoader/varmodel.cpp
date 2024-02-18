@@ -1,7 +1,7 @@
 #include "varmodel.h"
 #include <QStringList>
 
-#define DEBUG_VIEW 0
+#define DEBUG_VIEW 1
 
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -232,6 +232,7 @@ QModelIndex VarModel::index(int row, int column, const QModelIndex &parent) cons
 
     childNode = var_node_get_child_at_index(parentNode, row);
     if (childNode == NULL){
+        return createIndex(row, column, parentNode);
         return QModelIndex();
     }
 
@@ -256,7 +257,7 @@ QModelIndex VarModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 
-    return createIndex(0, 0, parent);
+    return createIndex(var_node_get_child_index(parent), 0, parent);
 }
 
 

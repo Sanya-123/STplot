@@ -42,8 +42,8 @@ signals:
 private:
     void loadVariables(const QString &);
     Ui::VarLoader *ui;
-    // VarFilter *proxyModel;
-    QSortFilterProxyModel *proxyModel;
+    VarFilter *proxyModel;
+    // QSortFilterProxyModel *proxyModel;
     VarModel *varModel;
     QFileSystemWatcher watcher;
 };

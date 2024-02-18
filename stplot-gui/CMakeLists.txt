@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
+find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
 
 set(PROJECT_SOURCES
@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         widgets/VarLoader/varloader.h
         widgets/VarLoader/varloader.cpp
         widgets/VarLoader/varloader.ui
+        widgets/VarLoader/varfilter.cpp
+        widgets/VarLoader/varfilter.h
         widgets/VarLoader/varmodel.cpp
         widgets/VarLoader/varmodel.h
         widgets/ChannelsList/channelmodel.h

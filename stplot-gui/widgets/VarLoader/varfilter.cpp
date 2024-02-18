@@ -11,31 +11,25 @@ VarFilter::VarFilter(QObject *parent) :
 
 bool VarFilter::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
-    // varloc_node_t *source_node = static_cast<varloc_node_t*>(source_parent.internalPointer());
+    // accept if node is accepted
     if (filterAcceptsRowItself(source_row, source_parent)){
         return true;
     }
-    else{
-        return false;
-    }
-
-    //accept if any of the parents is accepted on it's own merits
-
-    // if (hasAcceptedParents(source_row, source_parent)){
-
-    // }
+    //accept if any of the parents is accepted
     QModelIndex parent = source_parent;
-    QModelIndex parent_parent = source_parent.parent();
     while (parent.isValid()) {
-        // source_node = static_cast<varloc_node_t*>(parent.internalPointer());
-        if (filterAcceptsRowItself(parent.row(), parent.parent())){
-            // qDebug() << "Accepted" << source_parent << source_row << parent.row() << parent.parent();
+        QModelIndex grandparent = parent.parent();
+        if (filterAcceptsRowItself(parent.row(), grandparent)){
             return true;
         }
+        if (filterAcceptsRowItself(grandparent.row(), grandparent)){    // if parent is top level node there is some mess
+            return true;
+        }
+
         parent = parent.parent();
     }
 
-    //accept if any of the children is accepted on it's own merits
+    //accept if any of the children is accepted
     if (hasAcceptedChildren(source_row, source_parent)) {
         return true;
     }
@@ -65,29 +59,9 @@ bool VarFilter::hasAcceptedChildren(int source_row, const QModelIndex &source_pa
     for (int i = 0; i < childCount; ++i) {
         if (filterAcceptsRowItself(i, item))
             return true;
-        //recursive call -> NOTICE that this is depth-first searching, you're probably better off with breadth first search...
         if (hasAcceptedChildren(i, item))
             return true;
     }
 
     return false;
-
-}
-
-bool VarFilter::hasAcceptedParents(int source_row, const QModelIndex &source_parent) const
-{
-    QModelIndex item = sourceModel()->index(source_row,0,source_parent);
-    if (!item.isValid()) {
-        qDebug() << "item invalid" << source_parent << source_row;
-        return false;
-    }
-
-    //check if there are parents
-    QModelIndex parent = item.parent();
-    if (!parent.isValid()) {
-        qDebug() << "item invalid" << source_parent << source_row;
-        return false;
-    }
-
-    return hasAcceptedParents(source_row, parent);
 }

@@ -143,7 +143,8 @@ int var_node_get_child_index(varloc_node_t* child){
         child = child->previous;
         row_n++;
         if (child == NULL){
-            return -1;
+            //reach tree root
+            return row_n;
         }
     }
     return row_n;
