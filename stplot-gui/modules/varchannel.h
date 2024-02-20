@@ -53,6 +53,7 @@ public:
     int dotStyle() const;
     void setDotStyle(int newDotStyle);
     void setLocation(varloc_location_t loc);
+    void clearLocation();
     int lineStyle() const;
     void setLineStyle(int newLineStyle);
 

@@ -54,7 +54,7 @@ void SimpleTable::addPlot(VarChannel *varChanale)
     connect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     connect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
 
-    mapPlots.append(varChanale);
+    // mapPlots.append(varChanale);
 
 //    doUpdatePlot(varChanale, newGruph);
 }

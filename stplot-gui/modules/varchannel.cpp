@@ -122,6 +122,13 @@ varloc_location_t VarChannel::getLocation()
     return m_location;
 }
 
+void VarChannel::clearLocation()
+{
+    m_location.address.base = 0;
+    m_location.address.offset_bits = 0;
+    m_location.address.size_bits = 0;;
+}
+
 uint32_t VarChannel::getMask()
 {
     return m_mask;

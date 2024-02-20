@@ -1,7 +1,7 @@
 #include "varmodel.h"
 #include <QStringList>
 
-#define DEBUG_VIEW 1
+#define DEBUG_VIEW 0
 
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -175,7 +175,7 @@ QVariant VarModel::headerData(int section, Qt::Orientation orientation,
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
         if (section == 0){
-            return QVariant("Name");
+            return QVariant("Variable Name");
         }
         if (section == 1){
             return QVariant("CType");
@@ -184,7 +184,7 @@ QVariant VarModel::headerData(int section, Qt::Orientation orientation,
             return QVariant("Address");
         }
         if (section == 3){
-            return QVariant("Size");
+            return QVariant("Size bits");
         }
         if (section == 4){
             return QVariant("Type");

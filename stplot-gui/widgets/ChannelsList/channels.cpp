@@ -221,6 +221,7 @@ void Channels::reloadChannels(varloc_node_t* root){
             }
         }
         else{
+            m_channels->at(i)->clearLocation();
             not_found = true;
         }
     }

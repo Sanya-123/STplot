@@ -100,7 +100,7 @@ varloc_node_t* var_node_get_by_name(varloc_node_t* root, char* name){
     int idx = get_char_index(name, '.');
     while(root != NULL){
         if (root->var_type == ARRAY){
-            varloc_node_t* res = var_node_get_by_name(root->child, name+idx+1);
+            varloc_node_t* res = var_node_get_by_name(root->child, name);
             if (res != NULL){
                 return res;
             }

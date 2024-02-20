@@ -18,57 +18,24 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
     memset(&uplink, 0, sizeof(SHnet_link_t));
     // open socket
     udpSocket = new QUdpSocket(this);
-    udpSocket->connectToHost(QHostAddress("10.19.0.48"), 31337);
+    udpSocket->connectToHost(QHostAddress("127.0.0.1"), 31337);
     if (!udpSocket->waitForConnected(3000)){
         return -1;
     }
     qDebug() << "Socket connected";
 
-    // // make request queue
-    // int address_cnt = 0;
-    // debug_msg_t req = {
-    //     .cmd = DEBUG_READ,
-    // };
-    // for(int i = 0; i < readSeuqence.size(); i++){
-    //     int serial_cnt = 0;
-    //     for (int j = 0; j < readSeuqence[i].readSize / 4; j++){
-    //         req.read_request.addresses[address_cnt] = readSeuqence[i].addres + (serial_cnt * 4);
-    //         address_cnt++;
-    //         serial_cnt++;
-    //         if (address_cnt == DEBUG_DATA_SIZE_WORDS){
-    //             address_cnt = 0;
-    //             requestQueue.append(req);
-    //             memset(&req, 0, sizeof(debug_msg_t));
-    //             req.cmd = DEBUG_READ;
-    //         }
-    //     }
-    // }
-    // if (address_cnt){
-    //     requestQueue.append(req);
-    // }
-
     downlink.net_id_0 = SHNET_ID_KPP;
     downlink.protocol_id = SHNET_MSG_DEBUG;
-    // connect(udpSocket, &QUdpSocket::readyRead,
-    //              this, &SHnetUDPDevice::readPendingDatagrams);
-
     return 0;
 }
 
-// void SHnetUDPDevice::readPendingDatagrams()
-// {
-//     udpSocket->readDatagram((char*)&uplink, sizeof(SHnet_link_t), NULL, NULL);
-//     qDebug() << "New message";
-// }
+
 
 
 void SHnetUDPDevice::stopDev()
 {
-    //    readSeuqence.clear();
     if(udpSocket){
         udpSocket->close();
-        // disconnect(udpSocket, &QUdpSocket::readyRead,
-        //            this, &SHnetUDPDevice::readPendingDatagrams);
     }
 }
 
@@ -85,7 +52,12 @@ bool SHnetUDPDevice::dataRecieved(){
             return true;
         }
     }
-    // qDebug() << "No reply match";
+    qDebug() << "No reply match";
+    qDebug() << uplink.msg_id << downlink.msg_id;
+    qDebug() << uplink.net_id_0 << downlink.net_id_0;
+    qDebug() << uplink.net_id_1 << downlink.net_id_1;
+    qDebug() << uplink.net_id_2 << downlink.net_id_2;
+    qDebug() << uplink.net_id_3 << downlink.net_id_3;
     return false;
 
 }
