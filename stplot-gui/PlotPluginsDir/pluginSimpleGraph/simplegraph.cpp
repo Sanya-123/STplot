@@ -6,11 +6,11 @@
 
 SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract(parent)
 {
-    mapSettingsDefauold["gColor.varColor"] = QColor(Qt::white);
-    mapSettingsDefauold["gColor.gridColor"] = QColor(140, 140, 140);
-    mapSettingsDefauold["gColor.subGridColor"] = QColor(80, 80, 80);
-    mapSettingsDefauold["gColor.bgColor1"] = QColor(80, 80, 80);
-    mapSettingsDefauold["gColor.bgColor2"] = QColor(50, 50, 50);
+    mapSettingsDefauold["gColor.varColor"] = QColor(0x5f, 0x5f, 0x5f);
+    mapSettingsDefauold["gColor.gridColor"] = QColor(0x9a, 0x9a, 0x9a);
+    mapSettingsDefauold["gColor.subGridColor"] = QColor(0xbe, 0xbe, 0xbe);
+    mapSettingsDefauold["gColor.bgColor1"] = QColor(0xf9, 0xf9, 0xf9);
+    mapSettingsDefauold["gColor.bgColor2"] = QColor(0xf9, 0xf9, 0xf9);
     mapSettingsDefauold["legend.enLegend"] = false;
     mapSettingsDefauold["scale.windowSec"] = 5.0;
 
@@ -380,27 +380,29 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
 {
     // handle right click scaling
     if (rightMousePressed){
-        // scaleTime = lastScaleTime  + ((lastClickPos.x() - event->pos().x()) * 0.1);
-        // if (scaleTime < 0.1){
-        //     scaleTime = 0.1;
-        // }
 
         QCPRange timeRange;
-        double last_x = plotWidget->xAxis->pixelToCoord(lastClickPos.x());
-        double new_x = plotWidget->xAxis->pixelToCoord(event->pos().x());
-        timeRange.lower = lastTimeRange.lower + ((last_x - new_x) * 1.0);
-        timeRange.upper = lastTimeRange.upper - ((last_x - new_x) * 1.0);
+        double last_x =  lastClickPos.x();
+        double new_x = event->pos().x();
+        double delta_f = (new_x - last_x) / (new_x + last_x);
+        double delta_r =  plotWidget->xAxis->range().size() * delta_f;
+        timeRange.lower = lastTimeRange.lower + delta_r;
+        timeRange.upper = lastTimeRange.upper - delta_r;
+        timeRange.normalize();
         plotWidget->xAxis->setRange(timeRange);
         scaleTime = timeRange.size();
-        // plotWidget->xAxis->rescale();
+        // qDebug() << "TimeScale:" << last_x << new_x << timeRange << delta_f << delta_r;
 
         QCPRange valueRange;
-        double last_y = plotWidget->yAxis->pixelToCoord(lastClickPos.y());
-        double new_y = plotWidget->yAxis->pixelToCoord(event->pos().y());
-        valueRange.lower = lastValueRange.lower + ((last_y - new_y) * 1.0);
-        valueRange.upper = lastValueRange.upper - ((last_y - new_y) * 1.0);
+        double last_y = lastClickPos.y();
+        double new_y = event->pos().y();
+        delta_f = (new_y - last_y) / (new_y + last_y);
+        delta_r =  plotWidget->yAxis->range().size() * delta_f;
+        valueRange.lower = lastValueRange.lower - delta_r;
+        valueRange.upper = lastValueRange.upper + delta_r;
+        valueRange.normalize();
         plotWidget->yAxis->setRange(valueRange);
-        // qDebug() << "Val range: " << newRange;
+        // qDebug() << "ValueScale:" << last_y << new_y << valueRange << delta_f << delta_r;
     }
 
     if(subLayout->visible()){

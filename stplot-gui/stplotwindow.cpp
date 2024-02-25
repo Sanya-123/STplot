@@ -102,8 +102,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     //init devicec
 //    readDeviceces.append(&stlinkDevice);
-    // readManager.setReadDevicece(&stlinkDevice);
-    readManager.setReadDevicece(&shnet);
+    readManager.setReadDevicece(&stlinkDevice);
+    // readManager.setReadDevicece(&shnet);
 
     //restore settings
     // QSettings settings("STdebuger", "STplotDebuger");

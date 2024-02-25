@@ -983,8 +983,12 @@ out:
     varloc_node_t* node = tree_base;
     while(node){
         if(node->address.base == 0){
-            node->previous->next = node->next;
-            node->next->previous = node->previous;
+            if(node->previous){
+                node->previous->next = node->next;
+            }
+            if (node->next){
+                node->next->previous = node->previous;
+            }
         }
         node = node->next;
     }
