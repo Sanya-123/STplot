@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
 
 set(PROJECT_SOURCES
@@ -33,30 +33,33 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/comboboxdelegate.cpp
         widgets/ChannelsList/chanaleitemdelegate.h
         widgets/ChannelsList/chanaleitemdelegate.cpp
+        # widgets/SettingsViewer/settingsviewer.cpp
+        # widgets/SettingsViewer/settingsviewer.h
+        widgets/plotsettingsviever.h
+        widgets/plotsettingsviever.cpp
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
-        widgets/stlinkdevice.h
-        widgets/stlinkdevice.cpp
-        widgets/readloop.h
-        widgets/readloop.cpp
-        widgets/readmanager.h
-        widgets/readmanager.cpp
-        widgets/plotsettingsviever.h
-        widgets/plotsettingsviever.cpp
-        widgets/stmstudiofiledevice.h
-        widgets/stmstudiofiledevice.cpp
-        widgets/fimesavereaddevice.h
-        widgets/fimesavereaddevice.cpp
-        modules/varchannel.h
-        modules/varchannel.cpp
-        modules/plotinterface.h
+        # modules/settingsabstract.h
         modules/plotwidgetabstract.h
-        modules/readwritedevice.h
+        modules/plotinterface.h
+        modules/ReadWriteDevice/stlinkdevice.h
+        modules/ReadWriteDevice/stlinkdevice.cpp
+        modules/ReadManager/readloop.h
+        modules/ReadManager/readloop.cpp
+        modules/ReadManager/readmanager.h
+        modules/ReadManager/readmanager.cpp
+        modules/ReadWriteDevice/stmstudiofiledevice.h
+        modules/ReadWriteDevice/stmstudiofiledevice.cpp
+        modules/ReadWriteDevice/fimesavereaddevice.h
+        modules/ReadWriteDevice/fimesavereaddevice.cpp
+        modules/ReadWriteDevice/readwritedevice.h
+        modules/ReadWriteDevice/shnet_socket_device.h
+        modules/ReadWriteDevice/shnet_socket_device.cpp
+        modules/VarChannel/varchannel.h
+        modules/VarChannel/varchannel.cpp
         modules/SimpleReader/simplereader.cpp
         modules/SimpleReader/simplereader.h
-        widgets/shnet_socket_device.h
-        widgets/shnet_socket_device.cpp
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
 )
@@ -101,10 +104,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules
     modules/SimpleReader
+    modules/VarChannel
+    modules/ReadManager
+    modules/ReadWriteDevice
     widgets
     widgets/VarLoader
+    widgets/SettingsViewer
     widgets/ChannelsList
     widgets/ViewManager/
+    widgets/PlotWidget/
+    PlotPluginsDir/
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps

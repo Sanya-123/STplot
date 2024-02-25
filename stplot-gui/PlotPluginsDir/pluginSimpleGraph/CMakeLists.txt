@@ -14,8 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(${PLUGIN_NAME} SHARED
     ${PATH_PLOT_INTERFACE}/plotinterface.h
     #TODO build var chanale as lib
-    ${PATH_PLOT_INTERFACE}/varchannel.h
-    ${PATH_PLOT_INTERFACE}/varchannel.cpp
+    ${PATH_VARCHANNEL}/varchannel.h
+    ${PATH_VARCHANNEL}/varchannel.cpp
     simplegraph.h simplegraph.cpp simplegraph.ui
     ${PATH_COMMON_QT_LIBS}/qcustomplot.h
     ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
