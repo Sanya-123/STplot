@@ -15,7 +15,7 @@ char* varloc_node_types[] = {
 };
 
 
-void for_each_var_loop(varloc_node_t* root, void(*func)(varloc_node_t*)){
+void for_each_var_loop(varloc_node_t* root, void(*func)(void*)){
     if (root == NULL){
         return;
     }
@@ -777,6 +777,28 @@ out:
     return;
 }
 
+
+// remove top level nodes with no address
+void prune_empty_tree_nodes(varloc_node_t* node){
+    while(node){
+        if(node->address.base == 0){
+            // unlink node
+            if(node->previous){
+                node->previous->next = node->next;
+                if (node->next){
+                    node->next->previous = node->previous;
+                }
+                varloc_node_t* rm = node;
+                node->next = NULL;
+                node = node->previous;
+                varloc_delete_tree(rm);
+            }
+        }
+        node = node->next;
+
+    }
+}
+
 void parse_class(struct class *class, const struct cu *cu, varloc_node_t *node)
 {
     struct type *type = &class->type;
@@ -979,19 +1001,6 @@ out_cus_delete:
 out_dwarves_exit:
     dwarves__exit();
 out:
-    // "remove" top level nodes with no address
-    varloc_node_t* node = tree_base;
-    while(node){
-        if(node->address.base == 0){
-            if(node->previous){
-                node->previous->next = node->next;
-            }
-            if (node->next){
-                node->next->previous = node->previous;
-            }
-        }
-        node = node->next;
-    }
-
+    prune_empty_tree_nodes(tree_base);
     return tree_base;
 }

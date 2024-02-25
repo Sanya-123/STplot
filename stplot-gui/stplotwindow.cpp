@@ -11,6 +11,7 @@
 #include <QToolBar>
 #include <QFileDialog>
 
+
 //#include <iostream>
 //#include <format>
 #include "varmodel.h"
@@ -69,11 +70,14 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->actionStop->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
     ui->actionStop->setDisabled(true);
 
+    readSelector.insertItem(0,"STLink", QVariant());
+    readSelector.insertItem(1,"UDP", QVariant());
+
     QToolBar *runToolBar = addToolBar("Run");
     runToolBar->addAction(ui->actionStart);
     runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
-
+    runToolBar->addWidget(&readSelector);
     ui->menuView->addAction(runToolBar->toggleViewAction());
 
     ui->menuView->addSeparator();
@@ -83,7 +87,6 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetVarLoader);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
-
     connect(varloader, &VarLoader::variableAdded, channelsView, &Channels::add_channel);
     connect(varloader, SIGNAL(variablesUpdated(varloc_node_t*)), channelsView, SLOT(reloadChannels(varloc_node_t*)));
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
@@ -92,6 +95,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(loadSettings()));
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(saveSettings()));
     connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
+    connect(&readSelector, SIGNAL(activated(int)), this, SLOT(setReadDevice(int)));
 
 
     viewManager->setDockContainer(ui->dockContainer);
@@ -102,8 +106,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     //init devicec
 //    readDeviceces.append(&stlinkDevice);
-    readManager.setReadDevicece(&stlinkDevice);
-    // readManager.setReadDevicece(&shnet);
+    // readManager.setReadDevicece(&stlinkDevice);
+    // readManager.setReadDevicece(&shnetDevice);
 
     //restore settings
     // QSettings settings("STdebuger", "STplotDebuger");
@@ -118,23 +122,36 @@ STPlotWindow::~STPlotWindow()
     delete ui;
 }
 
-void STPlotWindow::read(){
-    if (!simpleReader.isConnected()){
-        if (simpleReader.connect() < 0){
-            qInfo( "Error connecting stlink" );
-        }
-        simpleReader.loadChannels(channelsView->getListChanales());
-    }
-    else{
-        if(simpleReader.readData() < 0){
-            qInfo( "Error getting data" );
-        }
-    }
+// void STPlotWindow::read(){
+//     if (!simpleReader.isConnected()){
+//         if (simpleReader.connect() < 0){
+//             qInfo( "Error connecting stlink" );
+//         }
+//         simpleReader.loadChannels(channelsView->getListChanales());
+//     }
+//     else{
+//         if(simpleReader.readData() < 0){
+//             qInfo( "Error getting data" );
+//         }
+//     }
 
+// }
+void STPlotWindow::setReadDevice(int readDevice){
+    switch(readDevice){
+    case 0:
+        readManager.setReadDevicece(&stlinkDevice);
+        qDebug() << "Read device STLINK";
+        break;
+    case 1:
+        readManager.setReadDevicece(&shnetDevice);
+        qDebug() << "Read device UDP";
+        break;
+    }
 }
 
 void STPlotWindow::startRead()
 {
+    readSelector.setDisabled(true);
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);
     redrawTimer.start(100);
@@ -143,6 +160,7 @@ void STPlotWindow::startRead()
 
 void STPlotWindow::stopedRead()
 {
+    readSelector.setDisabled(false);
     ui->actionStart->setEnabled(true);
     ui->actionStop->setEnabled(false);
     redrawTimer.stop();

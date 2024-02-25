@@ -15,6 +15,7 @@ extern "C" {
 #include "readloop.h"
 #include <QThread>
 #include <QTimer>
+#include <QComboBox>
 #include "readmanager.h"
 #include "simplereader.h"
 #include "shnet_socket_device.h"
@@ -35,7 +36,8 @@ public:
 public slots:
     void startRead();
     void stopedRead();
-    void read();
+    void setReadDevice(int);
+    // void read();
     void loadSettings();
     void saveSettings();
     void saveSettingsAs();
@@ -52,16 +54,14 @@ private:
     Channels* channelsView;
     VarLoader* varloader;
     ViewManager* viewManager;
-    QVector<ReadDeviceObject*> readDeviceces;
-//    QVector<SaveDeviceObject*> saveDeviceces;
+    // QVector<ReadDeviceObject*> readDeviceces;
+    QVector<SaveDeviceObject*> saveDeviceces;
     STlinkDevice stlinkDevice;
-//    ReadLoop readLoop;
-//    QThread readLoopThread;
     ReadManager readManager;
-    SimpleReader simpleReader;
-    SHnetUDPDevice shnet;
+    SHnetUDPDevice shnetDevice;
     QString curentSettingsPath;
     QTimer redrawTimer;
+    QComboBox readSelector;
 };
 
 
