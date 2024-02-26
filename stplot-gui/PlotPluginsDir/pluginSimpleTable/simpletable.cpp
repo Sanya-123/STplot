@@ -4,7 +4,7 @@
 #include "initplot.h"
 #include <QDebug>
 
-SimpleTableSettings::SimpleTableSettings(QObject *parent) : PlotSettingsAbstract(parent)
+SimpleTableSettings::SimpleTableSettings(QObject *parent) : SettingsAbstract(parent)
 {
     mapSettingsDefauold["gColor.varColor"] = QColor(Qt::white);
 //    mapSettingsDefauold["gColor.gridColor"] = QColor(140, 140, 140);
@@ -16,7 +16,7 @@ SimpleTableSettings::SimpleTableSettings(QObject *parent) : PlotSettingsAbstract
     restoreDefoultSetings();
 }
 
-SimpleTable::SimpleTable(PlotSettingsAbstract *settings, QWidget *parent) :
+SimpleTable::SimpleTable(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
     ui(new Ui::SimpleTable)
 {

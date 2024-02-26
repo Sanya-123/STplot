@@ -8,7 +8,7 @@ namespace Ui {
 class SimpleTable;
 }
 
-class SimpleTableSettings : public PlotSettingsAbstract
+class SimpleTableSettings : public SettingsAbstract
 {
     Q_OBJECT
 public:
@@ -19,7 +19,7 @@ class SimpleTable : public PlotWidgetAbstract
 {
     Q_OBJECT
 public:
-    explicit SimpleTable(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
+    explicit SimpleTable(SettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
     ~SimpleTable();
     void redraw();
     void addPlot(VarChannel *varChanale);
@@ -27,7 +27,7 @@ public:
 //    bool plotVar(QString plotName, QVector<VarValue> values);
 //    void setName(QString name);
 //    QString getName();
-    PlotSettingsAbstract* gedSettings() {return &settings; }
+    SettingsAbstract* gedSettings() {return &settings; }
 
 private:
     int getGruph(QObject *sender, VarChannel **varChanale);
@@ -65,7 +65,7 @@ public:
     }
     QString getName() { return QString("SimpleTable"); }
 
-    PlotSettingsAbstract* gedDefauoldSettings() {return &defSettings;}
+    SettingsAbstract* gedDefauoldSettings() {return &defSettings;}
 
 private:
     SimpleTableSettings defSettings;

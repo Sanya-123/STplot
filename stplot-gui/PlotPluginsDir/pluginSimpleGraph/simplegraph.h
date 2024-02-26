@@ -9,7 +9,7 @@ namespace Ui {
 class SimpleGraph;
 }
 
-class SimpleGraphSettings : public PlotSettingsAbstract
+class SimpleGraphSettings : public SettingsAbstract
 {
     Q_OBJECT
 public:
@@ -20,7 +20,7 @@ class SimpleGraph : public PlotWidgetAbstract
 {
     Q_OBJECT
 public:
-    explicit SimpleGraph(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
+    explicit SimpleGraph(SettingsAbstract* settings = nullptr, QWidget *parent = nullptr);
     ~SimpleGraph();
     void addPlot(VarChannel *varChanale);
     void deletePlot(VarChannel *varChanale);
@@ -28,7 +28,7 @@ public:
 //    bool plotVar(QString plotName, QVector<VarValue> values);
 //    void setName(QString name);
 //    QString getName();
-    PlotSettingsAbstract* gedSettings() {return &settings; }
+    SettingsAbstract* gedSettings() {return &settings; }
 
 private:
     QCPGraph* getGruph(QObject *sender, VarChannel **varChanale);
@@ -81,7 +81,7 @@ public:
     }
     QString getName() { return QString("SimpleGraph"); }
 
-    PlotSettingsAbstract* gedDefauoldSettings() {return &defSettings;}
+    SettingsAbstract* gedDefauoldSettings() {return &defSettings;}
 
 private:
     SimpleGraphSettings defSettings;

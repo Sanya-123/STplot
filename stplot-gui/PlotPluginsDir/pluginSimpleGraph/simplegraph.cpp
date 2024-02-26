@@ -4,7 +4,7 @@
 #include "initplot.h"
 #include <QDebug>
 
-SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract(parent)
+SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(parent)
 {
     mapSettingsDefauold["gColor.varColor"] = QColor(0x5f, 0x5f, 0x5f);
     mapSettingsDefauold["gColor.gridColor"] = QColor(0x9a, 0x9a, 0x9a);
@@ -18,7 +18,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : PlotSettingsAbstract
     restoreDefoultSetings();
 }
 
-SimpleGraph::SimpleGraph(PlotSettingsAbstract *settings, QWidget *parent) :
+SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
     ui(new Ui::SimpleGraph), emptyGraphs(true)
 {

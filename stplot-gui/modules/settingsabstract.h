@@ -2,11 +2,10 @@
 #define SETTINGSABSTRACT_G
 #include <QObject>
 #include <QString>
-#include <QWidget>
 #include <QSettings>
 #include <QMap>
 /**
- * @brief The SettingsAbstract class - abstract plot setting class,
+ * @brief The SettingsAbstract class - abstract setting class,
  */
 class SettingsAbstract : public QObject
 {

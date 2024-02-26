@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # BEGIN PLUGIN
 add_library(${PLUGIN_NAME} SHARED
+    ${PATH_PLOT_INTERFACE}/settingsabstract.h
     ${PATH_PLOT_INTERFACE}/plotinterface.h
     #TODO build var chanale as lib
     ${PATH_VARCHANNEL}/varchannel.h

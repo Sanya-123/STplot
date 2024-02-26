@@ -33,10 +33,10 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/comboboxdelegate.cpp
         widgets/ChannelsList/chanaleitemdelegate.h
         widgets/ChannelsList/chanaleitemdelegate.cpp
-        # widgets/SettingsViewer/settingsviewer.cpp
-        # widgets/SettingsViewer/settingsviewer.h
-        widgets/plotsettingsviever.h
-        widgets/plotsettingsviever.cpp
+        widgets/SettingsViewer/settingsviewer.cpp
+        widgets/SettingsViewer/settingsviewer.h
+        # widgets/plotsettingsviever.h
+        # widgets/plotsettingsviever.cpp
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
@@ -111,9 +111,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/VarLoader
     widgets/SettingsViewer
     widgets/ChannelsList
-    widgets/ViewManager/
-    widgets/PlotWidget/
-    PlotPluginsDir/
+    widgets/ViewManager
+    widgets/PlotWidget
+    PlotPluginsDir
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps

@@ -12,6 +12,7 @@
 #include <QtPlugin>
 #include <chrono>
 #include "varchannel.h"
+#include "settingsabstract.h"
 
 #define PLOT_INTERFACE_HEADER_VERSION           0x00000000
 
@@ -37,80 +38,13 @@ static QString versionUnionToString(uint32_t version)
 }
 
 /**
- * @brief The PlotSettingsAbstract class - abstract plot setting class,
- */
-//TODO add here map name value and type of value, also add maybe custom widget an so PlotSettingsWidgetAbstract will remove and so we will use common setting widget
-class PlotSettingsAbstract : public QObject
-{
-    Q_OBJECT
-public:
-    //int constructor I should fill mapSettings
-    PlotSettingsAbstract (QObject *parent = nullptr) : QObject(parent){mapSettings = mapSettingsDefauold;}
-    QMap<QString, QVariant> getSettingsMap() {return mapSettings;}
-
-public slots:
-    /**
-     * @brief setSettings - metod copy form setting to mapSettings
-     * @param settings
-     */
-    virtual void setSettings(PlotSettingsAbstract *settings) {setSettings(settings->getSettingsMap());}
-    virtual void setSettings(QMap<QString, QVariant> nemMap)
-    {
-        QList<QString> names = nemMap.keys();
-        foreach (QString name, names) {
-            setValues(name, nemMap[name]);
-        }
-    }
-    /**
-     * @brief setValues - set value for setings
-     * @param name - name setting
-     * @param val - value setting
-     */
-    virtual void setValues(QString name, QVariant val)
-    {
-        if(mapSettings.contains(name))
-        {
-            if(mapSettings[name].type() == val.type())
-            {
-                mapSettings[name] = val;
-                emit settingsUpdated();
-            }
-        }
-    }
-
-    virtual void restoreDefoultSetings() {mapSettings = mapSettingsDefauold; emit settingsUpdated();}
-
-
-signals:
-    void settingsUpdated();
-
-protected:
-    //map settings mname and values
-    QMap<QString, QVariant> mapSettingsDefauold;
-//    friend class PlotWidgetAbstract;
-//    friend class PlotWidgetInterfacePlugin;
-private:
-    QMap<QString, QVariant> mapSettings;
-};
-
-//class PlotSettingsWidgetAbstract : public QWidget
-//{
-//    Q_OBJECT
-//public:
-//    PlotSettingsWidgetAbstract(PlotSettingsAbstract *setings, QWidget *parent = nullptr) :QWidget(parent) {}
-//    void setSetings(PlotSettingsAbstract *setings);
-////    PlotSettingsAbstract getSetings();
-//};
-
-
-/**
  * @brief The PlotWidgetAbstract class - abstrac widget clas for plot data
  */
 class PlotWidgetAbstract : public QWidget
 {
     Q_OBJECT
 public:
-    PlotWidgetAbstract(PlotSettingsAbstract* settings = nullptr, QWidget *parent = nullptr) :QWidget(parent) {}
+    PlotWidgetAbstract(SettingsAbstract* settings = nullptr, QWidget *parent = nullptr) :QWidget(parent) {}
     PlotWidgetAbstract(QWidget *parent = nullptr) :QWidget(parent) {}
     /**
      * @brief addPlot - redraw plot graphics
@@ -132,13 +66,13 @@ public:
      * @brief gedSettings - get curent gruph settings
      * @return - point to settings
      */
-    virtual PlotSettingsAbstract* gedSettings() = 0;
+    virtual SettingsAbstract* gedSettings() = 0;
 
 //    /**
 //     * @brief getSettings - get curent plot settings
 //     * @return
 //     */
-//    virtual PlotSettingsAbstract* getSettings() = 0;
+//    virtual SettingsAbstract* getSettings() = 0;
 
 //    /**
 //     * @brief plotVar - update plot(update graph)
@@ -184,7 +118,7 @@ public:
      * @brief gedDefauoldSettings - get defouoult settings for gruph
      * @return - reyrn point to defoult settings
      */
-    virtual PlotSettingsAbstract* gedDefauoldSettings() = 0;
+    virtual SettingsAbstract* gedDefauoldSettings() = 0;
 
     /**
      * @brief getName - get plugin name
