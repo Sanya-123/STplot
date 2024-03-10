@@ -1,10 +1,10 @@
-#include "settingsviewer.h"
+#include "settingsdialog.h"
 #include "QtnProperty/GUI/PropertyQColor.h"
 #include "QtnProperty/GUI/PropertyQPen.h"
 #include <QLayout>
 #include <QDebug>
 
-SettingsViewer::SettingsViewer(SettingsAbstract *settings, QWidget *parent)
+SettingsDialog::SettingsDialog(SettingsAbstract *settings, QWidget *parent)
     : QDialog{parent}
 {
     propertySets = new QtnPropertySet(this);
@@ -64,12 +64,12 @@ SettingsViewer::SettingsViewer(SettingsAbstract *settings, QWidget *parent)
     setModal(true);
 }
 
-SettingsViewer::~SettingsViewer()
+SettingsDialog::~SettingsDialog()
 {
 
 }
 
-QtnPropertySet * SettingsViewer::findParentProperty(QString propertyName, QString *displayName, QtnPropertySet *propertySets)
+QtnPropertySet * SettingsDialog::findParentProperty(QString propertyName, QString *displayName, QtnPropertySet *propertySets)
 {
     QList<QString> tree = propertyName.split('.');
 
@@ -125,7 +125,7 @@ QtnPropertySet * SettingsViewer::findParentProperty(QString propertyName, QStrin
     return findProperty;
 }
 
-void SettingsViewer::changeValue(QtnPropertyChangeReason reson)
+void SettingsDialog::changeValue(QtnPropertyChangeReason reson)
 {
     //after edit reason is 0x0401
     if(reson & QtnPropertyChangeReasonEdit)

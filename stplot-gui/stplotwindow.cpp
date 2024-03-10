@@ -73,12 +73,13 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     readSelector.insertItem(0,"STLink", QVariant());
     readSelector.insertItem(1,"UDP", QVariant());
 
-    QToolBar *runToolBar = addToolBar("Run");
+    runToolBar = addToolBar("Run");
     runToolBar->addAction(ui->actionStart);
     runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
     runToolBar->addWidget(&readSelector);
     ui->menuView->addAction(runToolBar->toggleViewAction());
+    lastReadWidget  = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
 
     ui->menuView->addSeparator();
 
@@ -140,10 +141,14 @@ void STPlotWindow::setReadDevice(int readDevice){
     switch(readDevice){
     case 0:
         readManager.setReadDevicece(&stlinkDevice);
+        runToolBar->removeAction(lastReadWidget);
+        lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
         qDebug() << "Read device STLINK";
         break;
     case 1:
         readManager.setReadDevicece(&shnetDevice);
+        runToolBar->removeAction(lastReadWidget);
+        lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
         qDebug() << "Read device UDP";
         break;
     }

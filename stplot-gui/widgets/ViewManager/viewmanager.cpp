@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QMenu>
-#include "settingsviewer.h"
+#include "settingsdialog.h"
 
 ViewManager::ViewManager(QWidget *parent) :
     QWidget(parent),
@@ -287,7 +287,7 @@ void ViewManager::on_pushButton_open_def_setings_clicked()
 {
     if(ui->comboBox_typeView->currentIndex() >= 0)
     {
-        SettingsViewer *sett = new SettingsViewer(pluginsPlot[ui->comboBox_typeView->currentIndex()]->gedDefauoldSettings());
+        SettingsDialog *sett = new SettingsDialog(pluginsPlot[ui->comboBox_typeView->currentIndex()]->gedDefauoldSettings());
         sett->show();
         sett->exec();
     }
@@ -305,7 +305,7 @@ void ViewManager::on_pushButton_open_selected_plot_setings_clicked()
         SettingsAbstract* firstElementSettings = listPlots[numberFirstElement].first->gedSettings();
 
         //show then edit
-        SettingsViewer *sett = new SettingsViewer(firstElementSettings);
+        SettingsDialog *sett = new SettingsDialog(firstElementSettings);
         sett->show();
         sett->exec();
 

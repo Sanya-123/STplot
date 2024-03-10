@@ -62,6 +62,8 @@ private:
     QString curentSettingsPath;
     QTimer redrawTimer;
     QComboBox readSelector;
+    QToolBar *runToolBar;
+    QAction *lastReadWidget;
 };
 
 

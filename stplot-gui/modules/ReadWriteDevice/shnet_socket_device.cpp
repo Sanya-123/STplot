@@ -1,14 +1,40 @@
 #include "shnet_socket_device.h"
 #include <QThread>
 #include <QTime>
-SHnetUDPDevice::SHnetUDPDevice() : configWidget(nullptr)
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSpinBox>
+#include <QLineEdit>
+#include <QComboBox>
+
+SHnetUDPDevice::SHnetUDPDevice()
 {
+    serverAddress = "127.0.0.1";
+    serverPort = 31337;
+
+    shnetIDMap.insert("KPP", SHNET_ID_KPP);
+    shnetIDMap.insert("KLCD", SHNET_ID_KLCD);
+    shnetIDMap.insert("KBO_TRACK", SHNET_ID_KBO_TRACK);
+    shnetIDMap.insert("KBO_LIFT", SHNET_ID_KBO_LIFT);
+    // shnetIDMap.insert("KPP", SHNET_ID_KUE_TRACK);
+    // shnetIDMap.insert("KPP", SHNET_ID_KUE_LIFT);
+    shnetIDMap.insert("IMU_BODY", SHNET_ID_INCL_BODY);
+    shnetIDMap.insert("IMU_PLATFORM", SHNET_ID_INCL_PLATFORM);
+    shnetIDMap.insert("NAV", SHNET_ID_NAV);
+    shnetIDMap.insert("PU", SHNET_ID_PU);
+    shnetIDMap.insert("HEC_FRONT", SHNET_ID_HEC_FRONT);
+    shnetIDMap.insert("HEC_REAR", SHNET_ID_HEC_REAR);
+    shnetIDMap.insert("HEC_RIGHT", SHNET_ID_SHELF_RIGHT);
+    shnetIDMap.insert("HEC_LEFT", SHNET_ID_SHELF_LEFT);
+    shnetIDMap.insert("HEC_TOP", SHNET_ID_SHELF_TOP);
+    shnetIDMap.insert("RADAR_FRONT", SHNET_ID_RADAR_FRONT);
+    shnetIDMap.insert("RADAR_REAR", SHNET_ID_RADAR_REAR);
+    shnetIDMap.insert("RADAR_SIDE", SHNET_ID_RADAR_SIDE);
 
 }
 
 SHnetUDPDevice::~SHnetUDPDevice()
 {
-
 }
 
 int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
@@ -18,7 +44,7 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
     memset(&uplink, 0, sizeof(SHnet_link_t));
     // open socket
     udpSocket = new QUdpSocket(this);
-    udpSocket->connectToHost(QHostAddress("127.0.0.1"), 31337);
+    udpSocket->connectToHost(QHostAddress(serverAddress), serverPort);
     if (!udpSocket->waitForConnected(3000)){
         return -1;
     }
@@ -167,7 +193,89 @@ int SHnetUDPDevice::writeDataDevice(uint32_t data, varloc_location_t location)
     return 0;
 }
 
+void SHnetUDPDevice::setServerAddress(const QString &text)
+{
+    serverAddress = text;
+}
+
+void SHnetUDPDevice::setServerPort(int port)
+{
+    serverPort = port;
+}
+
+void SHnetUDPDevice::setSHnetL0Address(const QString &text)
+{
+    downlink.net_id_0 = shnetIDMap.value(text);
+}
+void SHnetUDPDevice::setSHnetL1Address(int adr)
+{
+    downlink.net_id_1 = adr;
+}
+void SHnetUDPDevice::setSHnetL2Address(int adr)
+{
+    downlink.net_id_2 = adr;
+}
+void SHnetUDPDevice::setSHnetL3Address(int adr)
+{
+    downlink.net_id_3 = adr;
+}
+
 QWidget *SHnetUDPDevice::getReadDevConfigWidget()
 {
+
+    QWidget* configWidget = new QWidget();
+    QLabel *labelIP = new QLabel("IP address:");
+    QLabel *labelPort = new QLabel("Port:");
+    QLabel *labelShnet = new QLabel("SHnet address:");
+
+
+    QLineEdit* serverAddressWidget = new QLineEdit();
+    serverAddressWidget->setText(serverAddress);
+    serverAddressWidget->setMaxLength(15);
+    // serverAddressWidget->setInputMask("000.000.000.000;_");
+    connect(serverAddressWidget, &QLineEdit::textChanged, this, &SHnetUDPDevice::setServerAddress);
+
+    QSpinBox* serverPortWidget = new QSpinBox();
+    serverPortWidget->setMinimum(0);
+    serverPortWidget->setMaximum(99999);
+    serverPortWidget->setValue(serverPort);
+    // connect(serverPortWidget, &QSpinBox::valueChanged, this, &SHnetUDPDevice::setServerPort);
+    connect(serverPortWidget, SIGNAL(valueChanged(int)), this, SLOT(setServerPort(int)));
+
+    QComboBox *shnetID0 = new QComboBox;
+    shnetID0->addItems(QStringList(shnetIDMap.keys()));
+    shnetID0->setCurrentText("KPP");
+    connect(shnetID0, &QComboBox::currentTextChanged, this, &SHnetUDPDevice::setSHnetL0Address);
+
+    QSpinBox* shnetID1 = new QSpinBox();
+    shnetID1->setMinimum(0);
+    shnetID1->setMaximum(31);
+    shnetID1->setValue(downlink.net_id_1);
+    connect(shnetID1, SIGNAL(valueChanged(int)), this, SLOT(setSHnetL1Address(int)));
+
+    QSpinBox* shnetID2 = new QSpinBox();
+    shnetID2->setMinimum(0);
+    shnetID2->setMaximum(31);
+    shnetID2->setValue(downlink.net_id_2);
+    connect(shnetID2, SIGNAL(valueChanged(int)), this, SLOT(setSHnetL2Address(int)));
+
+    QSpinBox* shnetID3 = new QSpinBox();
+    shnetID3->setMinimum(0);
+    shnetID3->setMaximum(7);
+    shnetID3->setValue(downlink.net_id_3);
+    connect(shnetID3, SIGNAL(valueChanged(int)), this, SLOT(setSHnetL3Address(int)));
+
+
+    QHBoxLayout* layout = new QHBoxLayout(configWidget);
+    layout->addWidget(labelIP);
+    layout->addWidget(serverAddressWidget);
+    layout->addWidget(labelPort);
+    layout->addWidget(serverPortWidget);
+    layout->addWidget(labelShnet);
+    layout->addWidget(shnetID0);
+    layout->addWidget(shnetID1);
+    layout->addWidget(shnetID2);
+    layout->addWidget(shnetID3);
+
     return configWidget;
 }

@@ -21,20 +21,29 @@ public:
 
 // private slots:
     // void readPendingDatagrams();
+public slots:
+    void setServerAddress(const QString &text);
+    void setServerPort(int port);
+    void setSHnetL0Address(const QString &text);
+    void setSHnetL1Address(int adr);
+    void setSHnetL2Address(int adr);
+    void setSHnetL3Address(int adr);
 
 private:
-
     int processRequest(debug_msg_t* req);
     bool dataRecieved();
     QVector<struct ReadAddres> readSeuqence;
     QVector<debug_msg_t> requestQueue;
-    QWidget *configWidget;
-    QHostAddress serverAddress;
-    int serverPort;
+    // QHostAddress serverAddress;
+    // int serverPort;
     QUdpSocket* udpSocket;
     SHnet_link_t uplink;
     SHnet_link_t downlink;
     int currentRequest;
+    QString serverAddress;
+    int serverPort;
+    QMap<QString, SHnet_ID_L0> shnetIDMap;
+
 };
 
 #endif // SHNET_SOCKET_DEVICE_H

@@ -1,5 +1,5 @@
-#ifndef SettingsViewer_H
-#define SettingsViewer_H
+#ifndef SettingsDialog_H
+#define SettingsDialog_H
 
 #include <QWidget>
 #include "settingsabstract.h"
@@ -7,12 +7,12 @@
 #include "PropertyCore.h"
 #include <QDialog>
 
-class SettingsViewer : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SettingsViewer(SettingsAbstract *settings, QWidget *parent = nullptr);
-    ~SettingsViewer();
+    explicit SettingsDialog(SettingsAbstract *settings, QWidget *parent = nullptr);
+    ~SettingsDialog();
 
 private:
     QtnPropertySet *findParentProperty(QString propertyName, QString *displayName, QtnPropertySet *propertySets);
@@ -28,4 +28,4 @@ private:
     SettingsAbstract *settings;
 };
 
-#endif // SettingsViewer_H
+#endif // SettingsDialog_H

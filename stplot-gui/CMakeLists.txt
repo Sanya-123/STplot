@@ -33,8 +33,8 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/comboboxdelegate.cpp
         widgets/ChannelsList/chanaleitemdelegate.h
         widgets/ChannelsList/chanaleitemdelegate.cpp
-        widgets/SettingsViewer/settingsviewer.cpp
-        widgets/SettingsViewer/settingsviewer.h
+        widgets/SettingsDialog/settingsdialog.cpp
+        widgets/SettingsDialog/settingsdialog.h
         # widgets/plotsettingsviever.h
         # widgets/plotsettingsviever.cpp
         widgets/ViewManager/viewmanager.h
@@ -109,7 +109,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     modules/ReadWriteDevice
     widgets
     widgets/VarLoader
-    widgets/SettingsViewer
+    widgets/SettingsDialog
     widgets/ChannelsList
     widgets/ViewManager
     widgets/PlotWidget
