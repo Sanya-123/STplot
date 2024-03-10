@@ -28,6 +28,7 @@ public:
 //    void setName(QString name);
 //    QString getName();
     SettingsAbstract* gedSettings() {return &settings; }
+    void resizeEvent(QResizeEvent *event);
 
 private:
     int getGruph(QObject *sender, VarChannel **varChanale);

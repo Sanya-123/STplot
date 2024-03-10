@@ -16,12 +16,22 @@ SimpleTableSettings::SimpleTableSettings(QObject *parent) : SettingsAbstract(par
     restoreDefoultSetings();
 }
 
+
+void SimpleTable::resizeEvent(QResizeEvent *event){
+    ui->tableWidget_table->setColumnWidth(0,this->size().width()*0.7);
+    ui->tableWidget_table->setColumnWidth(1,this->size().width()*0.3);
+}
+
 SimpleTable::SimpleTable(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
     ui(new Ui::SimpleTable)
 {
     ui->setupUi(this);
 
+    ui->tableWidget_table->setColumnWidth(0,this->size().width()*0.7);
+    ui->tableWidget_table->setColumnWidth(1,this->size().width()*0.3);
+
+    // ui->tableWidget_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
     this->settings.setSettings(settings);

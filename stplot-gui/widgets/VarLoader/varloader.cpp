@@ -145,6 +145,7 @@ void VarLoader::loadVariables(const QString & fileName)
     // proxyModel->setAutoAcceptChildRows(true);
     ui->treeView->setModel(proxyModel);
     ui->treeView->show();
+    ui->treeView->setColumnWidth(0,300);
 
     watcher.addPath(fileName);
     QObject::connect(&watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(updateElf(const QString&)));
