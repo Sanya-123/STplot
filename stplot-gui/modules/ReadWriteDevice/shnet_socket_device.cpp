@@ -31,6 +31,7 @@ SHnetUDPDevice::SHnetUDPDevice()
     shnetIDMap.insert("RADAR_FRONT", SHNET_ID_RADAR_FRONT);
     shnetIDMap.insert("RADAR_REAR", SHNET_ID_RADAR_REAR);
     shnetIDMap.insert("RADAR_SIDE", SHNET_ID_RADAR_SIDE);
+    downlink.net_id_0 = SHNET_ID_KPP;
 
 }
 
@@ -40,19 +41,29 @@ SHnetUDPDevice::~SHnetUDPDevice()
 
 int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
 {
+    qDebug() << "Init SHnet UDP socket device";
     this->readSeuqence = readSeuqence;
-    memset(&downlink, 0, sizeof(SHnet_link_t));
+    // memset(&downlink, 0, sizeof(SHnet_link_t));
     memset(&uplink, 0, sizeof(SHnet_link_t));
+    float n_words = 0;
+
+    for (int i = 0; i < readSeuqence.size(); i++){
+        n_words += readSeuqence[i].readSize / 4;
+        qDebug("Read sequence #%d %x %d", i, readSeuqence[i].addres, readSeuqence[i].readSize);
+    }
+    qDebug("Read sequence size is %f debug frames", n_words/DEBUG_DATA_SIZE_WORDS);
+
     // open socket
     udpSocket = new QUdpSocket(this);
     udpSocket->connectToHost(QHostAddress(serverAddress), serverPort);
-    if (!udpSocket->waitForConnected(3000)){
+    if (!udpSocket->waitForConnected(5000)){
         return -1;
     }
     qDebug() << "Socket connected";
 
-    downlink.net_id_0 = SHNET_ID_KPP;
     downlink.protocol_id = SHNET_MSG_DEBUG;
+    qDebug() << downlink.msg_id;
+
     return 0;
 }
 
@@ -76,6 +87,16 @@ bool SHnetUDPDevice::dataRecieved(){
         debug_msg_t* rx_msg = (debug_msg_t*)&uplink.data;
         debug_msg_t* tx_msg = (debug_msg_t*)&downlink.data;
         if (tx_msg->cmd == rx_msg->cmd){
+            // qDebug() << tx_msg->read_request.addresses[0];
+            // qDebug() << tx_msg->read_request.addresses[1];
+            // qDebug() << tx_msg->read_request.addresses[2];
+            // qDebug() << tx_msg->read_request.addresses[3];
+            // qDebug() << tx_msg->read_request.addresses[4];
+            // qDebug() << tx_msg->read_request.addresses[5];
+            // qDebug() << tx_msg->read_request.addresses[6];
+            // qDebug() << tx_msg->read_request.addresses[7];
+
+            qDebug() << "Got debug reply!";
             return true;
         }
     }
@@ -99,7 +120,7 @@ int SHnetUDPDevice::processRequest(debug_msg_t* req){
             qDebug() << "Socket write error";
             return -1;
         }
-        QThread::msleep(20);
+        QThread::msleep(100);
         int read = udpSocket->read((char*)&uplink, sizeof(SHnet_link_t));
         if (read < 0){
             qDebug() << "Socket read error";
@@ -149,8 +170,23 @@ int SHnetUDPDevice::execReadDevice()
                 int ret = processRequest(&req);
                 if (ret == 0){
                     debug_msg_t* response = (debug_msg_t*)&uplink.data;
-                    memcpy(readData.data(), response->read_reply.values, (readData.size() * sizeof(uint32_t)));
+                    // copy last n_words
+                    int total_words = DEBUG_DATA_SIZE_WORDS;
+                    memcpy(readData.data(), &response->read_reply.values[DEBUG_DATA_SIZE_WORDS-n_words], sizeof(uint32_t)*n_words);
+                    total_words = total_words - n_words - 1;
+                    // copy other data collected
+                    for (int k = emitList.size() - 1; k >= 0; k--){
+                        QVector<uint32_t>* pData = &emitList[k];
+                        for (int l = pData->size() - 1; l >= 0; l--){
+                            pData->data()[l] = response->read_reply.values[total_words];
+                            total_words--;
+                            if (total_words < 0){
+                                break;
+                            }
+                        }
+                    }
                 }
+
                 else{
                     // error processing request
                     return -1;
@@ -167,7 +203,7 @@ int SHnetUDPDevice::execReadDevice()
         if (ret == 0){
             debug_msg_t* response = (debug_msg_t*)&uplink.data;
             int words_copied = 0;
-            for (int i = 0; i < emitList.size(); i++){
+            for (int i = emitList.size() - address_cnt; i < emitList.size(); i++){
                 QVector<uint32_t> &pData = emitList[i];
                 int n_words = readSeuqence[i].readSize / 4;
                 if (n_words == 0){n_words = 1;}
@@ -207,6 +243,7 @@ void SHnetUDPDevice::setServerPort(int port)
 void SHnetUDPDevice::setSHnetL0Address(const QString &text)
 {
     downlink.net_id_0 = shnetIDMap.value(text);
+    qDebug("Set SHnetID: %d",downlink.net_id_0);
 }
 void SHnetUDPDevice::setSHnetL1Address(int adr)
 {
