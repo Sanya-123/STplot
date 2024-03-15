@@ -141,7 +141,6 @@ int SHnetUDPDevice::execReadDevice()
     };
     memset(&downlink.data, 0, SHNET_DATA_SIZE_BYTES);
     memset(&uplink.data, 0, SHNET_DATA_SIZE_BYTES);
-
     int address_cnt = 0;
     int data_cnt = 0;
     int remaining = addresses.size() % DEBUG_DATA_SIZE_WORDS;
@@ -152,16 +151,17 @@ int SHnetUDPDevice::execReadDevice()
         address_cnt++;
         if (address_cnt == DEBUG_DATA_SIZE_WORDS){
             // have full frame
+            address_cnt = 0;
             int ret = processRequest(&req);
-                if (ret == 0){
-                    // copy data
-                    debug_msg_t* response = (debug_msg_t*)&uplink.data;
-                    for (int i = 0; i < DEBUG_DATA_SIZE_WORDS; i++){
-                        data[data_cnt] = response->read_reply.values[i];
-                        data_cnt++;
-                    }
-                    memset(&req.read_request, 0, DEBUG_DATA_SIZE_WORDS * 4);
+            if (ret == 0){
+                // copy data
+                debug_msg_t* response = (debug_msg_t*)&uplink.data;
+                for (int i = 0; i < DEBUG_DATA_SIZE_WORDS; i++){
+                    data[data_cnt] = response->read_reply.values[i];
+                    data_cnt++;
                 }
+                memset(&req.read_request, 0, DEBUG_DATA_SIZE_WORDS * 4);
+            }
             else{
                 // error processing request
                 return -1;
@@ -170,9 +170,6 @@ int SHnetUDPDevice::execReadDevice()
     }
     if (remaining > 0){
         // last not full debug frame
-        for (int i = 0; i < remaining; i++){
-            req.read_request.addresses[i] = addresses[(frames * DEBUG_DATA_SIZE_WORDS) + i];
-        }
         int ret = processRequest(&req);
         if (ret == 0){
             debug_msg_t* response = (debug_msg_t*)&uplink.data;
@@ -186,7 +183,6 @@ int SHnetUDPDevice::execReadDevice()
             return -1;
         }
     }
-
     // emit collected data
     int packed = 0;
     QDateTime dt = QDateTime::currentDateTime();
