@@ -43,15 +43,21 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
 {
     qDebug() << "Init SHnet UDP socket device";
     this->readSeuqence = readSeuqence;
-    // memset(&downlink, 0, sizeof(SHnet_link_t));
+    memset(&downlink, 0, sizeof(SHnet_link_t));
     memset(&uplink, 0, sizeof(SHnet_link_t));
-    float n_words = 0;
-
+    addresses.clear();
+    data.clear();
+    // fill addresses
     for (int i = 0; i < readSeuqence.size(); i++){
-        n_words += readSeuqence[i].readSize / 4;
-        qDebug("Read sequence #%d %x %d", i, readSeuqence[i].addres, readSeuqence[i].readSize);
+        // qDebug("Read sequence #%d %x %d", i, readSeuqence[i].addres, readSeuqence[i].readSize);
+        for (int j = 0; j < readSeuqence[i].readSize / 4; j++){
+            addresses.append(readSeuqence[i].addres + (j*4));
+            data.append(0);
+            // qDebug("Address %d %x", j, readSeuqence[i].addres + (j*4));
+        }
     }
-    qDebug("Read sequence size is %f debug frames", n_words/DEBUG_DATA_SIZE_WORDS);
+    qDebug("Sequence size is %d addresses, %f debug frames",
+           addresses.size(),(float)addresses.size()/DEBUG_DATA_SIZE_WORDS);
 
     // open socket
     udpSocket = new QUdpSocket(this);
@@ -87,25 +93,9 @@ bool SHnetUDPDevice::dataRecieved(){
         debug_msg_t* rx_msg = (debug_msg_t*)&uplink.data;
         debug_msg_t* tx_msg = (debug_msg_t*)&downlink.data;
         if (tx_msg->cmd == rx_msg->cmd){
-            // qDebug() << tx_msg->read_request.addresses[0];
-            // qDebug() << tx_msg->read_request.addresses[1];
-            // qDebug() << tx_msg->read_request.addresses[2];
-            // qDebug() << tx_msg->read_request.addresses[3];
-            // qDebug() << tx_msg->read_request.addresses[4];
-            // qDebug() << tx_msg->read_request.addresses[5];
-            // qDebug() << tx_msg->read_request.addresses[6];
-            // qDebug() << tx_msg->read_request.addresses[7];
-
-            qDebug() << "Got debug reply!";
             return true;
         }
     }
-    qDebug() << "No reply match";
-    qDebug() << uplink.msg_id << downlink.msg_id;
-    qDebug() << uplink.net_id_0 << downlink.net_id_0;
-    qDebug() << uplink.net_id_1 << downlink.net_id_1;
-    qDebug() << uplink.net_id_2 << downlink.net_id_2;
-    qDebug() << uplink.net_id_3 << downlink.net_id_3;
     return false;
 
 }
@@ -149,80 +139,65 @@ int SHnetUDPDevice::execReadDevice()
     debug_msg_t req = {
         .cmd = DEBUG_READ,
     };
-    int address_cnt = 0;
-    int serial_cnt = 0;
     memset(&downlink.data, 0, SHNET_DATA_SIZE_BYTES);
-    QVector<QVector<uint32_t>> emitList;
-    for(int i = 0; i < readSeuqence.size(); i++){
-        serial_cnt = 0;
-        int n_words = readSeuqence[i].readSize / 4;
-        if (readSeuqence[i].readSize < 4){
-            n_words = 1;
-        }
-        QVector<uint32_t> readData(n_words);
-        for (int j = 0; j < n_words; j++){
-            req.read_request.addresses[address_cnt] = readSeuqence[i].addres + (serial_cnt * 4);
-            address_cnt++;
-            serial_cnt++;
-            if (address_cnt == DEBUG_DATA_SIZE_WORDS){
-                address_cnt = 0;
-                // send request and copy data to readData
-                int ret = processRequest(&req);
-                if (ret == 0){
-                    debug_msg_t* response = (debug_msg_t*)&uplink.data;
-                    // copy last n_words
-                    int total_words = DEBUG_DATA_SIZE_WORDS;
-                    memcpy(readData.data(), &response->read_reply.values[DEBUG_DATA_SIZE_WORDS-n_words], sizeof(uint32_t)*n_words);
-                    total_words = total_words - n_words - 1;
-                    // copy other data collected
-                    for (int k = emitList.size() - 1; k >= 0; k--){
-                        QVector<uint32_t>* pData = &emitList[k];
-                        for (int l = pData->size() - 1; l >= 0; l--){
-                            pData->data()[l] = response->read_reply.values[total_words];
-                            total_words--;
-                            if (total_words < 0){
-                                break;
-                            }
-                        }
-                    }
-                }
+    memset(&uplink.data, 0, SHNET_DATA_SIZE_BYTES);
 
-                else{
-                    // error processing request
-                    return -1;
+    int address_cnt = 0;
+    int data_cnt = 0;
+    int remaining = addresses.size() % DEBUG_DATA_SIZE_WORDS;
+    int frames = addresses.size() / DEBUG_DATA_SIZE_WORDS;
+    // collect addresses into debug frames
+    for (int adr = 0; adr < addresses.size(); adr++){
+        req.read_request.addresses[address_cnt] = addresses[adr];
+        address_cnt++;
+        if (address_cnt == DEBUG_DATA_SIZE_WORDS){
+            // have full frame
+            int ret = processRequest(&req);
+                if (ret == 0){
+                    // copy data
+                    debug_msg_t* response = (debug_msg_t*)&uplink.data;
+                    for (int i = 0; i < DEBUG_DATA_SIZE_WORDS; i++){
+                        data[data_cnt] = response->read_reply.values[i];
+                        data_cnt++;
+                    }
+                    memset(&req.read_request, 0, DEBUG_DATA_SIZE_WORDS * 4);
                 }
-                memset(&req, 0, sizeof(debug_msg_t));
-                req.cmd = DEBUG_READ;
+            else{
+                // error processing request
+                return -1;
             }
         }
-        emitList.append(readData);
     }
-    if (address_cnt > 0){
-        memset(&downlink.data, 0, SHNET_DATA_SIZE_BYTES);
+    if (remaining > 0){
+        // last not full debug frame
+        for (int i = 0; i < remaining; i++){
+            req.read_request.addresses[i] = addresses[(frames * DEBUG_DATA_SIZE_WORDS) + i];
+        }
         int ret = processRequest(&req);
         if (ret == 0){
             debug_msg_t* response = (debug_msg_t*)&uplink.data;
-            int words_copied = 0;
-            for (int i = emitList.size() - address_cnt; i < emitList.size(); i++){
-                QVector<uint32_t> &pData = emitList[i];
-                int n_words = readSeuqence[i].readSize / 4;
-                if (n_words == 0){n_words = 1;}
-                memcpy(pData.data(), &response->read_reply.values[words_copied], n_words * 4);
-                words_copied += n_words;
+            for (int i = 0; i < remaining; i++){
+                data[(frames * DEBUG_DATA_SIZE_WORDS) + i] = response->read_reply.values[i];
             }
+            memset(&req.read_request, 0, DEBUG_DATA_SIZE_WORDS * 4);
         }
         else{
             // error processing request
             return -1;
         }
     }
+
+    // emit collected data
+    int packed = 0;
     QDateTime dt = QDateTime::currentDateTime();
-    for (int i = 0; i < emitList.size(); i++){
-        QVector<uint8_t> ret (emitList[i].size() * 4);
-        memcpy(ret.data(),emitList[i].data(), ret.size());
+    for (int i = 0; i < readSeuqence.size(); i++){
+        QVector<uint8_t> ret (readSeuqence[i].readSize);
+        memcpy(ret.data(), &data[packed], ret.size());
+        packed += ret.size() / 4;
         emit addressesReedWithTime(readSeuqence[i].addres, ret, dt);
     }
     return 0;
+
 }
 
 int SHnetUDPDevice::writeDataDevice(uint32_t data, varloc_location_t location)

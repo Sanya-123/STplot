@@ -1,4 +1,2 @@
-- Table view
-- Writing data
-- Connnection manager
-
+- Writing data to target
+- Saving / reloading recorded data

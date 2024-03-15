@@ -65,7 +65,7 @@ SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     connect(plotWidget, &QCustomPlot::mouseRelease, this, &SimpleGraph::handleMouseRelease);
     connect(plotWidget, &QCustomPlot::mousePress,   this, &SimpleGraph::handleMousePress);
     connect(plotWidget->xAxis, SIGNAL(rangeChanged(const QCPRange&,const QCPRange&)), this, SLOT(limitTimeRange(const QCPRange&,const QCPRange&)));
-
+    plotWidget->setNoAntialiasingOnDrag(true);
     //settings
     connect(&this->settings, SIGNAL(settingsUpdated()), this, SLOT(settingsChanged()));
     this->settings.setSettings(settings);
@@ -104,6 +104,7 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
     newGruph->setLineStyle((QCPGraph::LineStyle)varChanale->lineStyle());
     newGruph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)varChanale->dotStyle()));
     newGruph->setPen(QPen(varChanale->lineColor()));
+    // newGruph->setAdaptiveSampling(true); // default on
 
     QCPItemTracer* newTracker = new QCPItemTracer(plotWidget);
 //    plotWidget->addItem(newTracker);

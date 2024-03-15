@@ -153,7 +153,7 @@ void Channels::restoreSettings(QSettings *settings)
 //                chanale->setEnableOnPlot(j, listPlot[j]);
                 m_channelModel->setEnablePlot(chanale, j, listPlot[j]);
             }
-           qDebug() << "plotLisi:" << displayName << j << listPlot[j];
+           // qDebug() << "plotLisi:" << displayName << j << listPlot[j];
         }
     }
     settings->endArray();

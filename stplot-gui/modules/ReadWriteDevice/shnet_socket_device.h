@@ -33,7 +33,7 @@ private:
     int processRequest(debug_msg_t* req);
     bool dataRecieved();
     QVector<struct ReadAddres> readSeuqence;
-    QVector<debug_msg_t> requestQueue;
+    // QVector<debug_msg_t> requestQueue;
     // QHostAddress serverAddress;
     // int serverPort;
     QUdpSocket* udpSocket;
@@ -43,6 +43,8 @@ private:
     QString serverAddress;
     int serverPort;
     QMap<QString, SHnet_ID_L0> shnetIDMap;
+    QVector<uint32_t> addresses;
+    QVector<uint32_t> data;
 
 };
 
