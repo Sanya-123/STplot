@@ -61,6 +61,13 @@ public:
      */
     virtual QWidget* getReadDevConfigWidget() = 0;
 
+    /**
+     * @brief readFileDevice - function for read file device (directly read chanales)
+     * @param chanales - list of chanales
+     * @return - -1 this fuction is note support; -2... error
+     */
+    virtual int readFileDevice(QVector<VarChannel *> chanales) {return -1;}
+
 signals:
     void addressesReed(uint32_t addres, QVector<uint8_t> data);
     void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);

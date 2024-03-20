@@ -35,7 +35,7 @@ public:
     float getValue();
     varloc_location_t getLocation();
     uint32_t getMask();
-    float decode_value(uint32_t value);
+    static float decode_value(uint32_t value, uint32_t mask, varloc_location_t location);
     bool hasLocation(varloc_location_t loc);
 
     static QString getFullNmaeNode(varloc_node_t* node);

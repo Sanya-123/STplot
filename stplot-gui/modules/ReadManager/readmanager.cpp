@@ -17,6 +17,16 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
     if(readDevicece == nullptr)
         return -1;
 
+    if(readDevicece->isFileDevice())
+    {
+        int res = readDevicece->readFileDevice(*channels);
+        if(res != -1)//if this function is supported
+        {
+            emit stopingRead();
+            return res;
+        }
+    }
+
     this->channels = channels;
     readSeuqencs = calcReadSeuqence(channels);
 //    qDebug() << "readSeuqencs size :" << readSeuqencs.size();
@@ -174,7 +184,7 @@ void ReadManager::stopReadLoop()
     for(int i = 0; i < saveDeviceces.size(); i++)
         saveDeviceces[i]->moveToThread(this->thread());
 
-    saveLoader.saveChanalesData(channels, startTime);
+//    saveLoader.saveChanalesData(channels, startTime);
 
     emit stopingRead();
 }
@@ -182,6 +192,11 @@ void ReadManager::stopReadLoop()
 void ReadManager::setReadDevicece(ReadDeviceObject *newReadDevicece)
 {
     readDevicece = newReadDevicece;
+}
+
+void ReadManager::addSaveDevice(SaveDeviceObject *newSaveDevicece)
+{
+    saveDeviceces.append(newSaveDevicece);
 }
 
 void ReadManager::stopRead()

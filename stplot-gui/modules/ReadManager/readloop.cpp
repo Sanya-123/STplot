@@ -28,7 +28,7 @@ void ReadLoop::readLoop()
 
     connect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
     if(!isFileDev)
-        connect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
+        connect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>,QDateTime)));
 
     try {
 
@@ -90,7 +90,7 @@ void ReadLoop::readLoop()
     }
      disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
     if(!isFileDev)
-        disconnect(readDevicec, SIGNAL(addressesReed(uint32_t,QVector<uint8_t>)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>)));
+        disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>,QDateTime)));
     saveSequence.clear();
     emit stopedLoop();
 }
@@ -114,8 +114,9 @@ void ReadLoop::requestWriteData(uint32_t data, varloc_location_t location)
     requestedWriteData.append(qMakePair(data, location));
 }
 
-void ReadLoop::saveReedSequence(uint32_t addres, QVector<uint8_t> data)
+void ReadLoop::saveReedSequence(uint32_t addres, QVector<uint8_t> data, QDateTime time)
 {
+    Q_UNUSED(time);
     saveSequence.append(qMakePair(addres, data));
 }
 

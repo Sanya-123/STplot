@@ -4,9 +4,11 @@
 #include "readwritedevice.h"
 #include <QFile>
 #include <QDateTime>
+#include <QWidget>
 
 class STMstudioFileDevice : public SaveDeviceObject, ReadDeviceObject
 {
+//    Q_OBJECT
 public:
     STMstudioFileDevice();
     ~STMstudioFileDevice();
@@ -18,14 +20,18 @@ public:
     QWidget* getReadDevConfigWidget();
     QWidget* getSaveDevConfigWidget();
 
+    int readFileDevice(QVector<VarChannel *> chanales);
+
 private:
-    QWidget *configReadWidget;
-    QWidget *configSaveWidget;
+    QWidget *configReadWidget;//TODO
+    QWidget *configSaveWidget;//TODO
     QFile device;
     QDateTime startTime;
     QVector<struct ReadDeviceObject::ReadAddres> readSeuqence;
     bool isReadMode;//as it class use for save and load dataI should know witch type is now
     bool isWriteMode;
+    QVector<uint32_t> masks;
+    QVector<varloc_location_t> locations;
 };
 
 #endif // STMSTUDIOFILEDEVICE_H

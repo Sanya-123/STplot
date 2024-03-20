@@ -52,7 +52,8 @@ void VarChannel::pushValue(float value, QTime record_time){
         emit updatePlot();
     // }
 }
-float VarChannel::decode_value(uint32_t value){
+float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t location)
+{
     float ret = 0;
     union {
         _Float32    _f;
@@ -63,26 +64,26 @@ float VarChannel::decode_value(uint32_t value){
         uint32_t    _u32;
         int32_t     _i32;
     }combiner;
-    combiner._u32 = (value & m_mask) >> m_location.address.offset_bits;
-    if(m_location.address.size_bits <= 8){
-        if (m_location.type == VARLOC_SIGNED){
+    combiner._u32 = (value & mask) >> location.address.offset_bits;
+    if(location.address.size_bits <= 8){
+        if (location.type == VARLOC_SIGNED){
             ret = combiner._i8;
         } else{
             ret = combiner._u8;
         }
     }
-    else if(m_location.address.size_bits <= 16){
-        if (m_location.type == VARLOC_SIGNED){
+    else if(location.address.size_bits <= 16){
+        if (location.type == VARLOC_SIGNED){
             ret = combiner._i16;
         } else{
             ret = combiner._u16;
         }
     }
     else {
-        if (m_location.type == VARLOC_SIGNED){
+        if (location.type == VARLOC_SIGNED){
             ret = combiner._i32;
         }
-        else if (m_location.type == VARLOC_FLOAT){
+        else if (location.type == VARLOC_FLOAT){
             ret = combiner._f;
         } else{
             ret = combiner._u32;
@@ -92,13 +93,13 @@ float VarChannel::decode_value(uint32_t value){
 }
 
 void VarChannel::pushValueRawWithTime(uint32_t value, QDateTime date_time){
-    pushValue(decode_value(value), date_time.time());
+    pushValue(decode_value(value, m_mask, m_location), date_time.time());
 }
 
 void VarChannel::pushValueRaw(uint32_t value){
 
     QTime time = QTime::currentTime();
-    pushValue(decode_value(value), time);
+    pushValue(decode_value(value, m_mask, m_location), time);
 }
 
 void VarChannel::selectCurentPlot()

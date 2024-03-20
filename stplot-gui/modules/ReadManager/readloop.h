@@ -22,7 +22,7 @@ public slots:
     void requestWriteData(uint32_t data, varloc_location_t location);
 
 private slots:
-    void saveReedSequence(uint32_t addres, QVector<uint8_t> data);
+    void saveReedSequence(uint32_t addres, QVector<uint8_t> data, QDateTime time);
 
 signals:
     void stopedLoop();

@@ -70,8 +70,9 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->actionStop->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
     ui->actionStop->setDisabled(true);
 
-    readSelector.insertItem(0,"STLink", QVariant());
-    readSelector.insertItem(1,"UDP", QVariant());
+    readSelector.addItem("STLink");
+    readSelector.addItem("UDP");
+    readSelector.addItem("STLinkFile");
 
     runToolBar = addToolBar("Run");
     runToolBar->addAction(ui->actionStart);
@@ -107,10 +108,11 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 
     //init default read device
     readManager.setReadDevicece(&stlinkDevice);
+    readManager.addSaveDevice(&stmStudioSaveDevicec);
 
     //restore settings
-    // QSettings settings("STdebuger", "STplotDebuger");
-    // applySettings(settings);
+    QSettings settings("STdebuger", "STplotDebuger");
+    applySettings(settings);
 }
 
 STPlotWindow::~STPlotWindow()
@@ -137,18 +139,26 @@ STPlotWindow::~STPlotWindow()
 // }
 void STPlotWindow::setReadDevice(int readDevice){
     switch(readDevice){
-    case 0:
-        readManager.setReadDevicece(&stlinkDevice);
-        runToolBar->removeAction(lastReadWidget);
-        lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
-        qDebug() << "Read device STLINK";
-        break;
-    case 1:
-        readManager.setReadDevicece(&shnetDevice);
-        runToolBar->removeAction(lastReadWidget);
-        lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
-        qDebug() << "Read device UDP";
-        break;
+        case 0:
+            readManager.setReadDevicece(&stlinkDevice);
+            runToolBar->removeAction(lastReadWidget);
+            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
+            qDebug() << "Read device STLINK";
+            break;
+        case 1:
+            readManager.setReadDevicece(&shnetDevice);
+            runToolBar->removeAction(lastReadWidget);
+            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
+            qDebug() << "Read device UDP";
+            break;
+        case 2:
+            readManager.setReadDevicece((ReadDeviceObject *)(&stmStudioSaveDevicec));
+            runToolBar->removeAction(lastReadWidget);
+            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
+            qDebug() << "Read device STMstudio file";
+            break;
+        default:
+            break;
     }
 }
 

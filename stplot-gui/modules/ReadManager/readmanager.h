@@ -7,6 +7,7 @@
 #include "readloop.h"
 #include <QMap>
 #include "fimesavereaddevice.h"
+#include "stmstudiofiledevice.h"
 
 class ReadManager : public QObject
 {
@@ -19,6 +20,8 @@ public:
     static QVector<ReadDeviceObject::ReadAddres> calcReadSeuqence(QVector<VarChannel*> *channels);
 
     void setReadDevicece(ReadDeviceObject *newReadDevicece);
+
+    void addSaveDevice(SaveDeviceObject *newSaveDevicece);
 
 public slots:
     void stopRead();
@@ -41,7 +44,7 @@ private:
     QThread readLoopThread;
     QVector<SaveDeviceObject*> saveDeviceces;
     ReadDeviceObject *readDevicece;
-    FimeSaveReadDevice saveLoader;
+//    FimeSaveReadDevice saveLoader;
     QDateTime startTime;
 };
 

@@ -56,14 +56,15 @@ private:
     ViewManager* viewManager;
     // QVector<ReadDeviceObject*> readDeviceces;
     QVector<SaveDeviceObject*> saveDeviceces;
-    STlinkDevice stlinkDevice;
     ReadManager readManager;
-    SHnetUDPDevice shnetDevice;
     QString curentSettingsPath;
     QTimer redrawTimer;
     QComboBox readSelector;
     QToolBar *runToolBar;
     QAction *lastReadWidget;
+    STlinkDevice stlinkDevice;
+    SHnetUDPDevice shnetDevice;
+    STMstudioFileDevice stmStudioSaveDevicec;
 };
 
 
