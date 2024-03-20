@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QDateTime>
 #include <QWidget>
+#include <QLineEdit>
 
 class STMstudioFileDevice : public SaveDeviceObject, ReadDeviceObject
 {
@@ -23,7 +24,8 @@ public:
     int readFileDevice(QVector<VarChannel *> chanales);
 
 private:
-    QWidget *configReadWidget;//TODO
+    QWidget *configReadWidget;
+    QLineEdit* fileRead;
     QWidget *configSaveWidget;//TODO
     QFile device;
     QDateTime startTime;

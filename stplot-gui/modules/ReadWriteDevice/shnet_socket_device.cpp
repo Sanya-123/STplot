@@ -233,9 +233,9 @@ QWidget *SHnetUDPDevice::getReadDevConfigWidget()
 {
 
     QWidget* configWidget = new QWidget();
-    QLabel *labelIP = new QLabel("IP:");
-    QLabel *labelPort = new QLabel("Port:");
-    QLabel *labelShnet = new QLabel("SHnet:");
+    QLabel *labelIP = new QLabel("IP:", configWidget);
+    QLabel *labelPort = new QLabel("Port:", configWidget);
+    QLabel *labelShnet = new QLabel("SHnet:", configWidget);
 
     labelIP->setAlignment(Qt::AlignRight);
     labelPort->setAlignment(Qt::AlignRight);
@@ -244,14 +244,14 @@ QWidget *SHnetUDPDevice::getReadDevConfigWidget()
 
     QSpacerItem *spacer = new QSpacerItem(50,0);
 
-    QLineEdit* serverAddressWidget = new QLineEdit();
+    QLineEdit* serverAddressWidget = new QLineEdit(configWidget);
     serverAddressWidget->setText(serverAddress);
     serverAddressWidget->setMaxLength(15);
     serverAddressWidget->setMaximumWidth(100);
     // serverAddressWidget->setInputMask("000.000.000.000;_");
     connect(serverAddressWidget, &QLineEdit::textChanged, this, &SHnetUDPDevice::setServerAddress);
 
-    QSpinBox* serverPortWidget = new QSpinBox();
+    QSpinBox* serverPortWidget = new QSpinBox(configWidget);
     serverPortWidget->setMinimum(0);
     serverPortWidget->setMaximum(99999);
     serverPortWidget->setMaximumWidth(80);
@@ -259,27 +259,27 @@ QWidget *SHnetUDPDevice::getReadDevConfigWidget()
     // connect(serverPortWidget, &QSpinBox::valueChanged, this, &SHnetUDPDevice::setServerPort);
     connect(serverPortWidget, SIGNAL(valueChanged(int)), this, SLOT(setServerPort(int)));
 
-    QComboBox *shnetID0 = new QComboBox;
+    QComboBox *shnetID0 = new QComboBox(configWidget);
     shnetID0->addItems(QStringList(shnetIDMap.keys()));
     shnetID0->setMaximumWidth(150);
     shnetID0->setCurrentText("KPP");
     connect(shnetID0, &QComboBox::currentTextChanged, this, &SHnetUDPDevice::setSHnetL0Address);
 
-    QSpinBox* shnetID1 = new QSpinBox();
+    QSpinBox* shnetID1 = new QSpinBox(configWidget);
     shnetID1->setMinimum(0);
     shnetID1->setMaximum(31);
     shnetID1->setMaximumWidth(50);
     shnetID1->setValue(downlink.net_id_1);
     connect(shnetID1, SIGNAL(valueChanged(int)), this, SLOT(setSHnetL1Address(int)));
 
-    QSpinBox* shnetID2 = new QSpinBox();
+    QSpinBox* shnetID2 = new QSpinBox(configWidget);
     shnetID2->setMinimum(0);
     shnetID2->setMaximum(31);
     shnetID2->setMaximumWidth(50);
     shnetID2->setValue(downlink.net_id_2);
     connect(shnetID2, SIGNAL(valueChanged(int)), this, SLOT(setSHnetL2Address(int)));
 
-    QSpinBox* shnetID3 = new QSpinBox();
+    QSpinBox* shnetID3 = new QSpinBox(configWidget);
     shnetID3->setMinimum(0);
     shnetID3->setMaximum(7);
     shnetID3->setMaximumWidth(50);

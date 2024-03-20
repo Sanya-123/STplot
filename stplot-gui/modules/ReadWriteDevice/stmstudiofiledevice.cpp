@@ -1,9 +1,22 @@
 #include "stmstudiofiledevice.h"
+#include <QLabel>
+#include <QLineEdit>
+#include <QLayout>
+#include <QPushButton>
 
 STMstudioFileDevice::STMstudioFileDevice()
 {
-    configReadWidget = new QWidget;
     stopDev();
+    configReadWidget = new QWidget;
+    QLabel *labelFile = new QLabel("File:", configReadWidget);
+    fileRead = new QLineEdit(configReadWidget);
+//    QPushButton *buttomSelectFile = new QPushButton("open", configReadWidget);
+//    QObject::connect(buttomSelectFile, &QPushButton::click, this, [=] () {});
+
+
+    QHBoxLayout* layout = new QHBoxLayout(configReadWidget);
+    layout->addWidget(labelFile);
+    layout->addWidget(fileRead);
 }
 
 STMstudioFileDevice::~STMstudioFileDevice()
@@ -225,7 +238,7 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
     if(isWriteMode)
         return -1;
 
-    device.setFileName("/home/user/Project/Desktop/STplot_deb/bin/stplot-gui/log_2024_03_20__15_01_33.txt");
+    device.setFileName(fileRead->text());
     if(!device.open(QIODevice::ReadOnly))
         return -2;
 

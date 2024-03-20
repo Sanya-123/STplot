@@ -21,7 +21,7 @@ public:
 
 // private slots:
     // void readPendingDatagrams();
-public slots:
+private slots:
     void setServerAddress(const QString &text);
     void setServerPort(int port);
     void setSHnetL0Address(const QString &text);
