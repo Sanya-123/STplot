@@ -233,6 +233,8 @@ QWidget *STMstudioFileDevice::getSaveDevConfigWidget()
     return configSaveWidget;
 }
 
+#include <QDebug>
+
 int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
 {
     if(isWriteMode)
@@ -241,6 +243,9 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
     device.setFileName(fileRead->text());
     if(!device.open(QIODevice::ReadOnly))
         return -2;
+
+    QVector<VarChannel *> readChanales;
+
 
     if(!isReadMode)//if it is first exec
     {
@@ -253,8 +258,27 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
         device.readLine();
         QByteArray names = device.readLine();
         QByteArray addresses = device.readLine();
+        names.remove(names.size() - 1, 1);//remove \n
+//        names.r
 
-        //check names
+        QList<QByteArray> listName = names.split('\t');
+
+        readChanales.resize(listName.size() - 2);
+
+        //check names and map chanales
+        for(int i = 2; i < listName.size(); i++)
+        {
+            readChanales[i - 2] = nullptr;
+            for(int j = 0; j < chanales.size(); j++)
+            {
+                if(listName[i] == chanales[j]->getName())
+                {
+                    readChanales[i - 2] = chanales[j];
+                }
+            }
+//
+        }
+
         QString namesShouldBe("D:\t");
         for(int i = 0; i < readSeuqence.size(); i++)
         {
@@ -288,12 +312,12 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
 
         int timeSample_ms = listVaribels[1].toLongLong();
 
-        QTime time;
+        QTime time = QTime(0, 0);
         time = time.addMSecs(timeSample_ms);
 
         for(int i = 2; i < listVaribels.size(); i++)
         {
-            chanales[i - 2]->pushValue(listVaribels[i].toFloat(), time);
+            readChanales[i - 2]->pushValue(listVaribels[i].toFloat(), time);
         }
     }
 
