@@ -21,7 +21,7 @@ Channels::Channels(QWidget *parent) :
 //    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
     ui->treeView->setModel(m_channelModel);
 
-    ui->treeView_customChanale->setItemDelegate(new ChanaleItemDelegate(true, this));
+    ui->treeView_customChanale->setItemDelegate(new ChanaleItemDelegate(true, this, m_channels));
     ui->treeView_customChanale->setModel(m_channelMathModel);
 
 //    ui->tableView->setItemDelegateForColumn(1, cbid);

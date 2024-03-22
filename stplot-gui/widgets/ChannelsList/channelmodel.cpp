@@ -40,7 +40,7 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
         }
         else if(index.column() == 1){
             if(isMathChanale)
-                return QVariant("...");
+                return QVariant(m_channels->at(index.row())->script());
             else
                 return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
         }
@@ -167,6 +167,11 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
             m_channels->at(index.row())->setLineWidth(value.toInt());
             return true;
         }
+        if((index.column() == 1) && isMathChanale)
+        {
+            m_channels->at(index.row())->setScript(value.toString());
+            return true;
+        }
     }
 
     return QAbstractTableModel::setData(index, value, role);
@@ -182,6 +187,8 @@ Qt::ItemFlags ChannelModel::flags(const QModelIndex &index) const
     if (index.column() >= GRUPH_FERST_COLUMN)
         return /*flags | */Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     else if(index.column() != 1)
+        return /*flags | */Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    else if((index.column() == 1) && isMathChanale)
         return /*flags | */Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;

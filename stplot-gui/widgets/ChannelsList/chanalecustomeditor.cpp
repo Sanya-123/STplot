@@ -46,6 +46,19 @@ QString ChanaleCustomEditor::getScipt()
     return ui->textEdit_script->toPlainText();
 }
 
+void ChanaleCustomEditor::setScript(QString script)
+{
+    ui->textEdit_script->setText(script);
+}
+
+void ChanaleCustomEditor::updateChanaleNames(QStringList chanaleNames)
+{
+    ui->listWidget_names->clear();
+    foreach (QString element, chanaleNames) {
+        ui->listWidget_names->addItem(element);
+    }
+}
+
 void ChanaleCustomEditor::iteamCliced(QListWidgetItem* iteam)
 {
     ui->textEdit_script->textCursor().insertText(iteam->text());

@@ -19,6 +19,11 @@ public:
     QString getName();
     QString getScipt();
 
+public slots:
+    void setScript(QString script);
+    void updateChanaleNames(QStringList chanaleNames);
+
+
 private slots:
     void iteamCliced(QListWidgetItem* iteam);
 

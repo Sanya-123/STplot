@@ -5,9 +5,10 @@
 #include <channelmodel.h>
 #include <QColorDialog>
 #include <QLineEdit>
+#include "chanalecustomeditor.h"
 
-ChanaleItemDelegate::ChanaleItemDelegate(bool mathChanale, QObject *parent)
-    : QStyledItemDelegate{parent}, isMathChanale(mathChanale)
+ChanaleItemDelegate::ChanaleItemDelegate(bool mathChanale, QObject *parent, QVector<VarChannel *> *chanales)
+    : QStyledItemDelegate{parent}, isMathChanale(mathChanale), chanalesList(chanales)
 {
 
 }
@@ -44,6 +45,12 @@ QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         QLineEdit *lineEdit = new QLineEdit(parent);
         return lineEdit;
     }
+    else if((index.column() == 1) && isMathChanale)
+    {
+        QStringList empty;
+        ChanaleCustomEditor *editor = new ChanaleCustomEditor(empty, "", "", parent);
+        return editor;
+    }
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
@@ -76,6 +83,24 @@ void ChanaleItemDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
         if(lineEdit != nullptr)
             lineEdit->setText(index.data().toString());//this is main different beatwen defoult editor and this
     }
+    else if((index.column() == 1) && isMathChanale)
+    {
+        ChanaleCustomEditor *scriptDialog = qobject_cast<ChanaleCustomEditor *>(editor);
+        if(scriptDialog != nullptr)
+        {
+            //update editor chanale lists
+            QStringList chanaleNames;
+            if(chanalesList != nullptr)
+            {
+                for(int i = 0; i < chanalesList->size(); i++)
+                {
+                    chanaleNames << chanalesList->at(i)->displayName();
+                }
+            }
+            scriptDialog->updateChanaleNames(chanaleNames);
+            scriptDialog->setScript(index.data().toString());
+        }
+    }
     else
         return QStyledItemDelegate::setEditorData(editor, index);
 }
@@ -99,6 +124,15 @@ void ChanaleItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
         QLineEdit *lineEdit = qobject_cast<QLineEdit *>(editor);
         if(lineEdit != nullptr)
             model->setData(index, lineEdit->text());
+    }
+    else if((index.column() == 1) && isMathChanale)
+    {
+        ChanaleCustomEditor *scriptDialog = qobject_cast<ChanaleCustomEditor *>(editor);
+        if(scriptDialog != nullptr)
+        {
+            if(scriptDialog->result() == QDialog::Accepted)
+                model->setData(index, scriptDialog->getScipt());
+        }
     }
     else
         return QStyledItemDelegate::setModelData(editor, model, index);

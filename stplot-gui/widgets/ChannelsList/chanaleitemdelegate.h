@@ -4,13 +4,15 @@
 #include <QAbstractItemDelegate>
 #include <QStyledItemDelegate>
 #include <QObject>
+#include "varchannel.h"
 
 class ChanaleItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
-    ChanaleItemDelegate(bool mathChanale = false, QObject *parent = nullptr);
+    ChanaleItemDelegate(bool mathChanale = false, QObject *parent = nullptr, QVector<VarChannel*> *chanales = nullptr);
+                                                                             /* none math chanale use for skript editor */
     void paint(QPainter *painter,
                const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
@@ -31,6 +33,7 @@ public:
 
 private:
     bool isMathChanale;
+    QVector<VarChannel*> *chanalesList;
 
 };
 
