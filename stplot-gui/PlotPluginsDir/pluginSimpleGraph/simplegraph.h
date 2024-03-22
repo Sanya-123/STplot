@@ -47,6 +47,7 @@ private slots:
     void handleMouseMove(QMouseEvent *event);
     void handleMousePress(QMouseEvent *event);
     void handleMouseRelease(QMouseEvent *event);
+//    void handleMouseWheel(QWheelEvent *event);
 
 private:
     Ui::SimpleGraph *ui;
@@ -66,6 +67,8 @@ private:
     double scaleTime;
     QCPRange lastTimeRange;
     QCPRange lastValueRange;
+    bool simpleScaleMode;
+    double lastTime;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

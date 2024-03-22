@@ -70,15 +70,15 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->actionStop->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
     ui->actionStop->setDisabled(true);
 
-    readSelector.addItem("STLink");
-    readSelector.addItem("UDP");
-    readSelector.addItem("STLinkFile");
+    //init list devicec
+    initReadDevice();
 
     runToolBar = addToolBar("Run");
     runToolBar->addAction(ui->actionStart);
     runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
     runToolBar->addWidget(&readSelector);
+    runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config", this, SLOT(openSettingsReader()));
     ui->menuView->addAction(runToolBar->toggleViewAction());
     lastReadWidget  = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
 
@@ -118,8 +118,8 @@ STPlotWindow::STPlotWindow(QWidget *parent)
 STPlotWindow::~STPlotWindow()
 {
     //save settings
-    // QSettings settings("STdebuger", "STplotDebuger");
-    // writeSettings(settings);
+    QSettings settings("STdebuger", "STplotDebuger");
+    writeSettings(settings);
     delete ui;
 }
 
@@ -141,25 +141,28 @@ void STPlotWindow::setReadDevice(int readDevice){
     switch(readDevice){
         case 0:
             readManager.setReadDevicece(&stlinkDevice);
-            runToolBar->removeAction(lastReadWidget);
-            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
+//            runToolBar->removeAction(lastReadWidget);
+//            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
             qDebug() << "Read device STLINK";
             break;
         case 1:
             readManager.setReadDevicece(&shnetDevice);
-            runToolBar->removeAction(lastReadWidget);
-            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
+//            runToolBar->removeAction(lastReadWidget);
+//            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
             qDebug() << "Read device UDP";
             break;
         case 2:
             readManager.setReadDevicece((ReadDeviceObject *)(&stmStudioSaveDevicec));
-            runToolBar->removeAction(lastReadWidget);
-            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
+//            runToolBar->removeAction(lastReadWidget);
+//            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
             qDebug() << "Read device STMstudio file";
             break;
         default:
             break;
     }
+
+//    runToolBar->removeAction(lastReadWidget);
+//    lastReadWidget = runToolBar->addWidget(listReadDeviceInstance[readDevice].configWidget);
 }
 
 void STPlotWindow::startRead()
@@ -217,6 +220,20 @@ void STPlotWindow::saveSettingsAs()
     }
 }
 
+void STPlotWindow::openSettingsReader()
+{
+    int index = readSelector.currentIndex();
+    if(index < listReadDeviceInstance.size())
+    {
+        qDebug() << listReadDeviceInstance[index].name;
+        QWidget *configWidget = listReadDeviceInstance[index].object->getReadDevConfigWidget();
+        if(configWidget != nullptr)
+        {
+            configWidget->show();
+        }
+    }
+}
+
 void STPlotWindow::applySettings(QSettings &settings)
 {
     //NOTE do not forget clean some stuff like gruphs that should me implementer in restore settings
@@ -264,6 +281,31 @@ void STPlotWindow::saveSettingsToFile(QString fileName)
     if(settings.isWritable())
     {
         writeSettings(settings);
+    }
+}
+
+void STPlotWindow::initReadDevice()
+{
+    struct ReadDeviceInstance devRead;
+    devRead.object = &stlinkDevice;
+    devRead.name = "STLink";
+//    devRead.configWidget = stlinkDevice.getReadDevConfigWidget();
+    listReadDeviceInstance.append(devRead);
+
+    devRead.object = &shnetDevice;
+    devRead.name = "UDP";
+//    devRead.configWidget = shnetDevice.getReadDevConfigWidget();
+    listReadDeviceInstance.append(devRead);
+
+    devRead.object = (ReadDeviceObject *)(&stmStudioSaveDevicec);
+    devRead.name = "STLinkFile";
+//    devRead.configWidget = stmStudioSaveDevicec.getReadDevConfigWidget();
+    listReadDeviceInstance.append(devRead);
+
+
+    for(int i = 0; i < listReadDeviceInstance.size(); i++)
+    {
+        readSelector.addItem(listReadDeviceInstance[i].name);
     }
 }
 

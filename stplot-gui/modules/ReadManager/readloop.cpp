@@ -54,6 +54,9 @@ void ReadLoop::readLoop()
             if(resRead != 0)//error read device
                 throw resRead;
 
+            //TODO add here decode values
+            //TODO add thhen calc custom chanales
+
             //savde data in
             if(!isFileDev && saveDeviceces != nullptr)
             {
@@ -88,7 +91,8 @@ void ReadLoop::readLoop()
         for(int i = 0; i < saveDeviceces->size(); i++)
             saveDeviceces->at(i)->stopDev();
     }
-     disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
+
+    disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)));
     if(!isFileDev)
         disconnect(readDevicec, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SLOT(saveReedSequence(uint32_t,QVector<uint8_t>,QDateTime)));
     saveSequence.clear();

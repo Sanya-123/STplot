@@ -41,12 +41,14 @@ public slots:
     void loadSettings();
     void saveSettings();
     void saveSettingsAs();
+    void openSettingsReader();
 //    void connect();
 
 private:
     void applySettings(QSettings &settings);
     void writeSettings(QSettings &settings);
     void saveSettingsToFile(QString fileName);
+    void initReadDevice();
 
 private:
     Ui::STPlotWindow *ui;
@@ -65,6 +67,13 @@ private:
     STlinkDevice stlinkDevice;
     SHnetUDPDevice shnetDevice;
     STMstudioFileDevice stmStudioSaveDevicec;
+
+    struct ReadDeviceInstance{
+        ReadDeviceObject *object;
+        QString name;
+        QWidget *configWidget;
+    };
+    QList<struct ReadDeviceInstance> listReadDeviceInstance;
 };
 
 

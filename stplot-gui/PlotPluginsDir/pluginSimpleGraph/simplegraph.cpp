@@ -13,6 +13,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(par
     mapSettingsDefauold["gColor.bgColor2"] = QColor(0xf9, 0xf9, 0xf9);
     mapSettingsDefauold["legend.enLegend"] = false;
     mapSettingsDefauold["scale.windowSec"] = 5.0;
+    mapSettingsDefauold["scale.simpleMode"] = false;
 
 //    mapSettings = mapSettingsDefauold;
     restoreDefoultSetings();
@@ -20,7 +21,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(par
 
 SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
-    ui(new Ui::SimpleGraph), emptyGraphs(true)
+    ui(new Ui::SimpleGraph), emptyGraphs(true), simpleScaleMode(false), lastTime(0)
 {
     ui->setupUi(this);
 
@@ -78,16 +79,19 @@ SimpleGraph::~SimpleGraph()
 
 void SimpleGraph::redraw(){
     if (firstRedraw){
+        lastTime = 0;
         // rescale both axis when first data arrives
-        plotWidget->rescaleAxes(!emptyGraphs);
+//        plotWidget->rescaleAxes(!emptyGraphs);
+        plotWidget->yAxis->rescale(!emptyGraphs);
         if (!emptyGraphs){
             firstRedraw = false;
         }
     }
     else{
         // only track time axis when running
-        plotWidget->xAxis->rescale();
+//        plotWidget->xAxis->rescale();
     }
+    plotWidget->xAxis->setRange(/*plotWidget->xAxis->range().upper */lastTime, scaleTime, Qt::AlignmentFlag::AlignRight);
     plotWidget->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -196,8 +200,11 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
     for(int i = gpuh->dataCount(); i < varChanale->getBufferSize(); i++)
     {
         VarValue val = varChanale->getValue(i);
+        double time = val.qtime.msecsSinceStartOfDay()*1.0/1000.0;
+        if(time > lastTime)
+            lastTime = time;
 //        gpuh->addData(val.time.time_since_epoch().count(), val.value);
-        gpuh->addData(val.qtime.msecsSinceStartOfDay()*1.0/1000.0, val.value);
+        gpuh->addData(time, val.value);
     }
 
     if(varChanale->getBufferSize())
@@ -206,7 +213,10 @@ void SimpleGraph::doUpdatePlot(VarChannel *varChanale, QCPGraph* gpuh)
 
 
 void SimpleGraph::limitTimeRange(const QCPRange & newRange, const QCPRange & oldRange){
-    plotWidget->xAxis->setRange(newRange.upper, scaleTime, Qt::AlignmentFlag::AlignRight);
+//    if(simpleScaleMode)
+//        return;
+    scaleTime = newRange.upper - newRange.lower;
+//    plotWidget->xAxis->setRange(newRange.upper, scaleTime, Qt::AlignmentFlag::AlignRight);
 }
 
 
@@ -313,6 +323,7 @@ void SimpleGraph::settingsChanged()
     plotWidget->setBackground(plotGradient);
 
     scaleTime = map["scale.windowSec"].toFloat();
+    simpleScaleMode = map["scale.simpleMode"].toBool();
 
     if(map["legend.enLegend"].toBool() != subLayout->visible())
     {
@@ -352,6 +363,9 @@ void SimpleGraph::plotSelecting()
 
 void SimpleGraph::handleMouseRelease(QMouseEvent *event)
 {
+    if(simpleScaleMode)
+        return;
+
     if (event->button() == Qt::RightButton){
         rightMousePressed = false;
         qDebug() << "RMB released";
@@ -360,6 +374,32 @@ void SimpleGraph::handleMouseRelease(QMouseEvent *event)
 
 void SimpleGraph::handleMousePress(QMouseEvent *event)
 {
+    if(simpleScaleMode)
+    {
+        if (event->button() == Qt::MiddleButton)
+        {
+            if (event->modifiers().testFlag(Qt::ControlModifier) && event->modifiers().testFlag(Qt::AltModifier))
+            {
+                plotWidget->rescaleAxes();
+            }
+        }
+        else if (event->button() == Qt::RightButton)
+        {
+            if (event->modifiers().testFlag(Qt::ControlModifier) && event->modifiers().testFlag(Qt::AltModifier))
+            {
+                plotWidget->xAxis->rescale();
+            }
+        }
+        else if (event->button() == Qt::LeftButton)
+        {
+            if (event->modifiers().testFlag(Qt::ControlModifier) && event->modifiers().testFlag(Qt::AltModifier))
+            {
+                plotWidget->yAxis->rescale();
+            }
+        }
+        return;
+    }
+
     if (event->button() == Qt::RightButton){
         qDebug() << "RMB pressed";
         rightMousePressed = true;
@@ -375,10 +415,11 @@ void SimpleGraph::handleMousePress(QMouseEvent *event)
     }
 }
 
-
-
 void SimpleGraph::handleMouseMove(QMouseEvent *event)
 {
+    if(simpleScaleMode)
+        return;
+
     // handle right click scaling
     if (rightMousePressed){
 
@@ -432,6 +473,11 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
     plotWidget->replot();
 
 }
+
+//void SimpleGraph::handleMouseWheel(QWheelEvent *event)
+//{
+
+//}
 
 //bool SimpleGraph::plotVar(QString plotName, QVector<VarValue> values)
 //{
