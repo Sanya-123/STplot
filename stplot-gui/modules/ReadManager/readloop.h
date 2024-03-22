@@ -19,6 +19,7 @@ public:
 
     void updateMathChanales(QVector<VarChannel *> *mathChanales);
 
+    //TODO move it into readwrite device
     static QMap<QString, float> fillMapValues(QStringList chanaleNames, QVector<float> values);
     static QVector<float> calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString,QString>> *listMathChanales);
     static QVector<float> calcMathChanales(QList<QString> listChanalesName, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales);

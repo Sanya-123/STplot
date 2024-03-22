@@ -138,28 +138,36 @@ STPlotWindow::~STPlotWindow()
 
 // }
 void STPlotWindow::setReadDevice(int readDevice){
-    switch(readDevice){
-        case 0:
-            readManager.setReadDevicece(&stlinkDevice);
-//            runToolBar->removeAction(lastReadWidget);
-//            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
-            qDebug() << "Read device STLINK";
-            break;
-        case 1:
-            readManager.setReadDevicece(&shnetDevice);
-//            runToolBar->removeAction(lastReadWidget);
-//            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
-            qDebug() << "Read device UDP";
-            break;
-        case 2:
-            readManager.setReadDevicece((ReadDeviceObject *)(&stmStudioSaveDevicec));
-//            runToolBar->removeAction(lastReadWidget);
-//            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
-            qDebug() << "Read device STMstudio file";
-            break;
-        default:
-            break;
+//    switch(readDevice){
+//        case 0:
+//            readManager.setReadDevicece(&stlinkDevice);
+////            runToolBar->removeAction(lastReadWidget);
+////            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
+//            qDebug() << "Read device STLINK";
+//            break;
+//        case 1:
+//            readManager.setReadDevicece(&shnetDevice);
+////            runToolBar->removeAction(lastReadWidget);
+////            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
+//            qDebug() << "Read device UDP";
+//            break;
+//        case 2:
+//            readManager.setReadDevicece(&stmStudioSaveDevicec);
+////            runToolBar->removeAction(lastReadWidget);
+////            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
+//            qDebug() << "Read device STMstudio file";
+//            break;
+//        default:
+//            break;
+//    }
+
+    if(readDevice < listReadDeviceInstance.size())
+    {
+        readManager.setReadDevicece(listReadDeviceInstance[readDevice].object);
+        qDebug() << "Read device " << listReadDeviceInstance[readDevice].name;
     }
+
+
 
 //    runToolBar->removeAction(lastReadWidget);
 //    lastReadWidget = runToolBar->addWidget(listReadDeviceInstance[readDevice].configWidget);
@@ -306,6 +314,10 @@ void STPlotWindow::initReadDevice()
     for(int i = 0; i < listReadDeviceInstance.size(); i++)
     {
         readSelector.addItem(listReadDeviceInstance[i].name);
+        if(listReadDeviceInstance[i].object->getReadDevConfigWidget() != nullptr)
+        {
+            ui->menuconfing->addAction(listReadDeviceInstance[i].name, listReadDeviceInstance[i].object->getReadDevConfigWidget(), SLOT(show()));
+        }
     }
 }
 

@@ -57,9 +57,17 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
    </widget>
+   <widget class="QMenu" name="menuconfing">
+    <property name="title">
+     <string>confing</string>
+    </property>
+    <addaction name="actionMainConfig"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
    <addaction name="menuRun"/>
+   <addaction name="menuconfing"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
@@ -96,6 +104,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionMainConfig">
+   <property name="text">
+    <string>main config</string>
    </property>
   </action>
  </widget>
