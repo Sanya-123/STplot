@@ -10,7 +10,7 @@ class ChannelModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit ChannelModel(QVector<VarChannel*> *channels, QObject *parent = nullptr);
+    explicit ChannelModel(QVector<VarChannel*> *channels, bool mathChanale = false, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -45,6 +45,8 @@ private:
     QStringList dotStyles;
     QStringList lineStyles;
     QStringList lineWidths;
+
+    bool isMathChanale;
 
 };
 

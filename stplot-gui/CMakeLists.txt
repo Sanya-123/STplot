@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport Script)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport Script)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -40,6 +40,9 @@ set(PROJECT_SOURCES
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
+        widgets/ChannelsList/chanalecustomeditor.h
+        widgets/ChannelsList/chanalecustomeditor.cpp
+        widgets/ChannelsList/chanalecustomeditor.ui
         # modules/settingsabstract.h
         modules/plotwidgetabstract.h
         modules/plotinterface.h
@@ -127,6 +130,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::PrintSupport
+    Qt${QT_VERSION_MAJOR}::Script
     qtadvanceddocking
     xcb
     varloc

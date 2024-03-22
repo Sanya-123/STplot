@@ -7,9 +7,9 @@
 #include <QWidget>
 #include <QLineEdit>
 
-class STMstudioFileDevice : public SaveDeviceObject, ReadDeviceObject
+class STMstudioFileDevice : public SaveDeviceObject
 {
-//    Q_OBJECT
+    Q_OBJECT
 public:
     STMstudioFileDevice();
     ~STMstudioFileDevice();
@@ -23,10 +23,13 @@ public:
 
     int readFileDevice(QVector<VarChannel *> chanales);
 
+private slots:
+    void openSelectFile();
+
 private:
     QWidget *configReadWidget;
     QLineEdit* fileRead;
-    QWidget *configSaveWidget;//TODO
+    QWidget *configSaveWidget;
     QFile device;
     QDateTime startTime;
     QVector<struct ReadDeviceObject::ReadAddres> readSeuqence;

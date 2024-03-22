@@ -80,7 +80,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     runToolBar->addWidget(&readSelector);
     runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config", this, SLOT(openSettingsReader()));
     ui->menuView->addAction(runToolBar->toggleViewAction());
-    lastReadWidget  = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
+//    lastReadWidget  = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
 
     ui->menuView->addSeparator();
 
@@ -171,7 +171,7 @@ void STPlotWindow::startRead()
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);
     redrawTimer.start(100);
-    readManager.runReadLoop(channelsView->getListChanales());
+    readManager.runReadLoop(channelsView->getListChanales(), channelsView->getListMathChanales());
 }
 
 void STPlotWindow::stopedRead()

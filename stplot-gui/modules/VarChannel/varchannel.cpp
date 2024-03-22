@@ -4,7 +4,7 @@
 using namespace std::chrono;
 
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(false)
 {
     if (node == NULL){
         return;
@@ -20,9 +20,28 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 }
 
 VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(false)
 {
     setLocation(location);
+    m_name = name;
+    m_displayName = m_name;
+
+    m_dotStyle = MAX_DEFAOULT_DOT_STYLE;
+    m_lineStyle = MAX_DEFAOULT_LINE_STYLE;
+
+    setDotStyle(dotStyle);
+}
+
+VarChannel::VarChannel(QString script, QString name, QColor lineColor, int dotStyle) :
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(true), m_script(script)
+{
+    varloc_location_t loc;
+    loc.address.base = 0x00000000;
+    loc.address.offset_bits = 0;
+    loc.address.size_bits = 32;
+    loc.type = VARLOC_FLOAT;
+
+    setLocation(loc);
     m_name = name;
     m_displayName = m_name;
 
@@ -105,6 +124,16 @@ void VarChannel::pushValueRaw(uint32_t value){
 void VarChannel::selectCurentPlot()
 {
     emit selectPlot();
+}
+
+QString VarChannel::script() const
+{
+    return m_script;
+}
+
+void VarChannel::setScript(const QString &newScript)
+{
+    m_script = newScript;
 }
 
 QString VarChannel::displayName() const

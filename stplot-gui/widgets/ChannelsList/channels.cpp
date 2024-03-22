@@ -4,17 +4,25 @@
 #include <QMessageBox>
 #include <qmath.h>
 #include <unistd.h>
+#include <chanalecustomeditor.h>
 
 Channels::Channels(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Channels), iteamDeclarater(this), curentColorSet(0), curentDotStyle(MAX_DEFAOULT_DOT_STYLE)
+    ui(new Ui::Channels), /*iteamDeclarater(this),*/ curentColorSet(0), curentDotStyle(MAX_DEFAOULT_DOT_STYLE)
 {
     ui->setupUi(this);
     m_channels = new QVector<VarChannel*>();
-    m_channelModel = new ChannelModel(m_channels);
-    ui->treeView->setItemDelegate(new ChanaleItemDelegate(this));
+    m_channelsMath = new QVector<VarChannel*>();
+
+    m_channelModel = new ChannelModel(m_channels, false, this);
+    m_channelMathModel = new ChannelModel(m_channelsMath, true, this);
+
+    ui->treeView->setItemDelegate(new ChanaleItemDelegate(false, this));
 //    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
     ui->treeView->setModel(m_channelModel);
+
+    ui->treeView_customChanale->setItemDelegate(new ChanaleItemDelegate(true, this));
+    ui->treeView_customChanale->setModel(m_channelMathModel);
 
 //    ui->tableView->setItemDelegateForColumn(1, cbid);
 
@@ -24,6 +32,15 @@ Channels::Channels(QWidget *parent) :
     connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 
     connect(ui->treeView, SIGNAL(clicked(QModelIndex)), m_channelModel, SLOT(selectChanale(QModelIndex)));
+
+
+    connect(m_channelMathModel, &ChannelModel::updateViewport,
+            ui->treeView_customChanale->viewport(), QOverload<>::of(&QWidget::update));
+
+    connect(m_channelMathModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
+
+    connect(ui->treeView_customChanale, SIGNAL(clicked(QModelIndex)), m_channelMathModel, SLOT(selectChanale(QModelIndex)));
+
 
     //init colur sequnce
     colorSetSequese.append(QColor(40, 110, 255));
@@ -190,6 +207,11 @@ QVector<VarChannel *> *Channels::getListChanales() const
     return m_channels;
 }
 
+QVector<VarChannel *> *Channels::getListMathChanales() const
+{
+    return m_channelsMath;
+}
+
 void Channels::reloadChannels(varloc_node_t* root){
 
     bool update_allowed = false;
@@ -260,16 +282,19 @@ void Channels::add_channel(varloc_node_t* node){
 void Channels::addPlot()
 {
     m_channelModel->addPlot();
+    m_channelMathModel->addPlot();
 }
 
 void Channels::deletePlot(int number)
 {
     m_channelModel->deletePlot(number);
+    m_channelMathModel->deletePlot(number);
 }
 
 void Channels::setPlotName(int number, QString name)
 {
     m_channelModel->setPlotName(number, name);
+    m_channelMathModel->setPlotName(number, name);
 }
 
 //void Channels::on_pushButton_clicked()
@@ -299,3 +324,32 @@ void Channels::on_pushButton_deleteChanale_clicked()
     }
 }
 
+void Channels::on_pushButton_addCustomChanale_clicked()
+{
+    QStringList chanaleNames;
+    foreach (VarChannel* chanale, *m_channels) {
+        chanaleNames << chanale->displayName();
+    }
+
+    ChanaleCustomEditor editor(chanaleNames, "", "", this);
+    editor.show();
+    editor.exec();
+
+    if(editor.result() == QDialog::Accepted)
+    {
+        QString name = editor.getName();
+        QString script = editor.getScipt();
+
+        m_channelsMath->push_back(new VarChannel(script, name, colorSetSequese[curentColorSet++], curentDotStyle++));
+
+        //reset sequnce colour set
+        if(curentColorSet >= colorSetSequese.size())
+            curentColorSet = 0;
+
+        if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
+            curentDotStyle = 1;//1 becouse 0 is none style
+
+        emit m_channelMathModel->layoutChanged();
+
+    }
+}

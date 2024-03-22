@@ -3,6 +3,7 @@
 #include <QLineEdit>
 #include <QLayout>
 #include <QPushButton>
+#include <QFileDialog>
 
 STMstudioFileDevice::STMstudioFileDevice()
 {
@@ -10,13 +11,14 @@ STMstudioFileDevice::STMstudioFileDevice()
     configReadWidget = new QWidget;
     QLabel *labelFile = new QLabel("File:", configReadWidget);
     fileRead = new QLineEdit(configReadWidget);
-//    QPushButton *buttomSelectFile = new QPushButton("open", configReadWidget);
-//    QObject::connect(buttomSelectFile, &QPushButton::click, this, [=] () {});
+    QPushButton *buttomSelectFile = new QPushButton("open", configReadWidget);
+    connect(buttomSelectFile, SIGNAL(clicked(bool)), this, SLOT(openSelectFile()));
 
 
     QHBoxLayout* layout = new QHBoxLayout(configReadWidget);
     layout->addWidget(labelFile);
     layout->addWidget(fileRead);
+    layout->addWidget(buttomSelectFile);
 }
 
 STMstudioFileDevice::~STMstudioFileDevice()
@@ -323,4 +325,11 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
 
 
     return 0;
+}
+
+void STMstudioFileDevice::openSelectFile()
+{
+    QString file = QFileDialog::getOpenFileName(configReadWidget, tr("Select file"), fileRead->text(), "*");
+    if(!file.isEmpty())
+        fileRead->setText(file);
 }

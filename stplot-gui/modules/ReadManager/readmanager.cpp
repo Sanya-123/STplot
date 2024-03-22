@@ -3,16 +3,18 @@
 //#include <QApplication>
 
 ReadManager::ReadManager(QObject *parent)
-    : QObject{parent}, readDevicece(nullptr)
+    : QObject{parent}, readDevicece(nullptr), channels(nullptr), mathChannels(nullptr)
 {
     loop = new ReadLoop;
     loop->moveToThread(&readLoopThread);
-    connect(loop, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SLOT(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), Qt::QueuedConnection);
+//    connect(loop, SIGNAL(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), this, SLOT(addressesReedWithTime(uint32_t,QVector<uint8_t>,QDateTime)), Qt::QueuedConnection);
+    connect(loop, SIGNAL(decodedDataWithTime(QVector<float>,QDateTime)), this, SLOT(decodedDataWithTime(QVector<float>,QDateTime)), Qt::QueuedConnection);
+    connect(loop, SIGNAL(mathDataWithTime(QVector<float>,QDateTime)), this, SLOT(mathDataWithTime(QVector<float>,QDateTime)), Qt::QueuedConnection);
     connect(loop, SIGNAL(stopedLoop()), this, SLOT(stopReadLoop()), Qt::QueuedConnection);
     connect(&readLoopThread, SIGNAL(started()), loop, SLOT(readLoop()));
 }
 
-int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
+int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel*> *mathChannels)
 {
     if(readDevicece == nullptr)
         return -1;
@@ -28,6 +30,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
     }
 
     this->channels = channels;
+    this->mathChannels = mathChannels;
     readSeuqencs = calcReadSeuqence(channels);
 //    qDebug() << "readSeuqencs size :" << readSeuqencs.size();
     readSeuqencsMap.clear();
@@ -40,7 +43,8 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels)
     }
 
 
-    loop->setReadSequence(readSeuqencs);
+    loop->setReadSequence(readSeuqencs, channels);
+    loop->updateMathChanales(mathChannels);
     loop->setReadDevicec(readDevicece);
     loop->setSaveDeviceces(&saveDeviceces);
 
@@ -136,6 +140,7 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
 
     return res;
 }
+
 void ReadManager::addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time){
     union __attribute__((packed)){
         uint8_t _8[4];
@@ -150,6 +155,31 @@ void ReadManager::addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, 
         memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 
         addresSequence.vectorChanales[j].chanale->pushValueRawWithTime(combiner._32, time);
+    }
+}
+
+void ReadManager::decodedDataWithTime(QVector<float> data, QDateTime time)
+{
+    for(int i = 0; i < channels->size(); i++)
+    {
+        if(i >= data.size())
+            break;
+
+        channels->at(i)->pushValue(data[i], time.time());
+    }
+}
+
+void ReadManager::mathDataWithTime(QVector<float> data, QDateTime time)
+{
+    if(mathChannels != nullptr)
+    {
+        for(int i = 0; i < mathChannels->size(); i++)
+        {
+            if(i >= data.size())
+                break;
+
+            mathChannels->at(i)->pushValue(data[i], time.time());
+        }
     }
 }
 

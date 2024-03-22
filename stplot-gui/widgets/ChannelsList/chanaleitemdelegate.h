@@ -10,7 +10,7 @@ class ChanaleItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
-//    ChanaleItemDelegate(QObject *parent = nullptr);
+    ChanaleItemDelegate(bool mathChanale = false, QObject *parent = nullptr);
     void paint(QPainter *painter,
                const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
@@ -28,6 +28,9 @@ public:
     void setEditorData(QWidget *editor, const QModelIndex &index) const override;
     void setModelData(QWidget *editor, QAbstractItemModel *model,
                       const QModelIndex &index) const override;
+
+private:
+    bool isMathChanale;
 
 };
 

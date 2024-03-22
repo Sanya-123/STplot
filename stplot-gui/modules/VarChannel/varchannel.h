@@ -24,12 +24,15 @@ typedef struct {
     QTime qtime;
 }VarValue;
 
+typedef float VarElement;//TODO move evrywere from intor VarElement
+
 class VarChannel : public QObject
 {//TODO add slot and signal write data for write it throu plagins plot and then in read manager connet signals with request write device
     Q_OBJECT
 public:
     VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     VarChannel(varloc_location_t location, QString name, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
+    VarChannel(QString script, QString name, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();
     QString getName();
     float getValue();
@@ -66,6 +69,9 @@ public:
     QString displayName() const;
     void setDisplayName(const QString &newDisplayName);
 
+    QString script() const;
+    void setScript(const QString &newScript);
+
 public slots:
     void pushValue(float value, QTime record_time);
     void pushValueRaw(uint32_t value);
@@ -91,7 +97,12 @@ private:
     int                     m_dotStyle;
     int                     m_lineStyle;
 
+    //custom ckript
+    bool                    m_isCustomChanale;
+    QString                 m_script;
+
     int tmpDesc;
+
 
 signals:
     void changePlotColor();

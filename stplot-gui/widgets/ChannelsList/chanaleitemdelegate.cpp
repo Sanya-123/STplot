@@ -6,11 +6,11 @@
 #include <QColorDialog>
 #include <QLineEdit>
 
-//ChanaleItemDelegate::ChanaleItemDelegate(QObject *parent)
-//    : QStyledItemDelegate{parent}
-//{
+ChanaleItemDelegate::ChanaleItemDelegate(bool mathChanale, QObject *parent)
+    : QStyledItemDelegate{parent}, isMathChanale(mathChanale)
+{
 
-//}
+}
 
 void ChanaleItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {

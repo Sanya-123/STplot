@@ -15,7 +15,7 @@ class ReadManager : public QObject
 public:
     explicit ReadManager(QObject *parent = nullptr);
 
-    int runReadLoop(QVector<VarChannel*> *channels);
+    int runReadLoop(QVector<VarChannel*> *channels, QVector<VarChannel*> *mathChannels = nullptr);
 
     static QVector<ReadDeviceObject::ReadAddres> calcReadSeuqence(QVector<VarChannel*> *channels);
 
@@ -34,12 +34,15 @@ signals:
 private slots:
     void addresRead(uint32_t addres, QVector<uint8_t> data);
     void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);
+    void decodedDataWithTime(QVector<float> data, QDateTime time);
+    void mathDataWithTime(QVector<float> data, QDateTime time);
     void stopReadLoop();
 
 private:
     QVector<ReadDeviceObject::ReadAddres> readSeuqencs;
     QMap<uint32_t, ReadDeviceObject::ReadAddres> readSeuqencsMap;
     QVector<VarChannel*> *channels;
+    QVector<VarChannel*> *mathChannels;
     ReadLoop *loop;
     QThread readLoopThread;
     QVector<SaveDeviceObject*> saveDeviceces;

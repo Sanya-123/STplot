@@ -14,11 +14,13 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="1">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Channels:</string>
+   <item row="0" column="0" colspan="3">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
+     <widget class="QTreeView" name="treeView"/>
+     <widget class="QTreeView" name="treeView_customChanale"/>
     </widget>
    </item>
    <item row="1" column="0">
@@ -28,8 +30,19 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QTreeView" name="treeView"/>
+   <item row="1" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Channels:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pushButton_addCustomChanale">
+     <property name="text">
+      <string>add custom chanale</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

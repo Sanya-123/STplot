@@ -22,6 +22,7 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
     QVector<VarChannel*> *getListChanales() const;
+    QVector<VarChannel*> *getListMathChanales() const;
 
 public slots:
     void reloadChannels(varloc_node_t* root);
@@ -38,11 +39,15 @@ private slots:
 
     void on_pushButton_deleteChanale_clicked();
 
+    void on_pushButton_addCustomChanale_clicked();
+
 private:
     Ui::Channels *ui;
     ChannelModel *m_channelModel;
+    ChannelModel *m_channelMathModel;
     QVector<VarChannel*> *m_channels;
-    ChanaleItemDelegate iteamDeclarater;
+    QVector<VarChannel*> *m_channelsMath;
+//    ChanaleItemDelegate iteamDeclarater;
     //sequnce sent color for new gruph
     QList<QColor> colorSetSequese;
     int curentColorSet;

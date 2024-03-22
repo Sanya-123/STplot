@@ -73,7 +73,7 @@ signals:
     void addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time);
 };
 
-class SaveDeviceObject : public QObject
+class SaveDeviceObject : public ReadDeviceObject
 {
     Q_OBJECT
 public:
@@ -101,6 +101,10 @@ public:
      * @return - configure widget for curent device
      */
     virtual QWidget* getSaveDevConfigWidget() = 0;
+
+    //some overwrite from read device
+    bool isFileDevice() {return true;}
+    int execReadDevice() {return -1;}
 };
 
 

@@ -4,8 +4,8 @@
 
 #define GRUPH_FERST_COLUMN          6
 
-ChannelModel::ChannelModel( QVector<VarChannel*> *channels, QObject *parent)
-    : QAbstractTableModel{parent}, numberGraph(0)
+ChannelModel::ChannelModel(QVector<VarChannel*> *channels, bool mathChanale, QObject *parent)
+    : QAbstractTableModel{parent}, numberGraph(0), isMathChanale(mathChanale)
 {
     m_channels = channels;
     dotStyles = getDotStyle();
@@ -39,7 +39,10 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
             return QVariant( m_channels->at(index.row())->displayName());
         }
         else if(index.column() == 1){
-            return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
+            if(isMathChanale)
+                return QVariant("...");
+            else
+                return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
         }
         else if(index.column() == 2){
             return QVariant(m_channels->at(index.row())->lineColor().name());
@@ -92,7 +95,10 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
             return QVariant("Name");
         }
         if (section == 1){
-            return QVariant("Addres");
+            if(isMathChanale)
+                return QVariant("Script");
+            else
+                return QVariant("Addres");
         }
         else if(section == 2)
         {
