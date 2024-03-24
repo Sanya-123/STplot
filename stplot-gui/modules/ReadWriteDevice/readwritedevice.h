@@ -66,7 +66,7 @@ public:
      * @param chanales - list of chanales
      * @return - -1 this fuction is note support; -2... error
      */
-    virtual int readFileDevice(QVector<VarChannel *> chanales) {return -1;}
+    virtual int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr) {return -1;}
 
 signals:
     void addressesReed(uint32_t addres, QVector<uint8_t> data);

@@ -78,6 +78,7 @@ Channels::~Channels()
 
 void Channels::saveSettings(QSettings *settings)
 {
+    settings->setValue("splitteChanales", ui->splitter->saveState());
     settings->beginWriteArray("chanales");
     for (int i = 0; i < m_channels->size(); i++)
     {
@@ -114,6 +115,8 @@ void Channels::saveSettings(QSettings *settings)
 
 void Channels::restoreSettings(QSettings *settings)
 {
+    ui->splitter->restoreState(settings->value("splitteChanales").toByteArray());
+
     //eset states
     for (int i = 0; i < m_channels->size(); ++i) {
         delete m_channels->at(i);;
@@ -164,7 +167,7 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setTotalSizePlot(totalSizePlot);
         m_channels->push_back(chanale);
         for(int j = 0; j < sizePlotList; j++)
-        {//TODO add signal to ViewManager
+        {
             if(listPlot[j])
             {
 //                chanale->setEnableOnPlot(j, listPlot[j]);

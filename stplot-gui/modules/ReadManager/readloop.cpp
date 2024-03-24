@@ -151,6 +151,7 @@ void ReadLoop::updateMathChanales(QVector<VarChannel *> *mathChanales)
         {
             QString name = mathChanales->at(i)->displayName();
             QString script = mathChanales->at(i)->script();
+//            script = script.replace(".", "_");
             listMathChanales.append(qMakePair(name, script));
         }
     }
@@ -215,7 +216,7 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesName, QVect
     for(int i = 0; i < listMathChanales->size(); i++)
     {
         QString script = listMathChanales->at(i).second;
-        script = script.replace(".", "_");
+//        script = script.replace(".", "_");
         res.append(myEngine.evaluate(script).toNumber());
     }
 

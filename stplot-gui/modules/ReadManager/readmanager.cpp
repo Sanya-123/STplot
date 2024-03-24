@@ -21,9 +21,20 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
 
     if(readDevicece->isFileDevice())
     {
-        int res = readDevicece->readFileDevice(*channels);
+        //save size vectors before start
+        QVector<int> sizeVector;
+
+        for(int i = 0; i < channels->size(); i++)
+        {
+            sizeVector.append(channels->at(i)->getBufferSize());
+        }
+
+        QVector<QTime> readTimes;
+        int res = readDevicece->readFileDevice(*channels, &readTimes);
         if(res != -1)//if this function is supported
         {
+            calcMathFileData(sizeVector, channels, mathChannels, readTimes);
+            //exec calc math
             emit stopingRead();
             return res;
         }
@@ -217,6 +228,70 @@ void ReadManager::stopReadLoop()
 //    saveLoader.saveChanalesData(channels, startTime);
 
     emit stopingRead();
+}
+
+QVector<float> ReadManager::getChanaleReedData(QVector<int> sizeVectorBefore, QVector<VarChannel *> *channels, int iteration)
+{
+    QVector<float> chanalesValues;
+
+    for(int i = 0; i < channels->size(); i++)
+    {
+        if(i >= sizeVectorBefore.size())
+        {
+            break;
+        }
+        else
+        {
+            chanalesValues.append(channels->at(i)->getValue(sizeVectorBefore[i] + iteration).value);
+        }
+    }
+
+    return chanalesValues;
+}
+
+void ReadManager::calcMathFileData(QVector<int> sizeVectorBefore, QVector<VarChannel *> *channels, QVector<VarChannel *> *mathChannels, QVector<QTime> readTimes)
+{
+    QList<QString> listChanalesName;
+    QVector<QPair<QString,QString>> listMathChanales;
+
+    //init display names
+    for(int i = 0; i < channels->size(); i++)
+    {
+        QString name = channels->at(i)->displayName();
+        name = name.replace(".", "_");//TODO make better replease
+        listChanalesName.append(name);
+    }
+
+    //init list math chanales
+
+    if(mathChannels != nullptr)
+    {
+        for(int i = 0; i < mathChannels->size(); i++)
+        {
+            QString name = mathChannels->at(i)->displayName();
+            QString script = mathChannels->at(i)->script();
+            listMathChanales.append(qMakePair(name, script));
+        }
+    }
+    else
+        return;
+
+    for(int i = 0; i < readTimes.size(); i++)
+    {
+        QVector<float> listChanalesValues = getChanaleReedData(sizeVectorBefore, channels, i);
+        QVector<float> listMathChanalesValues = ReadLoop::calcMathChanales(listChanalesName, listChanalesValues, &listMathChanales);
+
+        for(int j = 0; j < mathChannels->size(); j++)
+        {
+            if(j >= listMathChanalesValues.size())
+                break;
+
+
+            mathChannels->at(j)->pushValue(listMathChanalesValues[j], readTimes[i]);
+        }
+
+    }
+
 }
 
 void ReadManager::setReadDevicece(ReadDeviceObject *newReadDevicece)

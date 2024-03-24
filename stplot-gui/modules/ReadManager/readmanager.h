@@ -39,6 +39,10 @@ private slots:
     void stopReadLoop();
 
 private:
+    QVector<float> getChanaleReedData(QVector<int> sizeVectorBefore, QVector<VarChannel *> *channels, int iteration);
+    void calcMathFileData(QVector<int> sizeVectorBefore, QVector<VarChannel *> *channels, QVector<VarChannel*> *mathChannels, QVector<QTime> readTimes);
+
+private:
     QVector<ReadDeviceObject::ReadAddres> readSeuqencs;
     QMap<uint32_t, ReadDeviceObject::ReadAddres> readSeuqencsMap;
     QVector<VarChannel*> *channels;

@@ -21,7 +21,7 @@ public:
     QWidget* getReadDevConfigWidget();
     QWidget* getSaveDevConfigWidget();
 
-    int readFileDevice(QVector<VarChannel *> chanales);
+    int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
 
 private slots:
     void openSelectFile();

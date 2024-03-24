@@ -19,12 +19,12 @@
 #define MAX_DEFAOULT_DOT_STYLE              1
 #define MAX_DEFAOULT_LINE_STYLE             1
 
+typedef double VarElement;//TODO move evrywere from intor VarElement
+
 typedef struct {
     double value;
     QTime qtime;
 }VarValue;
-
-typedef float VarElement;//TODO move evrywere from intor VarElement
 
 class VarChannel : public QObject
 {//TODO add slot and signal write data for write it throu plagins plot and then in read manager connet signals with request write device

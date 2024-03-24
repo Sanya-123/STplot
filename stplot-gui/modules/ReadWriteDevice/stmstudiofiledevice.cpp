@@ -237,7 +237,7 @@ QWidget *STMstudioFileDevice::getSaveDevConfigWidget()
 
 #include <QDebug>
 
-int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
+int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
 {
     if(isWriteMode)
         return -1;
@@ -316,6 +316,9 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales)
 
         QTime time = QTime(0, 0);
         time = time.addMSecs(timeSample_ms);
+        if(readTimes != nullptr)
+            readTimes->append(time);
+
 
         for(int i = 2; i < listVaribels.size(); i++)
         {

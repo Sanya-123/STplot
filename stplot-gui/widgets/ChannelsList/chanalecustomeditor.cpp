@@ -12,14 +12,14 @@ ChanaleCustomEditor::ChanaleCustomEditor(QStringList chanaleNames, QString name,
     maths << "-";
     maths << "*";
     maths << "/";
-    maths << "math.sin(";
+    maths << "Math.sqrt(";
+    maths << "Math.sin(";
+    maths << "Math.cos(";
     foreach (QString element, maths) {
         ui->listWidget_math->addItem(element);
     }
 
-    foreach (QString element, chanaleNames) {
-        ui->listWidget_names->addItem(element);
-    }
+    updateChanaleNames(chanaleNames);
 
     connect(ui->listWidget_math, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(iteamCliced(QListWidgetItem*)));
     connect(ui->listWidget_names, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(iteamCliced(QListWidgetItem*)));
@@ -55,6 +55,7 @@ void ChanaleCustomEditor::updateChanaleNames(QStringList chanaleNames)
 {
     ui->listWidget_names->clear();
     foreach (QString element, chanaleNames) {
+        element = element.replace(".", "_");
         ui->listWidget_names->addItem(element);
     }
 }
