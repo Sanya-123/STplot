@@ -208,7 +208,7 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesName, QVect
         if(i >= listChanalesValues.size())
             break;
 
-        listChanalesName[i] = listChanalesName[i].replace(".", "_");
+        REPLEASE_DOT_VAR_NAME(listChanalesName[i]);
 
         myEngine.globalObject().setProperty(listChanalesName[i], listChanalesValues[i]);
     }

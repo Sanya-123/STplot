@@ -1,6 +1,7 @@
 #include "chanalecustomeditor.h"
 #include "ui_chanalecustomeditor.h"
 #include <QAction>
+#include "varchannel.h"
 
 ChanaleCustomEditor::ChanaleCustomEditor(QStringList chanaleNames, QString name, QString oldScript, QWidget *parent) :
     QDialog(parent),
@@ -55,7 +56,7 @@ void ChanaleCustomEditor::updateChanaleNames(QStringList chanaleNames)
 {
     ui->listWidget_names->clear();
     foreach (QString element, chanaleNames) {
-        element = element.replace(".", "_");
+        REPLEASE_DOT_VAR_NAME(element);
         ui->listWidget_names->addItem(element);
     }
 }

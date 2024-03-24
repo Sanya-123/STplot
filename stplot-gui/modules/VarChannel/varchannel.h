@@ -19,6 +19,8 @@
 #define MAX_DEFAOULT_DOT_STYLE              1
 #define MAX_DEFAOULT_LINE_STYLE             1
 
+#define REPLEASE_DOT_VAR_NAME(name)         name = name.replace(".", "_") /*TODO make better replease*/
+
 typedef double VarElement;//TODO move evrywere from intor VarElement
 
 typedef struct {

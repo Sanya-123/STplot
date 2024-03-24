@@ -258,7 +258,7 @@ void ReadManager::calcMathFileData(QVector<int> sizeVectorBefore, QVector<VarCha
     for(int i = 0; i < channels->size(); i++)
     {
         QString name = channels->at(i)->displayName();
-        name = name.replace(".", "_");//TODO make better replease
+        REPLEASE_DOT_VAR_NAME(name);
         listChanalesName.append(name);
     }
 
