@@ -326,6 +326,8 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
         }
     }
 
+    stopDev();
+
 
     return 0;
 }
