@@ -46,7 +46,7 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
 {
     qDebug() << "Init SHnet UDP socket device";
     this->readSeuqence = readSeuqence;
-    memset(&downlink, 0, sizeof(SHnet_link_t));
+    // memset(&downlink, 0, sizeof(SHnet_link_t));
     memset(&uplink, 0, sizeof(SHnet_link_t));
     addresses.clear();
     data.clear();
@@ -56,7 +56,7 @@ int SHnetUDPDevice::initDevise(QVector<ReadAddres> readSeuqence)
         for (int j = 0; j < readSeuqence[i].readSize / 4; j++){
             addresses.append(readSeuqence[i].addres + (j*4));
             data.append(0);
-            // qDebug("Address %d %x", j, readSeuqence[i].addres + (j*4));
+            qDebug("Address %d %x", j, readSeuqence[i].addres + (j*4));
         }
     }
     qDebug("Sequence size is %d addresses, %f debug frames",

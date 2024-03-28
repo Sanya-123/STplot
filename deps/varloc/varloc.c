@@ -534,7 +534,11 @@ static void parse_member(struct class_member *member, bool union_member,
         if (cm_name) {
             strncpy(child->name, cm_name, sizeof(child->name));
         }
-    } else {
+    }
+    // else if(tag__is_pointer(type)){
+
+    // }
+    else {
         parse_type(type, cu, cm_name, child);
     }
 
@@ -564,7 +568,6 @@ static void parse_type(struct tag *type, const struct cu *cu, const char* name, 
     };
     int expand_types = 1;
     int expand_pointers = 1;
-    node->address.size_bits = tag__size(type, cu) * 8;
     // expand pointers
     if (expand_pointers){
         int nr_indirections = 0;
@@ -578,6 +581,9 @@ static void parse_type(struct tag *type, const struct cu *cu, const char* name, 
                                              NULL, 0, stdout);
                 if (printed)
                     return;
+                // if (ttype->tag == DW_TAG_subroutine_type){
+                //     return;
+                // }
             }
             type = ttype;
             ++nr_indirections;
@@ -601,6 +607,14 @@ static void parse_type(struct tag *type, const struct cu *cu, const char* name, 
 
         expand_types = nr_indirections;
         /* Avoid loops */
+        if (node->var_type == POINTER){
+            node->address.size_bits = 32;
+            return;
+        }
+        else{
+            node->address.size_bits = tag__size(type, cu) * 8;
+        }
+
         if (type->recursivity_level != 0){
             expand_types = 0;
         }
