@@ -41,6 +41,7 @@ public:
     varloc_location_t getLocation();
     uint32_t getMask();
     static float decode_value(uint32_t value, uint32_t mask, varloc_location_t location);
+    static uint32_t code_value(float value, uint32_t mask, varloc_location_t location);
     bool hasLocation(varloc_location_t loc);
 
     static QString getFullNmaeNode(varloc_node_t* node);
@@ -79,6 +80,7 @@ public slots:
     void pushValueRaw(uint32_t value);
     void pushValueRawWithTime(uint32_t value, QDateTime date_time);
     void selectCurentPlot();
+    void writeValues(float value);
 
 private:
     float                   m_value;
@@ -100,7 +102,7 @@ private:
     int                     m_lineStyle;
 
     //custom ckript
-    bool                    m_isCustomChanale;
+    bool                    m_isMathChanale;
     QString                 m_script;
 
     int tmpDesc;
@@ -114,6 +116,8 @@ signals:
     void changeDisplayName();
     void updatePlot();
     void selectPlot();
+
+    void requestWriteData(uint32_t data, varloc_location_t location);
 };
 
 #endif // VARCHANNEL_H

@@ -41,6 +41,13 @@ SettingsDialog::SettingsDialog(SettingsAbstract *settings, QWidget *parent)
                     propBase = prop;
                     break;
                 }
+                case QVariant::Double:
+                {
+                    QtnPropertyDouble* prop = qtnCreateProperty<QtnPropertyDouble>(parentProp);
+                    prop->setValue(var.value<double>());
+                    propBase = prop;
+                    break;
+                }
                 default:
                 {
                     QtnPropertyQString* prop = qtnCreateProperty<QtnPropertyQString>(parentProp);

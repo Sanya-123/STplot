@@ -4,7 +4,7 @@
 using namespace std::chrono;
 
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(false)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false)
 {
     if (node == NULL){
         return;
@@ -20,7 +20,7 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 }
 
 VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(false)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false)
 {
     setLocation(location);
     m_name = name;
@@ -33,7 +33,7 @@ VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColo
 }
 
 VarChannel::VarChannel(QString script, QString name, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isCustomChanale(true), m_script(script)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(true), m_script(script)
 {
     varloc_location_t loc;
     loc.address.base = 0x00000000;
@@ -111,6 +111,33 @@ float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t 
     return ret;
 }
 
+uint32_t VarChannel::code_value(float value, uint32_t mask, varloc_location_t location)
+{
+    uint32_t ret = 0;
+
+    if (location.type == VARLOC_FLOAT)
+    {
+        union {
+            _Float32    _f;
+            uint32_t    _u32;
+        }combiner;
+        combiner._f = value;
+        ret = combiner._f;
+    }
+    else
+    {
+        if (location.type == VARLOC_SIGNED)
+            ret = (int32_t)value;
+        else
+            ret = (uint32_t)value;
+    }
+
+    ret = ret << location.address.offset_bits;
+    ret = ret & mask;
+
+    return ret;
+}
+
 void VarChannel::pushValueRawWithTime(uint32_t value, QDateTime date_time){
     pushValue(decode_value(value, m_mask, m_location), date_time.time());
 }
@@ -124,6 +151,14 @@ void VarChannel::pushValueRaw(uint32_t value){
 void VarChannel::selectCurentPlot()
 {
     emit selectPlot();
+}
+
+void VarChannel::writeValues(float value)
+{
+    if(!m_isMathChanale)
+    {
+        emit requestWriteData(code_value(value, m_mask, m_location), m_location);
+    }
 }
 
 QString VarChannel::script() const

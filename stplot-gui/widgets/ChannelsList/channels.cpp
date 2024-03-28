@@ -83,32 +83,23 @@ void Channels::saveSettings(QSettings *settings)
     for (int i = 0; i < m_channels->size(); i++)
     {
         settings->setArrayIndex(i);
-        settings->setValue("chanaleName", m_channels->at(i)->getName());
-        settings->setValue("displayName", m_channels->at(i)->displayName());
-        settings->setValue("dotStyle", m_channels->at(i)->dotStyle());
-        settings->setValue("lineStyle", m_channels->at(i)->lineStyle());
-        settings->setValue("lineColor", m_channels->at(i)->lineColor());
-        settings->setValue("lineWidth", m_channels->at(i)->lineWidth());
+        saveSettingsChanaleCommon(settings, m_channels->at(i));
 
-        settings->beginGroup("location");
-        varloc_location_t loc = m_channels->at(i)->getLocation();
-        settings->setValue("type", (int)loc.type);
-        settings->setValue("base", loc.address.base);
-        settings->setValue("offset_bits", loc.address.offset_bits);
-        settings->setValue("size_bits", loc.address.size_bits);
-        settings->endGroup();
+        saveSettingsChanaleLocation(settings, m_channels->at(i));
 
+        saveSettingsChanalePlot(settings, m_channels->at(i));
+    }
+    settings->endArray();
 
-        settings->setValue("totalSizePlot", m_channels->at(i)->getTotalSizePlot());
-        settings->beginWriteArray("plotList");
-        QVector<bool> listPlot = m_channels->at(i)->getPlotList();
-        for(int j = 0; j < listPlot.size(); j++)
-        {
-            settings->setArrayIndex(j);
-            settings->setValue("enPlot", listPlot[j]);
-        }
-        settings->endArray();
+    settings->beginWriteArray("chanalesMath");
+    for (int i = 0; i < m_channelsMath->size(); i++)
+    {
+        settings->setArrayIndex(i);
+        saveSettingsChanaleCommon(settings, m_channelsMath->at(i));
 
+        saveSettingsChanaleScript(settings, m_channelsMath->at(i));
+
+        saveSettingsChanalePlot(settings, m_channelsMath->at(i));
     }
     settings->endArray();
 }
@@ -127,37 +118,28 @@ void Channels::restoreSettings(QSettings *settings)
     curentDotStyle = 0;
     emit m_channelModel->layoutChanged();
 
+    //common stuff for chanales
+    QString chanaleName;
+    QString displayName;
+    int dotStyle;
+    int lineStyle;
+    QColor lineColor;
+    int lineWidth;
+
     int size = settings->beginReadArray("chanales");
     for (int i = 0; i < size; ++i)
     {
         settings->setArrayIndex(i);
         //read all setings
-        QString chanaleName = settings->value("chanaleName").toString();
-        QString displayName = settings->value("displayName").toString();
-        int dotStyle = settings->value("dotStyle").toUInt();
-        int lineStyle = settings->value("lineStyle").toUInt();
-        QColor lineColor = settings->value("lineColor").value<QColor>();
-        int lineWidth = settings->value("lineWidth").toUInt();
 
-        settings->beginGroup("location");
-        varloc_location_t loc;
-        loc.type = (varloc_loc_type_e)settings->value("type").toUInt();
-        loc.address.base = settings->value("base").toUInt();
-        loc.address.offset_bits = settings->value("offset_bits").toUInt();
-        loc.address.size_bits = settings->value("size_bits").toUInt();
-        settings->endGroup();
+        restoreSettingsChanaleCommon(settings, &chanaleName, &displayName, &dotStyle,
+                                     &lineStyle, &lineColor, &lineWidth);
+
+        varloc_location_t loc = restoreSettingsChanaleLocation(settings);
 
         int totalSizePlot = settings->value("totalSizePlot").toUInt();
 
-        int sizePlotList = settings->beginReadArray("plotList");
-        QVector<bool> listPlot;
-        for(int j = 0; j < sizePlotList; j++)
-        {
-            settings->setArrayIndex(j);
-            listPlot.append(settings->value("enPlot").toBool());
-//            settings->setValue("enPlot", listPlot[j]);
-        }
-        settings->endArray();
+        QVector<bool> listPlot = restoreSettingsChanaleListPlot(settings);
 
         //now create var
         VarChannel *chanale = new VarChannel(loc, chanaleName, lineColor, dotStyle);
@@ -166,27 +148,56 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setLineWidth(lineWidth);
         chanale->setTotalSizePlot(totalSizePlot);
         m_channels->push_back(chanale);
-        for(int j = 0; j < sizePlotList; j++)
+        for(int j = 0; j < listPlot.size(); j++)
         {
             if(listPlot[j])
             {
-//                chanale->setEnableOnPlot(j, listPlot[j]);
                 m_channelModel->setEnablePlot(chanale, j, listPlot[j]);
             }
-           // qDebug() << "plotLisi:" << displayName << j << listPlot[j];
+        }
+    }
+    settings->endArray();
+
+    size = settings->beginReadArray("chanalesMath");
+    for (int i = 0; i < size; ++i)
+    {
+        settings->setArrayIndex(i);
+        //read all setings
+        restoreSettingsChanaleCommon(settings, &chanaleName, &displayName, &dotStyle,
+                                     &lineStyle, &lineColor, &lineWidth);
+
+        int totalSizePlot = settings->value("totalSizePlot").toUInt();
+
+        QVector<bool> listPlot = restoreSettingsChanaleListPlot(settings);
+
+        QString script = restoreSettingsChanaleScript(settings);
+
+        //now create var
+        VarChannel *chanale = new VarChannel(script, chanaleName, lineColor, dotStyle);
+        chanale->setDisplayName(displayName);
+        chanale->setLineStyle(lineStyle);
+        chanale->setLineWidth(lineWidth);
+        chanale->setTotalSizePlot(totalSizePlot);
+        m_channelsMath->push_back(chanale);
+        for(int j = 0; j < listPlot.size(); j++)
+        {
+            if(listPlot[j])
+            {
+                m_channelMathModel->setEnablePlot(chanale, j, listPlot[j]);
+            }
         }
     }
     settings->endArray();
 
     //update next elements
-    curentColorSet = m_channels->size()%colorSetSequese.size();
-    curentDotStyle = m_channels->size()%(MAX_NUMBER_DOT_STYLE - 1);
+    curentColorSet = (m_channels->size() + m_channelsMath->size())%colorSetSequese.size();
+    curentDotStyle = (m_channels->size() + m_channelsMath->size())%(MAX_NUMBER_DOT_STYLE - 1);
 
     //if I remove some meadle element an so color is offsetings So I check colors ans set next
-    if(m_channels->size())
+    if(m_channels->size() || m_channelsMath->size())
     {
         //color
-        int indexColor = colorSetSequese.indexOf(m_channels->last()->lineColor());
+        int indexColor = colorSetSequese.indexOf(/*m_channels->last()->lineColor() */lineColor);
         if(indexColor >= 0)
         {
             curentColorSet = indexColor + 1;
@@ -195,13 +206,14 @@ void Channels::restoreSettings(QSettings *settings)
         }
 
 //        line style
-        curentDotStyle = m_channels->last()->dotStyle() + 1;
+        curentDotStyle = /*m_channels->last()->dotStyle()*/dotStyle + 1;
 
         if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
             curentDotStyle = 1;//1 becouse 0 is none style
     }
 
     emit m_channelModel->layoutChanged();
+    emit m_channelMathModel->layoutChanged();
 //    ui->treeView->update();
 }
 
@@ -272,6 +284,7 @@ void Channels::add_channel(varloc_node_t* node){
     }
     //set colour from sequence
     m_channels->push_back(new VarChannel(node, colorSetSequese[curentColorSet++], curentDotStyle++));
+    connect(m_channels->last(), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
     //reset sequnce colour set
     if(curentColorSet >= colorSetSequese.size())
         curentColorSet = 0;
@@ -300,6 +313,90 @@ void Channels::setPlotName(int number, QString name)
     m_channelMathModel->setPlotName(number, name);
 }
 
+void Channels::saveSettingsChanaleCommon(QSettings *settings, VarChannel *chanale)
+{
+    settings->setValue("chanaleName", chanale->getName());
+    settings->setValue("displayName", chanale->displayName());
+    settings->setValue("dotStyle", chanale->dotStyle());
+    settings->setValue("lineStyle", chanale->lineStyle());
+    settings->setValue("lineColor", chanale->lineColor());
+    settings->setValue("lineWidth", chanale->lineWidth());
+}
+
+void Channels::saveSettingsChanaleLocation(QSettings *settings, VarChannel *chanale)
+{
+    settings->beginGroup("location");
+    varloc_location_t loc = chanale->getLocation();
+    settings->setValue("type", (int)loc.type);
+    settings->setValue("base", loc.address.base);
+    settings->setValue("offset_bits", loc.address.offset_bits);
+    settings->setValue("size_bits", loc.address.size_bits);
+    settings->endGroup();
+}
+
+void Channels::saveSettingsChanaleScript(QSettings *settings, VarChannel *chanale)
+{
+    settings->setValue("script",  chanale->script());
+}
+
+void Channels::saveSettingsChanalePlot(QSettings *settings, VarChannel *chanale)
+{
+    settings->setValue("totalSizePlot", chanale->getTotalSizePlot());
+    settings->beginWriteArray("plotList");
+    QVector<bool> listPlot = chanale->getPlotList();
+    for(int j = 0; j < listPlot.size(); j++)
+    {
+        settings->setArrayIndex(j);
+        settings->setValue("enPlot", listPlot[j]);
+    }
+    settings->endArray();
+
+}
+
+varloc_location_t Channels::restoreSettingsChanaleLocation(QSettings *settings)
+{
+    settings->beginGroup("location");
+    varloc_location_t loc;
+    loc.type = (varloc_loc_type_e)settings->value("type").toUInt();
+    loc.address.base = settings->value("base").toUInt();
+    loc.address.offset_bits = settings->value("offset_bits").toUInt();
+    loc.address.size_bits = settings->value("size_bits").toUInt();
+    settings->endGroup();
+
+    return loc;
+
+}
+
+void Channels::restoreSettingsChanaleCommon(QSettings *settings, QString *chanaleName, QString *displayName, int *dotStyle, int *lineStyle, QColor *lineColor, int *lineWidth)
+{
+    *chanaleName = settings->value("chanaleName").toString();
+    *displayName = settings->value("displayName").toString();
+    *dotStyle = settings->value("dotStyle").toUInt();
+    *lineStyle = settings->value("lineStyle").toUInt();
+    *lineColor = settings->value("lineColor").value<QColor>();
+    *lineWidth = settings->value("lineWidth").toUInt();
+}
+
+QString Channels::restoreSettingsChanaleScript(QSettings *settings)
+{
+    return settings->value("script").toString();
+}
+
+QVector<bool> Channels::restoreSettingsChanaleListPlot(QSettings *settings)
+{
+    int sizePlotList = settings->beginReadArray("plotList");
+    QVector<bool> listPlot;
+    for(int j = 0; j < sizePlotList; j++)
+    {
+        settings->setArrayIndex(j);
+        listPlot.append(settings->value("enPlot").toBool());
+//            settings->setValue("enPlot", listPlot[j]);
+    }
+    settings->endArray();
+
+    return listPlot;
+}
+
 //void Channels::on_pushButton_clicked()
 //{
 //    int curentElement = ui->treeView->currentIndex().row();
@@ -322,12 +419,13 @@ void Channels::on_pushButton_deleteChanale_clicked()
     int curentElement = ui->treeView->currentIndex().row();
     if((curentElement >= 0) && (curentElement < m_channels->size()))
     {
+        disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
         m_channels->remove(curentElement);
         emit m_channelModel->layoutChanged();
     }
 }
 
-void Channels::on_pushButton_addCustomChanale_clicked()
+void Channels::on_pushButton_addMathChanale_clicked()
 {
     QStringList chanaleNames;
     foreach (VarChannel* chanale, *m_channels) {
@@ -354,5 +452,15 @@ void Channels::on_pushButton_addCustomChanale_clicked()
 
         emit m_channelMathModel->layoutChanged();
 
+    }
+}
+
+void Channels::on_pushButton_deleteMathChanale_clicked()
+{
+    int curentElement = ui->treeView_customChanale->currentIndex().row();
+    if((curentElement >= 0) && (curentElement < m_channelsMath->size()))
+    {
+        m_channelsMath->remove(curentElement);
+        emit m_channelMathModel->layoutChanged();
     }
 }

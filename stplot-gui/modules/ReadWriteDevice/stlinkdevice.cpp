@@ -137,7 +137,7 @@ int STlinkDevice::execReadDevice()
 }
 
 int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
-{
+{//TODO for bit array read data then overwrite bing then write
     if(!sl)
         return -1;
 
