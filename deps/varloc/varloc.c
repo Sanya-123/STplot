@@ -725,7 +725,7 @@ next_type:
                 strcpy(node->name, name);
             }
             else{
-                sprintf(node->name, "_");
+                sprintf(node->name, "_s");
                 node->is_anon = 1;
             }
         }
@@ -738,7 +738,7 @@ next_type:
                 strncpy(node->name, name, sizeof(node->name));
             }
             else{
-                sprintf(node->name, "union ...");
+                sprintf(node->name, "_u");
                 node->is_anon = 1;
             }
         }
