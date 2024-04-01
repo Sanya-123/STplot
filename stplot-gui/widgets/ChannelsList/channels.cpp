@@ -108,15 +108,21 @@ void Channels::restoreSettings(QSettings *settings)
 {
     ui->splitter->restoreState(settings->value("splitteChanales").toByteArray());
 
-    //eset states
+    //reset states
     for (int i = 0; i < m_channels->size(); ++i) {
         delete m_channels->at(i);;
     }
     m_channels->clear();
 
+    for (int i = 0; i < m_channelsMath->size(); ++i) {
+        delete m_channelsMath->at(i);;
+    }
+    m_channelsMath->clear();
+
     curentColorSet = 0;
     curentDotStyle = 0;
     emit m_channelModel->layoutChanged();
+    emit m_channelMathModel->layoutChanged();
 
     //common stuff for chanales
     QString chanaleName;

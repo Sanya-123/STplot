@@ -259,8 +259,11 @@ QVector<float> ReadLoop::decodSavedSequence()
 
         ReadDeviceObject::ReadAddres addresSequence = readSequence[i];
 
-        for(int j = 0 ; j < saveSequence[i].second.size()/4; j++)
+        for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
         {
+            if(numbegChanale >= decodeList.size())
+                break;
+
             combiner._32 = 0;
             memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 

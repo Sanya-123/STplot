@@ -121,7 +121,7 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
 
         ReadDeviceObject::ReadAddres addresSequence = readSeuqence[i];
 
-        for(int j = 0 ; j < saveSequence[i].second.size()/4; j++)
+        for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
         {
             combiner._32 = 0;
             memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
