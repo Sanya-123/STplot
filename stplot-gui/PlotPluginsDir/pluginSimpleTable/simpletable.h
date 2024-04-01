@@ -44,6 +44,9 @@ private slots:
     void settingsChanged();
     void plotSelecting();
 
+    void updateCellValues(int row, int column);
+    void updateCellValues();
+
 //    void showPointToolTip(QMouseEvent *event);
 
 private:

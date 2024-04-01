@@ -30,6 +30,9 @@ SimpleTable::SimpleTable(SettingsAbstract *settings, QWidget *parent) :
 
     ui->tableWidget_table->setColumnWidth(0,this->size().width()*0.7);
     ui->tableWidget_table->setColumnWidth(1,this->size().width()*0.3);
+//    connect(ui->tableWidget_table, SIGNAL(cellActivated(int,int)), this, SLOT(updateCellValues(int,int)));
+    connect(ui->tableWidget_table->itemDelegate(), SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)), this, SLOT(updateCellValues()));
+
 
     // ui->tableWidget_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //settings
@@ -54,6 +57,8 @@ void SimpleTable::addPlot(VarChannel *varChanale)
 
     ui->tableWidget_table->setItem(rowNumber, 0, new QTableWidgetItem(varChanale->displayName()));
     ui->tableWidget_table->setItem(rowNumber, 1, new QTableWidgetItem(QString::number(varChanale->getValue())));
+
+    ui->tableWidget_table->item(rowNumber, 0)->setFlags(ui->tableWidget_table->item(rowNumber, 0)->flags() & ~(Qt::ItemIsEditable));
 
 
     connect(varChanale, SIGNAL(updatePlot()), this, SLOT(doUpdatePlot()));
@@ -252,4 +257,20 @@ void SimpleTable::plotSelecting()
     int gpuh = getGruph(sender(), &varChanale);
     if(gpuh == -1 || varChanale == nullptr)
         return;
+}
+
+void SimpleTable::updateCellValues(int row, int column)
+{
+    qDebug() << row << column;
+}
+
+void SimpleTable::updateCellValues()
+{
+    int numberChanale = ui->tableWidget_table->currentRow();
+    qDebug() << ui->tableWidget_table->currentRow() << ui->tableWidget_table->currentColumn();
+    //exec write data
+    if(numberChanale < mapPlots.size())
+    {
+        mapPlots[numberChanale]->writeValues(ui->tableWidget_table->item(numberChanale, 1)->text().toFloat());
+    }
 }

@@ -4,7 +4,7 @@
 using namespace std::chrono;
 
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false), m_value(0)
 {
     if (node == NULL){
         return;
@@ -20,7 +20,7 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 }
 
 VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false), m_value(0)
 {
     setLocation(location);
     m_name = name;
@@ -33,7 +33,7 @@ VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColo
 }
 
 VarChannel::VarChannel(QString script, QString name, QColor lineColor, int dotStyle) :
-    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(true), m_script(script)
+    m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(true), m_script(script), m_value(0)
 {
     varloc_location_t loc;
     loc.address.base = 0x00000000;
