@@ -110,7 +110,8 @@ void Channels::restoreSettings(QSettings *settings)
 
     //reset states
     for (int i = 0; i < m_channels->size(); ++i) {
-        delete m_channels->at(i);;
+        disconnect(m_channels->at(i), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
+        delete m_channels->at(i);
     }
     m_channels->clear();
 
@@ -154,6 +155,7 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setLineWidth(lineWidth);
         chanale->setTotalSizePlot(totalSizePlot);
         m_channels->push_back(chanale);
+        connect(chanale, SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
         for(int j = 0; j < listPlot.size(); j++)
         {
             if(listPlot[j])

@@ -31,7 +31,7 @@ SimpleTable::SimpleTable(SettingsAbstract *settings, QWidget *parent) :
     ui->tableWidget_table->setColumnWidth(0,this->size().width()*0.7);
     ui->tableWidget_table->setColumnWidth(1,this->size().width()*0.3);
 //    connect(ui->tableWidget_table, SIGNAL(cellActivated(int,int)), this, SLOT(updateCellValues(int,int)));
-    connect(ui->tableWidget_table->itemDelegate(), SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)), this, SLOT(updateCellValues()));
+    connect(ui->tableWidget_table->itemDelegate(), SIGNAL(commitData(QWidget*)), this, SLOT(updateCellValues()));
 
 
     // ui->tableWidget_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -123,7 +123,10 @@ void SimpleTable::doUpdatePlot()
     if(gpuh == -1 || varChanale == nullptr)
         return;
 
-    ui->tableWidget_table->item(gpuh, 1)->setText(QString::number(varChanale->getValue()));
+    if(!ui->tableWidget_table->isPersistentEditorOpen(ui->tableWidget_table->item(gpuh, 1)))
+    {
+        ui->tableWidget_table->item(gpuh, 1)->setText(QString::number(varChanale->getValue()));
+    }
 
 //    return doUpdatePlot(varChanale, gpuh);
 }
@@ -267,7 +270,7 @@ void SimpleTable::updateCellValues(int row, int column)
 void SimpleTable::updateCellValues()
 {
     int numberChanale = ui->tableWidget_table->currentRow();
-    qDebug() << ui->tableWidget_table->currentRow() << ui->tableWidget_table->currentColumn();
+//    qDebug() << ui->tableWidget_table->currentRow() << ui->tableWidget_table->currentColumn();
     //exec write data
     if(numberChanale < mapPlots.size())
     {
