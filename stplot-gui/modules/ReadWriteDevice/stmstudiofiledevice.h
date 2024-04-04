@@ -16,7 +16,8 @@ public:
     bool isFileDevice();
     int initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence);
     void stopDev();
-    int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence);
+    int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time);
+    int execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time);
     int execReadDevice();
     QWidget* getReadDevConfigWidget();
     QWidget* getSaveDevConfigWidget();
@@ -25,6 +26,7 @@ public:
 
 private slots:
     void openSelectFile();
+    int initSaveFile();
 
 private:
     QWidget *configReadWidget;

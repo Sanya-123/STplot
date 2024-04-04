@@ -55,16 +55,10 @@ void ReadLoop::readLoop()
                 throw resRead;
 
 
-            //savde data in file
-            if(!isFileDev && saveDeviceces != nullptr)
-            {
-                for(int i = 0; i < saveDeviceces->size(); i++)
-                    saveDeviceces->at(i)->execSaveDevice(saveSequence);
-            }
+            QDateTime _t = QDateTime::currentDateTime();
 
             if(decodeList.size() != 0)
             {
-                QDateTime _t = QDateTime::currentDateTime();
                 QVector<float> listDecoded = decodSavedSequence();
                 emit decodedDataWithTime(listDecoded, _t);
 
@@ -72,6 +66,21 @@ void ReadLoop::readLoop()
                 QVector<float> listMathValues = calcMathChanales(chanaleNames, listDecoded, &listMathChanales);
                 emit mathDataWithTime(listMathValues, _t);
 
+                //savde data in file
+                if(!isFileDev && saveDeviceces != nullptr)
+                {
+                    for(int i = 0; i < saveDeviceces->size(); i++)
+                        saveDeviceces->at(i)->execSaveDevice(chanaleNames, listDecoded, _t);
+                }
+            }
+            else
+            {
+                //savde data in file
+                if(!isFileDev && saveDeviceces != nullptr)
+                {
+                    for(int i = 0; i < saveDeviceces->size(); i++)
+                        saveDeviceces->at(i)->execSaveDevice(saveSequence, _t);
+                }
             }
 
             //decode saved sequence

@@ -55,30 +55,22 @@ void STMstudioFileDevice::stopDev()
     device.close();
 }
 
-int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence)
+int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time)
 {//BUG rebork it as save row data
     if(isReadMode)
         return -1;
 
     if(!isWriteMode)//if it is first exec
     {
-        device.setFileName("log_" + startTime.toString("yyyy_MM_dd__hh_mm_ss") +  ".txt");
-        if(!device.open(QIODevice::ReadWrite))
-            return -1;
+        int res = initSaveFile();
+        if(res != 0)
+            return res;
 
         masks.clear();
         locations.clear();
 
-        //save header
-        QString header;
-        header.append("Syntax version=4\n");
-        header.append(startTime.toString("ddd MMMM dd hh:mm:ss yyyy") + "\n");
-        header.append("Starting process (10000000 clocks per sec)\n");//?
-        header.append("\n");
-        header.append("LogRawData=false\n");//?
-        header.append("VarHeader=1\n");
-
         //generate header data names
+        QString header;
         QString names("D:\t");
         QString addresses("D:\ttime(ms)");
         for(int i = 0; i < readSeuqence.size(); i++)
@@ -104,7 +96,7 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
     }
 
     QString values("D:\t");
-    values.append(QString::number(QDateTime::currentMSecsSinceEpoch() - startTime.toMSecsSinceEpoch()));
+    values.append(QString::number(time.time().msecsSinceStartOfDay()));
 
     union __attribute__((packed)){
         uint8_t _8[4];
@@ -135,6 +127,72 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
 
             numbegChanale++;
         }
+    }
+
+    values.append("\n");
+
+    if(device.write(values.toLocal8Bit()) == -1)
+        return -1;
+
+    return 0;
+}
+
+int STMstudioFileDevice::execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time)
+{
+    if(isReadMode)
+        return -1;
+
+    if(!isWriteMode)//if it is first exec
+    {
+        int res = initSaveFile();
+        if(res != 0)
+            return res;
+
+        //generate header data names
+        QString header;
+        QString names("D:\t");
+        QString addresses("D:\ttime(ms)");
+        for(int i = 0; i < chanaleNames.size(); i++)
+        {
+            QString name = chanaleNames[i];
+            uint32_t addres = 0;
+            for(int j = 0; j < readSeuqence.size(); j++)
+            {
+                if(addres != 0)
+                    break;
+                for(int k = 0; k < readSeuqence[j].vectorChanales.size(); k++)
+                {
+                    if(addres != 0)
+                        break;
+
+                    //TODO check how it works in anouther thread
+                    if(readSeuqence[j].vectorChanales[k].chanale->displayName() == chanaleNames[i])
+                    {
+                        varloc_location_t loc = readSeuqence[j].vectorChanales[k].chanale->getLocation();
+                        addres = loc.address.base + loc.address.offset_bits/8;
+//                        names.append("\t" + readSeuqence[i].vectorChanales[j].chanale->getName());
+                        name = readSeuqence[j].vectorChanales[k].chanale->getName();
+                    }
+                }
+            }
+            names.append("\t" + name);
+            addresses.append("\t(0x" + QString::number(addres, 16).rightJustified(8, 0) + ",6)");
+        }
+        header.append(names + "\n");
+        header.append(addresses + "\n");
+
+        if(device.write(header.toLocal8Bit()) == -1)
+            return -1;
+
+        isWriteMode = true;
+    }
+
+    QString values("D:\t");
+    values.append(QString::number(time.time().msecsSinceStartOfDay()));
+
+    for(int i = 0; i < listDecoded.size(); i++)
+    {
+        values.append("\t" + QString::number(listDecoded[i]));
     }
 
     values.append("\n");
@@ -337,4 +395,26 @@ void STMstudioFileDevice::openSelectFile()
     QString file = QFileDialog::getOpenFileName(configReadWidget, tr("Select file"), fileRead->text(), "*");
     if(!file.isEmpty())
         fileRead->setText(file);
+}
+
+int STMstudioFileDevice::initSaveFile()
+{
+    device.setFileName("log_" + startTime.toString("yyyy_MM_dd__hh_mm_ss") +  ".txt");
+    if(!device.open(QIODevice::ReadWrite))
+        return -1;
+
+    //save header
+    QString header;
+    header.append("Syntax version=4\n");
+    header.append(startTime.toString("ddd MMMM dd hh:mm:ss yyyy") + "\n");
+    header.append("Starting process (10000000 clocks per sec)\n");//?
+    header.append("\n");
+    header.append("LogRawData=false\n");//?
+    header.append("VarHeader=1\n");
+
+    if(device.write(header.toLocal8Bit()) == -1)
+        return -1;
+
+    return 0;
+
 }

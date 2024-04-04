@@ -9,6 +9,8 @@ project(
 
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(dwarves)
+# for windows download and build https://github.com/davea42/libdwarf-code
+# https://download.qt.io/development_releases/prebuilt/elfutils/
 
 
 add_library(varloc STATIC varloc.c varloc.h)

@@ -93,8 +93,18 @@ public:
     /**
      * @brief execSaveDevice - do save varibels should exec after read waribels and append just last value
      * @return - 0 if OK else return error code
+     * NOTE remo it when test with decod list will be finished
      */
-    virtual int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence) = 0;
+    virtual int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time) = 0;
+
+    /**
+     * @brief execSaveDevice - second metod save into file
+     * @param chanaleNames - chanales name
+     * @param listDecoded - vector values
+     * @param time - save time
+     * @return - 0 if OK else return error code
+     */
+    virtual int execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time) = 0;
 
     /**
      * @brief getSaveDevConfigWidget - get configure widget
