@@ -17,7 +17,7 @@ public:
 
     int runReadLoop(QVector<VarChannel*> *channels, QVector<VarChannel*> *mathChannels = nullptr);
 
-    static QVector<ReadDeviceObject::ReadAddres> calcReadSeuqence(QVector<VarChannel*> *channels);
+    static QVector<ReadDeviceObject::ReadAddres> calcReadSeuqence(QVector<VarChannel*> *channels, QVector<VarChannel *> *sortChannels = nullptr);
 
     void setReadDevicece(ReadDeviceObject *newReadDevicece);
 
@@ -46,6 +46,7 @@ private:
     QVector<ReadDeviceObject::ReadAddres> readSeuqencs;
     QMap<uint32_t, ReadDeviceObject::ReadAddres> readSeuqencsMap;
     QVector<VarChannel*> *channels;
+    QVector<VarChannel*> channelsSort;
     QVector<VarChannel*> *mathChannels;
     ReadLoop *loop;
     QThread readLoopThread;

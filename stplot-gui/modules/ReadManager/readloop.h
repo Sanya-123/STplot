@@ -56,6 +56,7 @@ private:
     QVector<QPair<uint32_t,varloc_location_t>> decodeList;
 
     //use for calc math
+    QList<QString> chanaleDisplayNames;
     QList<QString> chanaleNames;
     QVector<QPair<QString,QString>> listMathChanales;
 

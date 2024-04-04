@@ -63,7 +63,7 @@ void ReadLoop::readLoop()
                 emit decodedDataWithTime(listDecoded, _t);
 
                 //calc math chanales
-                QVector<float> listMathValues = calcMathChanales(chanaleNames, listDecoded, &listMathChanales);
+                QVector<float> listMathValues = calcMathChanales(chanaleDisplayNames, listDecoded, &listMathChanales);
                 emit mathDataWithTime(listMathValues, _t);
 
                 //savde data in file
@@ -235,13 +235,15 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesName, QVect
 void ReadLoop::calcDecodList(QVector<VarChannel *> *channels)
 {
     decodeList.clear();
+    chanaleDisplayNames.clear();
     chanaleNames.clear();
 
     if(channels != nullptr)
     {
         for(int i = 0; i < channels->size(); i++)
         {
-            chanaleNames << channels->at(i)->displayName();
+            chanaleDisplayNames << channels->at(i)->displayName();
+            chanaleNames << channels->at(i)->getName();
             varloc_location_t loc = channels->at(i)->getLocation();
             uint32_t mask = channels->at(i)->getMask();
             decodeList.append(qMakePair(mask, loc));

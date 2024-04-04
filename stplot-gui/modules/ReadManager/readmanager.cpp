@@ -42,7 +42,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
 
     this->channels = channels;
     this->mathChannels = mathChannels;
-    readSeuqencs = calcReadSeuqence(channels);
+    readSeuqencs = calcReadSeuqence(channels, &channelsSort);
 //    qDebug() << "readSeuqencs size :" << readSeuqencs.size();
     readSeuqencsMap.clear();
 
@@ -54,7 +54,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
     }
 
 
-    loop->setReadSequence(readSeuqencs, channels);
+    loop->setReadSequence(readSeuqencs, &channelsSort);
     loop->updateMathChanales(mathChannels);
     loop->setReadDevicec(readDevicece);
     loop->setSaveDeviceces(&saveDeviceces);
@@ -71,7 +71,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
     return 0;
 }
 
-QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarChannel *> *channels)
+QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarChannel *> *channels, QVector<VarChannel *> *sortChannels)
 {
     QVector<ReadDeviceObject::ReadAddres> res;
 
@@ -148,6 +148,13 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
 
 
     res.append(readAdd);
+
+    if(sortChannels != nullptr)
+    {
+        sortChannels->clear();
+        for(int i = 0; i < sortChanales.size(); i++)
+            sortChannels->append(sortChanales[i]);
+    }
 
     return res;
 }

@@ -166,12 +166,12 @@ int STMstudioFileDevice::execSaveDevice(QList<QString> chanaleNames, QVector<flo
                         break;
 
                     //TODO check how it works in anouther thread
-                    if(readSeuqence[j].vectorChanales[k].chanale->displayName() == chanaleNames[i])
+                    if(readSeuqence[j].vectorChanales[k].chanale->getName() == name)
                     {
                         varloc_location_t loc = readSeuqence[j].vectorChanales[k].chanale->getLocation();
                         addres = loc.address.base + loc.address.offset_bits/8;
 //                        names.append("\t" + readSeuqence[i].vectorChanales[j].chanale->getName());
-                        name = readSeuqence[j].vectorChanales[k].chanale->getName();
+//                        name = readSeuqence[j].vectorChanales[k].chanale->getName();
                     }
                 }
             }
