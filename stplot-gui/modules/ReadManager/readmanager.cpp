@@ -31,6 +31,7 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
 
         QVector<QTime> readTimes;
         int res = readDevicece->readFileDevice(*channels, &readTimes);
+        readDevicece->stopDev();
         if(res != -1)//if this function is supported
         {
             calcMathFileData(sizeVector, channels, mathChannels, readTimes);
@@ -178,12 +179,12 @@ void ReadManager::addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, 
 
 void ReadManager::decodedDataWithTime(QVector<float> data, QDateTime time)
 {
-    for(int i = 0; i < channels->size(); i++)
+    for(int i = 0; i < channelsSort.size(); i++)
     {
         if(i >= data.size())
             break;
 
-        channels->at(i)->pushValue(data[i], time.time());
+        channelsSort.at(i)->pushValue(data[i], time.time());
     }
 }
 

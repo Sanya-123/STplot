@@ -298,11 +298,11 @@ QWidget *STMstudioFileDevice::getSaveDevConfigWidget()
 int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
 {
     if(isWriteMode)
-        return -1;
+        return -2;
 
     device.setFileName(fileRead->text());
     if(!device.open(QIODevice::ReadOnly))
-        return -2;
+        return -3;
 
     QVector<VarChannel *> readChanales;
 
@@ -364,7 +364,7 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
     {
         QByteArray values = device.readLine();
         if(values.size() <= 0)
-            return 0;
+            break;
 
         QList<QByteArray> listVaribels = values.split('\t');
         if(listVaribels.size() <= 2)
