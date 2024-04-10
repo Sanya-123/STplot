@@ -19,6 +19,8 @@ extern "C" {
 #include "readmanager.h"
 #include "simplereader.h"
 #include "shnet_socket_device.h"
+#include "debugerwindow.h"
+#include "debugerwindow.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -32,6 +34,7 @@ class STPlotWindow : public QMainWindow
 public:
     STPlotWindow(QWidget *parent = nullptr);
     ~STPlotWindow();
+    void setDebuger(DebugerWindow *debuger);
 
 public slots:
     void startRead();

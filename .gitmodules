@@ -19,3 +19,6 @@
 [submodule "deps/PEK_Libs"]
 	path = deps/PEK_Libs
 	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs
+[submodule "stplot-gui/widgets/DebugerWindow"]
+	path = stplot-gui/widgets/DebugerWindow
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/debugerwindow.git

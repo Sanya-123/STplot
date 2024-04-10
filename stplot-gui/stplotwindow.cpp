@@ -10,6 +10,8 @@
 #include <QDebug>
 #include <QToolBar>
 #include <QFileDialog>
+#include <QtGlobal>
+#include <stdio.h>
 
 
 //#include <iostream>
@@ -34,7 +36,12 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     , ui(new Ui::STPlotWindow)
 {
     qApp;
+    //redirect debug data
+//    qInstallMessageHandler(myMessageOutput); // Install the handler
     ui->setupUi(this);
+
+    ui->menuView->addAction("Debuger")->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+
 //    proxyModel = new QSortFilterProxyModel(this);
 
 //    // Create the dock manager. Because the parent parameter is a QMainWindow
@@ -122,6 +129,12 @@ STPlotWindow::~STPlotWindow()
     QSettings settings("STdebuger", "STplotDebuger");
     writeSettings(settings);
     delete ui;
+}
+
+void STPlotWindow::setDebuger(DebugerWindow *debuger)
+{
+    if(debuger != nullptr)
+        connect(ui->menuView->actions()[0], SIGNAL(triggered(bool)), debuger, SLOT(show()));
 }
 
 // void STPlotWindow::read(){

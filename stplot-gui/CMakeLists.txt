@@ -65,6 +65,12 @@ set(PROJECT_SOURCES
         modules/SimpleReader/simplereader.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
+
+        widgets/DebugerWindow/debugerwindow.h widgets/DebugerWindow/debugerwindow.cpp widgets/DebugerWindow/debugerwindow.ui
+        widgets/DebugerWindow/debugerfilterseditor.h widgets/DebugerWindow/debugerfilterseditor.cpp widgets/DebugerWindow/debugerfilterseditor.ui
+        widgets/DebugerWindow/debugerfiltermodel.h widgets/DebugerWindow/debugerfiltermodel.cpp
+        widgets/DebugerWindow/debugmessadge.h widgets/DebugerWindow/debugmessadge.cpp widgets/DebugerWindow/debugmessadge.ui
+        widgets/DebugerWindow/debugerfilter.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -116,6 +122,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ChannelsList
     widgets/ViewManager
     widgets/PlotWidget
+    widgets/DebugerWindow
     PlotPluginsDir
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
