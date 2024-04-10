@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
     DebugerWindow _debuger;
     debuger = &_debuger;
     qInstallMessageHandler(myMessageOutput); // Install the handler
-    STPlotWindow w;
+    STPlotWindow w(debuger);
     w.show();
-    w.setDebuger(debuger);
     return a.exec();
 }

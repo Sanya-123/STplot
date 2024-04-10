@@ -32,7 +32,7 @@ class STPlotWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    STPlotWindow(QWidget *parent = nullptr);
+    STPlotWindow(DebugerWindow *debuger = nullptr, QWidget *parent = nullptr);
     ~STPlotWindow();
     void setDebuger(DebugerWindow *debuger);
 
@@ -55,6 +55,7 @@ private:
 
 private:
     Ui::STPlotWindow *ui;
+    DebugerWindow *debuger;
 //    ads::CDockManager* m_DockManager;
     Channels* channelsView;
     VarLoader* varloader;

@@ -31,8 +31,8 @@ extern "C" {
 
 using namespace ads;
 
-STPlotWindow::STPlotWindow(QWidget *parent)
-    : QMainWindow(parent)
+STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
+    : QMainWindow(parent), debuger(debuger)
     , ui(new Ui::STPlotWindow)
 {
     qApp;
@@ -41,6 +41,7 @@ STPlotWindow::STPlotWindow(QWidget *parent)
     ui->setupUi(this);
 
     ui->menuView->addAction("Debuger")->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+    setDebuger(debuger);
 
 //    proxyModel = new QSortFilterProxyModel(this);
 
@@ -133,6 +134,7 @@ STPlotWindow::~STPlotWindow()
 
 void STPlotWindow::setDebuger(DebugerWindow *debuger)
 {
+    this->debuger = debuger;
     if(debuger != nullptr)
         connect(ui->menuView->actions()[0], SIGNAL(triggered(bool)), debuger, SLOT(show()));
 }
@@ -275,6 +277,13 @@ void STPlotWindow::applySettings(QSettings &settings)
     channelsView->restoreSettings(&settings);
     settings.endGroup();
 
+    if(debuger != nullptr)
+    {
+        settings.beginGroup("debuger");
+        debuger->restoreSettings(&settings);
+        settings.endGroup();
+    }
+
     ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
 }
 
@@ -295,6 +304,13 @@ void STPlotWindow::writeSettings(QSettings &settings)
     settings.beginGroup("varloader");
     varloader->saveSettings(&settings);
     settings.endGroup();
+
+    if(debuger != nullptr)
+    {
+        settings.beginGroup("debuger");
+        debuger->saveSettings(&settings);
+        settings.endGroup();
+    }
 }
 
 void STPlotWindow::saveSettingsToFile(QString fileName)
