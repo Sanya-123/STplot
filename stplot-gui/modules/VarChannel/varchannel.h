@@ -32,7 +32,9 @@ class VarChannel : public QObject
 {//TODO add slot and signal write data for write it throu plagins plot and then in read manager connet signals with request write device
     Q_OBJECT
 public:
+#ifndef Q_OS_WINDOWS
     VarChannel(varloc_node_t* node, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
+#endif
     VarChannel(varloc_location_t location, QString name, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     VarChannel(QString script, QString name, QColor lineColor = Qt::green, int dotStyle = MAX_DEFAOULT_DOT_STYLE);
     ~VarChannel();

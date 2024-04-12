@@ -1,7 +1,7 @@
 #include "simpletable.h"
 #include "ui_simpletable.h"
 #include <QLayout>
-#include "initplot.h"
+//#include "initplot.h"
 #include <QDebug>
 
 SimpleTableSettings::SimpleTableSettings(QObject *parent) : SettingsAbstract(parent)

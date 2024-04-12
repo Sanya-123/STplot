@@ -1,8 +1,11 @@
 #include "varchannel.h"
 #include <QtMath>
 
+static_assert(CHAR_BIT * sizeof (float) == 32, "Error float size");
+
 using namespace std::chrono;
 
+#ifndef Q_OS_WINDOWS
 VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
     m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false), m_value(0)
 {
@@ -18,6 +21,7 @@ VarChannel::VarChannel(varloc_node_t* node, QColor lineColor, int dotStyle) :
 
     setDotStyle(dotStyle);
 }
+#endif
 
 VarChannel::VarChannel(varloc_location_t location, QString name, QColor lineColor, int dotStyle) :
     m_lineWidth(1), tmpDesc(0), m_lineColor(lineColor), m_isMathChanale(false), m_value(0)
@@ -75,7 +79,7 @@ float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t 
 {
     float ret = 0;
     union {
-        _Float32    _f;
+        float       _f;
         uint8_t     _u8;
         int8_t      _i8;
         uint16_t    _u16;
@@ -118,7 +122,7 @@ uint32_t VarChannel::code_value(float value, uint32_t mask, varloc_location_t lo
     if (location.type == VARLOC_FLOAT)
     {
         union {
-            _Float32    _f;
+            float       _f;
             uint32_t    _u32;
         }combiner;
         combiner._f = value;
@@ -227,6 +231,7 @@ QString VarChannel::getFullNmaeNode(varloc_node_t *node)
 
 
     QString name = QString(node->name);
+#ifndef Q_OS_WINDOWS
     varloc_node_t * parent = var_node_get_parent(node);
     while (parent != NULL){
         if (parent->var_type != ARRAY){
@@ -235,6 +240,7 @@ QString VarChannel::getFullNmaeNode(varloc_node_t *node)
         }
         parent = var_node_get_parent(parent);
     }
+#endif
 
     return name;
 }

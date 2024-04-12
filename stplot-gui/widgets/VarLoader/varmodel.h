@@ -8,7 +8,7 @@ extern "C" {
 #include "varloc.h"
 }
 
-
+#ifndef Q_OS_WINDOWS
 class VarModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -42,5 +42,6 @@ private:
     void apply_for_each_child(varloc_node_t* root, void (VarModel::*func)(varloc_node_t*), bool first);
 
 };
+#endif
 
 #endif // VARMODEL_H

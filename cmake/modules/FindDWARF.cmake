@@ -14,28 +14,52 @@ if (DWARF_INCLUDE_DIR AND LIBDW_INCLUDE_DIR AND DWARF_LIBRARY AND ELF_LIBRARY)
 	set(DWARF_FIND_QUIETLY TRUE)
 endif (DWARF_INCLUDE_DIR AND LIBDW_INCLUDE_DIR AND DWARF_LIBRARY AND ELF_LIBRARY)
 
-find_path(DWARF_INCLUDE_DIR dwarf.h
-	/usr/include
-	/usr/local/include
-	/usr/include/libdwarf
-	~/usr/local/include
-)
+if (WIN32)
+    find_path(DWARF_INCLUDE_DIR dwarf.h
+            ${CMAKE_SOURCE_DIR}/windowsLibs/libdwarf/include/libdwarf
+    )
 
-find_path(LIBDW_INCLUDE_DIR elfutils/libdw.h
-	/usr/include
-	/usr/local/include
-	~/usr/local/include
-)
+    find_path(LIBDW_INCLUDE_DIR elfutils/libdw.h
+            ${CMAKE_SOURCE_DIR}/windowsLibs/elfutils/include/elfutils
+            ${CMAKE_SOURCE_DIR}/windowsLibs/elfutils/include
+    )
 
-find_library(DWARF_LIBRARY
-	NAMES dw dwarf
-	PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 ~/usr/local/lib ~/usr/local/lib64
-)
+    find_library(DWARF_LIBRARY
+            NAMES dwarf
+            PATHS ${CMAKE_SOURCE_DIR}/windowsLibs/libdwarf/lib
+    )
 
-find_library(ELF_LIBRARY
-	NAMES elf
-	PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 ~/usr/local/lib ~/usr/local/lib64
-)
+    find_library(ELF_LIBRARY
+            NAMES elf dw
+            PATHS ${CMAKE_SOURCE_DIR}/windowsLibs/elfutils/lib
+    )
+
+else()
+
+    find_path(DWARF_INCLUDE_DIR dwarf.h
+            /usr/include
+            /usr/local/include
+            /usr/include/libdwarf
+            ~/usr/local/include
+    )
+
+    find_path(LIBDW_INCLUDE_DIR elfutils/libdw.h
+            /usr/include
+            /usr/local/include
+            ~/usr/local/include
+    )
+
+    find_library(DWARF_LIBRARY
+            NAMES dw dwarf
+            PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 ~/usr/local/lib ~/usr/local/lib64
+    )
+
+    find_library(ELF_LIBRARY
+            NAMES elf
+            PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 ~/usr/local/lib ~/usr/local/lib64
+    )
+
+endif (WIN32)
 
 if (DWARF_INCLUDE_DIR AND LIBDW_INCLUDE_DIR AND DWARF_LIBRARY AND ELF_LIBRARY)
 	set(DWARF_FOUND TRUE)

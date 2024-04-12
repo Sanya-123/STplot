@@ -25,8 +25,10 @@ public:
     QVector<VarChannel*> *getListMathChanales() const;
 
 public slots:
+#ifndef Q_OS_WINDOWS
     void reloadChannels(varloc_node_t* root);
     void add_channel(varloc_node_t* node);
+#endif
     void addPlot();
     void deletePlot(int number);
     void setPlotName(int number, QString name);

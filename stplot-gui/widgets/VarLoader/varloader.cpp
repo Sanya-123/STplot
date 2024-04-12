@@ -13,6 +13,7 @@ VarLoader::VarLoader(QWidget *parent) :
     ui(new Ui::VarLoader)
 {
     ui->setupUi(this);
+#ifndef Q_OS_WINDOWS
     proxyModel = new VarFilter(this);
     // proxyModel = new QSortFilterProxyModel(this);
     varModel = new VarModel(this);
@@ -22,18 +23,21 @@ VarLoader::VarLoader(QWidget *parent) :
     connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expandTree);
     connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapseTree);
     connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::applyFilter);
+#endif
 }
 
 VarLoader::~VarLoader()
 {
+#ifndef Q_OS_WINDOWS
     if (varModel->getModelRoot() != NULL){
         ui->treeView->setModel(NULL);
         proxyModel->setSourceModel(NULL);
         varloc_delete_tree(varModel->getModelRoot());
     }
     delete proxyModel;
-    delete ui;
     delete varModel;
+#endif
+    delete ui;
 }
 
 void VarLoader::saveSettings(QSettings *settings)
@@ -47,6 +51,7 @@ void VarLoader::restoreSettings(QSettings *settings)
     ui->lineEdit_file->setText(settings->value("elffile").toString());
 }
 
+#ifndef Q_OS_WINDOWS
 void VarLoader::expandTree(){
     ui->treeView->expandAll();
 }
@@ -152,3 +157,4 @@ void VarLoader::loadVariables(const QString & fileName)
 
     emit variablesUpdated(tree_root);
 }
+#endif

@@ -303,25 +303,25 @@ set(STLINK_SOURCE
         )
 
 if (WIN32)
-    include_directories(src/win32)
-    set(STLINK_SOURCE "${STLINK_SOURCE};src/win32/win32_socket.c")
-    set(STLINK_HEADERS "${STLINK_HEADERS};src/win32/win32_socket.h")
+    include_directories(stlink/src/win32)
+    set(STLINK_SOURCE "${STLINK_SOURCE};stlink/src/win32/win32_socket.c")
+    set(STLINK_HEADERS "${STLINK_HEADERS};stlink/src/win32/win32_socket.h")
 
     if (MSVC)
         # Add drop-in replacement for unistd.h to sources
-        include_directories(src/win32/unistd)
-        set(STLINK_HEADERS "${STLINK_HEADERS};src/win32/unistd/unistd.h")
+        include_directories(stlink/src/win32/unistd)
+        set(STLINK_HEADERS "${STLINK_HEADERS};stlink/src/win32/unistd/unistd.h")
     endif ()
 
     if (NOT STLINK_HAVE_SYS_MMAN_H)
-        include_directories(src/win32/mmap)
-        set(STLINK_SOURCE "${STLINK_SOURCE};src/win32/mmap.c")
-        set(STLINK_HEADERS "${STLINK_HEADERS};src/win32/mmap.h")
+        include_directories(stlink/src/win32/mmap)
+        set(STLINK_SOURCE "${STLINK_SOURCE};stlink/src/win32/mmap.c")
+        set(STLINK_HEADERS "${STLINK_HEADERS};stlink/src/win32/mmap.h")
     endif()
 
     if (NOT STLINK_HAVE_SYS_TIME_H)
-        set(STLINK_SOURCE "${STLINK_SOURCE};src/win32/sys_time.c")
-        set(STLINK_HEADERS "${STLINK_HEADERS};src/win32/sys_time.h")
+        set(STLINK_SOURCE "${STLINK_SOURCE};stlink/src/win32/sys_time.c")
+        set(STLINK_HEADERS "${STLINK_HEADERS};stlink/src/win32/sys_time.h")
     endif()
 endif ()
 

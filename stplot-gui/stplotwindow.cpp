@@ -10,8 +10,6 @@
 #include <QDebug>
 #include <QToolBar>
 #include <QFileDialog>
-#include <QtGlobal>
-#include <stdio.h>
 
 
 //#include <iostream>
@@ -97,8 +95,10 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetVarLoader);
     ui->dockContainer->addDockWidget(ads::NoDockWidgetArea, dockWidgetViwManager);
 
+#ifndef Q_OS_WINDOWS
     connect(varloader, &VarLoader::variableAdded, channelsView, &Channels::add_channel);
     connect(varloader, SIGNAL(variablesUpdated(varloc_node_t*)), channelsView, SLOT(reloadChannels(varloc_node_t*)));
+#endif
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
     connect(&readManager, SIGNAL(stopingRead()), this, SLOT(stopedRead()));
     connect(ui->actionStop, SIGNAL(triggered(bool)), &readManager, SLOT(stopRead()));
@@ -217,7 +217,9 @@ void STPlotWindow::loadSettings()
         {
             applySettings(settings);
             // Try to load elf file and update channel addresses
+#ifndef Q_OS_WINDOWS
             varloader->loadElf();
+#endif
         }
     }
 }

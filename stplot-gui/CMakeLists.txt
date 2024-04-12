@@ -139,11 +139,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Script
     qtadvanceddocking
-    xcb
-    varloc
+#    xcb
     stlink-static
     QtnProperty
 )
+
+if (UNIX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE varloc xcb)
+endif()
 
 target_link_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/lib

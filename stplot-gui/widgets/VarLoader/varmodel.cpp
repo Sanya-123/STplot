@@ -3,6 +3,7 @@
 
 #define DEBUG_VIEW 0
 
+#ifndef Q_OS_WINDOWS
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -285,5 +286,6 @@ int VarModel::rowCount(const QModelIndex &parent) const
     }
     return row_n + 1;
 }
+#endif
 
 
