@@ -18,7 +18,7 @@
     <widget class="QTableWidget" name="tableWidget_availebleWidgets">
      <column>
       <property name="text">
-       <string>viewes</string>
+       <string>Views</string>
       </property>
      </column>
     </widget>
@@ -45,14 +45,14 @@
      <item>
       <widget class="QPushButton" name="pushButton_open_def_setings">
        <property name="text">
-        <string>def setings</string>
+        <string>def settings</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_open_selected_plot_setings">
        <property name="text">
-        <string>selected plot setings</string>
+        <string>selected plot settings</string>
        </property>
       </widget>
      </item>

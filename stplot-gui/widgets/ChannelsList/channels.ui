@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0" colspan="2">
         <widget class="QTreeView" name="treeView"/>
@@ -40,7 +40,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0" colspan="2">
         <widget class="QTreeView" name="treeView_customChanale"/>
@@ -48,14 +48,14 @@
        <item row="1" column="0">
         <widget class="QPushButton" name="pushButton_addMathChanale">
          <property name="text">
-          <string>add math chanale</string>
+          <string>Add Math channel</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QPushButton" name="pushButton_deleteMathChanale">
          <property name="text">
-          <string>Delete math chanale</string>
+          <string>Delete Math channel</string>
          </property>
         </widget>
        </item>
