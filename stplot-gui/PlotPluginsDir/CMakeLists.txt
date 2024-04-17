@@ -13,5 +13,20 @@ set(PATH_VARCHANNEL ${CMAKE_CURRENT_LIST_DIR}/../modules/VarChannel)
 
 include_directories(${PATH_PLOT_INTERFACE} ${PATH_COMMON_QT_LIBS} ${CMAKE_CURRENT_LIST_DIR}/../modules/VarChannel/ ${CMAKE_CURRENT_LIST_DIR}/../../deps/varloc)
 link_libraries(Qt5::Widgets Qt5::Network Qt5::SerialPort Qt5::PrintSupport)
-add_subdirectory(pluginSimpleGraph)
-add_subdirectory(pluginSimpleTable)
+
+macro(subdirlist result curdir)
+    file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+    set(dirlist "")
+    foreach(child ${children})
+        if(IS_DIRECTORY ${curdir}/${child})
+            list(APPEND dirlist ${child})
+        endif()
+    endforeach()
+    set(${result} ${dirlist})
+endmacro()
+
+subdirlist(SUBDIRS ${CMAKE_CURRENT_LIST_DIR})
+
+foreach(subdir ${SUBDIRS})
+    add_subdirectory(${subdir})
+endforeach()
