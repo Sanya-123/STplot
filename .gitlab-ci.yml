@@ -10,11 +10,9 @@ linux:
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
     - cmake -B build -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
-    - cmake --build build
-    - cp -r ./build/lib/* ./build/stplot-gui/
+    - cmake --build build -j$(nproc) -- 2> ./build/log_build.txt
+    - cmake --build build --target deployment
   artifacts:
     paths:
-      - ./build/stplot-gui/lib/*
-      - ./build/stplot-gui/stplot-gui
-      - ./build/stplot-gui/plugins
+      - ./build/deployment/
     expire_in: 1 week
