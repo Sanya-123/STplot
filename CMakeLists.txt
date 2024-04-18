@@ -18,6 +18,7 @@ if (WIN32)
     #set(CMAKE_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
     add_subdirectory(windowsLibs/zlib)
 else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     add_subdirectory(deps/varloc)
 endif()
 
