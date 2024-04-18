@@ -9,10 +9,25 @@ linux:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
-    - cmake --build build -j$(nproc) -- 2> ./build/log_build.txt
-    - cmake --build build --target deployment
+    - cmake -B build/linux -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
+    - cmake --build build/linux -j$(nproc) -- 2> ./build/linux/log_build.txt
+    - cmake --build build/linux --target deployment
   artifacts:
     paths:
-      - ./build/deployment/
+      - ./build/linux/deployment/
+    expire_in: 1 week
+windows:
+  stage: build
+  tags:
+    - qtdeploy
+  variables:
+    GIT_STRATEGY: clone
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_FORCE_HTTPS: "true"
+  script:
+    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw.cmake
+    - cmake --build build/windows -j$(nproc) -- 2> ./build/windows/log_build.txt
+  artifacts:
+    paths:
+      - ./build/windows/
     expire_in: 1 week
