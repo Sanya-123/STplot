@@ -9,7 +9,7 @@ linux:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}:$CMAKE_PREFIX_PATH
+    - cmake -B build -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
     - cmake --build build
     - cp -r ./build/lib ./build/stplot-gui/
   artifacts:
