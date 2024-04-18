@@ -9,8 +9,12 @@ linux:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - ./pipeline_build.sh
+    - cmake -B build -S . 
+    - cmake --build build
+    - cp -r ./build/lib ./build/stplot-gui/
   artifacts:
     paths:
-      - dist/*
+      - ./build/stplot-gui/lib/*
+      - ./build/stplot-gui/stplot-gui
+      - ./build/stplot-gui/plugins
     expire_in: 1 week

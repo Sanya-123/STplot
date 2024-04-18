@@ -20,7 +20,6 @@ extern "C" {
 #include "simplereader.h"
 #include "shnet_socket_device.h"
 #include "debugerwindow.h"
-#include "debugerwindow.h"
 
 
 QT_BEGIN_NAMESPACE
