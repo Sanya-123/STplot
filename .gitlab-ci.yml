@@ -11,7 +11,7 @@ linux:
   script:
     - cmake -B build -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
     - cmake --build build
-    - cp -r ./build/lib ./build/stplot-gui/
+    - cp -r ./build/lib/* ./build/stplot-gui/
   artifacts:
     paths:
       - ./build/stplot-gui/lib/*
