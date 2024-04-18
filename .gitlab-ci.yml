@@ -1,0 +1,16 @@
+stages:
+  - build
+linux:
+  stage: build
+  tags:
+    - qtdeploy
+  variables:
+    GIT_STRATEGY: clone
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_FORCE_HTTPS: "true"
+  script:
+    - ./pipeline_build.sh
+  artifacts:
+    paths:
+      - dist/*
+    expire_in: 1 week
