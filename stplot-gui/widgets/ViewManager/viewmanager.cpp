@@ -114,7 +114,7 @@ void ViewManager::setChanales(Channels *newChanales)
 void ViewManager::loadPlugin()
 {
     PlotWidgetInterfacePlugin *_interface;
-    QDir pluginsDir(QCoreApplication::applicationDirPath());
+    QDir pluginsDir(QDir::currentPath());
 #if defined(Q_OS_WIN)
     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
         pluginsDir.cdUp();
