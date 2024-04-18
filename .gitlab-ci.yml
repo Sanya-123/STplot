@@ -1,7 +1,8 @@
 stages:
-  - build
+  - build_linux
+  - build_windows
 linux:
-  stage: build
+  stage: build_linux
   tags:
     - qtdeploy
   variables:
@@ -17,7 +18,7 @@ linux:
       - ./build/linux/deployment/
     expire_in: 1 week
 windows:
-  stage: build
+  stage: build_windows
   tags:
     - qtdeploy
   variables:
