@@ -75,7 +75,7 @@ void VarChannel::pushValue(float value, QTime record_time){
         emit updatePlot();
     // }
 }
-float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t location)
+float VarChannel::decode_value(uint32_t value, varloc_location_t location)
 {
     float ret = 0;
     union {
@@ -87,7 +87,7 @@ float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t 
         uint32_t    _u32;
         int32_t     _i32;
     }combiner;
-    combiner._u32 = (value & mask) >> location.address.offset_bits;
+    combiner._u32 = (value & location.mask) >> location.address.offset_bits;
     if(location.address.size_bits <= 8){
         if (location.type == VARLOC_SIGNED){
             ret = combiner._i8;
@@ -115,7 +115,7 @@ float VarChannel::decode_value(uint32_t value, uint32_t mask, varloc_location_t 
     return ret;
 }
 
-uint32_t VarChannel::code_value(float value, uint32_t mask, varloc_location_t location)
+uint32_t VarChannel::code_value(float value, varloc_location_t location)
 {
     uint32_t ret = 0;
 
@@ -137,19 +137,19 @@ uint32_t VarChannel::code_value(float value, uint32_t mask, varloc_location_t lo
     }
 
     ret = ret << location.address.offset_bits;
-    ret = ret & mask;
+    ret = ret & location.mask;
 
     return ret;
 }
 
 void VarChannel::pushValueRawWithTime(uint32_t value, QDateTime date_time){
-    pushValue(decode_value(value, m_mask, m_location), date_time.time());
+    pushValue(decode_value(value, m_location), date_time.time());
 }
 
 void VarChannel::pushValueRaw(uint32_t value){
 
     QTime time = QTime::currentTime();
-    pushValue(decode_value(value, m_mask, m_location), time);
+    pushValue(decode_value(value, m_location), time);
 }
 
 void VarChannel::selectCurentPlot()
@@ -161,7 +161,7 @@ void VarChannel::writeValues(float value)
 {
     if(!m_isMathChanale)
     {
-        emit requestWriteData(code_value(value, m_mask, m_location), m_location);
+        emit requestWriteData(code_value(value, m_location), m_location);
     }
 }
 
@@ -198,11 +198,6 @@ void VarChannel::clearLocation()
     m_location.address.size_bits = 0;;
 }
 
-uint32_t VarChannel::getMask()
-{
-    return m_mask;
-}
-
 bool VarChannel::hasLocation(varloc_location_t loc){
     if ((loc.address.base == this->m_location.address.base)
     && (loc.address.offset_bits == this->m_location.address.offset_bits)
@@ -216,12 +211,16 @@ bool VarChannel::hasLocation(varloc_location_t loc){
 
 void VarChannel::setLocation(varloc_location_t loc){
     m_location = loc;
-    m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
-    if(m_location.address.size_bits == 32)
-        m_mask = 0xFFFFFFFF;
+    if(m_location.mask == 0)
+    {
+        uint32_t m_mask = /*pow(2, m_location.address.size_bits)*/(1 << m_location.address.size_bits) - 1;
+        if(m_location.address.size_bits == 32)
+            m_mask = 0xFFFFFFFF;
 
-    m_mask = m_mask << m_location.address.offset_bits;
+        m_mask = m_mask << m_location.address.offset_bits;
 
+        m_location.mask = m_mask;
+    }
 }
 
 QString VarChannel::getFullNmaeNode(varloc_node_t *node)

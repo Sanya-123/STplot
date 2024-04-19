@@ -40,6 +40,7 @@
  typedef struct {
      varloc_loc_type_e  type;
      varloc_address_t   address;
+     uint32_t           mask;
  }varloc_location_t;
 
 

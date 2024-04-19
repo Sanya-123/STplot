@@ -33,7 +33,6 @@ bool STMstudioFileDevice::isFileDevice()
 
 int STMstudioFileDevice::initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence)
 {
-    masks.clear();
     locations.clear();
     isReadMode = false;
     isWriteMode = false;
@@ -66,7 +65,6 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
         if(res != 0)
             return res;
 
-        masks.clear();
         locations.clear();
 
         //generate header data names
@@ -82,7 +80,6 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
 
                 varloc_location_t loc = readSeuqence[i].vectorChanales[j].chanale->getLocation();
                 addresses.append("\t(0x" + QString::number(loc.address.base + loc.address.offset_bits/8, 16).rightJustified(8, 0) + ",6)");
-                masks.append(readSeuqence[i].vectorChanales[j].chanale->getMask());
                 locations.append(loc);
             }
         }
@@ -119,7 +116,7 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
             memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 
             //NOTE maybe move decode_value put of out of this module
-            float valuesFloat = VarChannel::decode_value(combiner._32, masks[numbegChanale], locations[numbegChanale]);
+            float valuesFloat = VarChannel::decode_value(combiner._32, locations[numbegChanale]);
             //NOTE add types if you vould like make it compareble with STMstudio
 
             values.append("\t" + QString::number(valuesFloat));

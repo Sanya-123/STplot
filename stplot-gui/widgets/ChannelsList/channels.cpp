@@ -341,6 +341,7 @@ void Channels::saveSettingsChanaleLocation(QSettings *settings, VarChannel *chan
     settings->setValue("base", loc.address.base);
     settings->setValue("offset_bits", loc.address.offset_bits);
     settings->setValue("size_bits", loc.address.size_bits);
+    settings->setValue("mask", loc.mask);
     settings->endGroup();
 }
 
@@ -371,6 +372,7 @@ varloc_location_t Channels::restoreSettingsChanaleLocation(QSettings *settings)
     loc.address.base = settings->value("base").toUInt();
     loc.address.offset_bits = settings->value("offset_bits").toUInt();
     loc.address.size_bits = settings->value("size_bits").toUInt();
+    loc.mask = settings->value("mask", 0).toUInt();
     settings->endGroup();
 
     return loc;

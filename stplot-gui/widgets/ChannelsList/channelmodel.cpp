@@ -42,7 +42,10 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
             if(isMathChanale)
                 return QVariant(m_channels->at(index.row())->script());
             else
-                return QVariant("0x" + QString::number(m_channels->at(index.row())->getLocation().address.base, 16).rightJustified(8, '0'));
+            {
+                varloc_location_t loc = m_channels->at(index.row())->getLocation();
+                return QVariant("0x" + QString::number(loc.address.base + loc.address.offset_bits/8, 16).rightJustified(8, '0'));
+            }
         }
         else if(index.column() == 2){
             return QVariant(m_channels->at(index.row())->lineColor().name());

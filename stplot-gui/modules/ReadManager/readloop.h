@@ -53,7 +53,7 @@ private:
     QVector<QPair<uint32_t,varloc_location_t>> requestedWriteData;
 
     //map decod chanales bitmap and locations
-    QVector<QPair<uint32_t,varloc_location_t>> decodeList;
+    QVector<varloc_location_t> decodeList;
 
     //use for calc math
     QList<QString> chanaleDisplayNames;

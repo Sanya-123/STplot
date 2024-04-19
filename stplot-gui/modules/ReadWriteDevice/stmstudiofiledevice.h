@@ -37,7 +37,6 @@ private:
     QVector<struct ReadDeviceObject::ReadAddres> readSeuqence;
     bool isReadMode;//as it class use for save and load dataI should know witch type is now
     bool isWriteMode;
-    QVector<uint32_t> masks;
     QVector<varloc_location_t> locations;
 };
 

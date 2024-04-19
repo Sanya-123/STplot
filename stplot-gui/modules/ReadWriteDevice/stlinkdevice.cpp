@@ -125,7 +125,7 @@ int STlinkDevice::execReadDevice()
     {
         int32_t res = stlink_read_mem32(sl, readSeuqence[i].addres, readSeuqence[i].readSize);
         if(res != 0)
-            return -1;
+            return res;
         QDateTime dt = QDateTime::currentDateTime();
         QVector<uint8_t> reedData(readSeuqence[i].readSize);
         memcpy(reedData.data(), sl->q_buf, readSeuqence[i].readSize);
@@ -140,6 +140,16 @@ int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
 {//TODO for bit array read data then overwrite bing then write
     if(!sl)
         return -1;
+
+//    int32_t res = stlink_read_mem32(sl, location.address.base, 4);
+//    if(res != 0)
+//        return res;
+
+//    uint32_t readData;
+//    memcpy(&readData, sl->q_buf, 4);
+//    readData = readData & ~location.mask;
+
+//    data |= readData;
 
     data >>= (location.address.offset_bits/8)*8;
 

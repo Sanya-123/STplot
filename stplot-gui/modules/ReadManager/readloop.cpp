@@ -245,8 +245,7 @@ void ReadLoop::calcDecodList(QVector<VarChannel *> *channels)
             chanaleDisplayNames << channels->at(i)->displayName();
             chanaleNames << channels->at(i)->getName();
             varloc_location_t loc = channels->at(i)->getLocation();
-            uint32_t mask = channels->at(i)->getMask();
-            decodeList.append(qMakePair(mask, loc));
+            decodeList.append(loc);
         }
     }
 }
@@ -278,8 +277,7 @@ QVector<float> ReadLoop::decodSavedSequence()
             combiner._32 = 0;
             memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 
-
-            float valuesFloat = VarChannel::decode_value(combiner._32, decodeList[numbegChanale].first, decodeList[numbegChanale].second);
+            float valuesFloat = VarChannel::decode_value(combiner._32, decodeList[numbegChanale]);
 
             res.append(valuesFloat);
 

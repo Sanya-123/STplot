@@ -41,9 +41,8 @@ public:
     QString getName();
     float getValue();
     varloc_location_t getLocation();
-    uint32_t getMask();
-    static float decode_value(uint32_t value, uint32_t mask, varloc_location_t location);
-    static uint32_t code_value(float value, uint32_t mask, varloc_location_t location);
+    static float decode_value(uint32_t value, varloc_location_t location);
+    static uint32_t code_value(float value, varloc_location_t location);
     bool hasLocation(varloc_location_t loc);
 
     static QString getFullNmaeNode(varloc_node_t* node);
@@ -89,7 +88,7 @@ private:
     QString                 m_name;
     QString                 m_displayName;
     varloc_location_t       m_location;
-    uint32_t                m_mask;
+//    uint32_t                m_mask;
 //    varloc_node_t*          m_var_node;
     QVector<VarValue>       m_buffer;
     //list for each plot gruph
