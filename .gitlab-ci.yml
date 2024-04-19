@@ -10,7 +10,7 @@ linux:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build/linux -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH}
+    - cmake -B build/linux -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH} -DCI_TOOLS_PATH=${CI_TOOLS_PATH}
     - cmake --build build/linux -j$(nproc) -- 2> ./build/linux/log_build.txt
     - cmake --build build/linux --target deployment
   artifacts:
@@ -26,7 +26,7 @@ windows:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw.cmake
+    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake
     - cmake --build build/windows -j$(nproc) -- 2> ./build/windows/log_build.txt
   artifacts:
     paths:
