@@ -4,12 +4,6 @@
 [submodule "deps/qt-advanced-docking-system"]
 	path = deps/qt-advanced-docking-system
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qt-advanced-docking-system.git
-[submodule "deps/elfio"]
-	path = deps/elfio
-	url = https://github.com/serge1/ELFIO.git
-[submodule "deps/varloc/dwarves"]
-	path = deps/varloc/dwarves
-	url = https://github.com/acmel/dwarves.git
 [submodule "deps/commonQtLibs"]
 	path = deps/commonQtLibs
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/commonqtlibs.git
