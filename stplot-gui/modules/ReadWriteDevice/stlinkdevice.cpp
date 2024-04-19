@@ -141,7 +141,7 @@ int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
     if(!sl)
         return -1;
 
-    data >>= location.address.offset_bits;
+    data >>= (location.address.offset_bits/8)*8;
 
     memcpy(sl->q_buf, &data, location.address.size_bits/8);
 
