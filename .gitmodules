@@ -19,3 +19,6 @@
 [submodule "windowsLibs/zlib"]
 	path = windowsLibs/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "deps/varloc"]
+	path = deps/varloc
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/varloc.git
