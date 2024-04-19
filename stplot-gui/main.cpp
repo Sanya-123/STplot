@@ -16,6 +16,9 @@ DebugerWindow *debuger = nullptr;
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {//https://stackoverflow.com/questions/4954140/how-to-redirect-qdebug-qwarning-qcritical-etc-output
+    if (QThread::currentThread() != debuger->thread())
+        return;
+
     QByteArray localMsg = msg.toLocal8Bit();
     QString outputSring;
     switch (type) {
