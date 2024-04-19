@@ -126,7 +126,7 @@ uint32_t VarChannel::code_value(float value, uint32_t mask, varloc_location_t lo
             uint32_t    _u32;
         }combiner;
         combiner._f = value;
-        ret = combiner._f;
+        ret = combiner._u32;
     }
     else
     {
