@@ -136,12 +136,16 @@ int STlinkDevice::execReadDevice()
     return 0;
 }
 
+#include <QDebug>
+
 int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
 {//TODO for bit array read data then overwrite bing then write
     if(!sl)
         return -1;
 
     memcpy(sl->q_buf, &data, location.address.size_bits/8);
+
+    qDebug("0x%08X;%d;%d", location.address.base, location.address.size_bits, location.address.offset_bits);
 
     return stlink_write_mem8(sl, location.address.base + location.address.offset_bits/8, location.address.size_bits/8);
 }
