@@ -51,6 +51,7 @@ private:
     void writeSettings(QSettings &settings);
     void saveSettingsToFile(QString fileName);
     void initReadDevice();
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::STPlotWindow *ui;

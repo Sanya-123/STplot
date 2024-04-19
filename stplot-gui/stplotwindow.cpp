@@ -353,6 +353,13 @@ void STPlotWindow::initReadDevice()
     }
 }
 
+void STPlotWindow::closeEvent(QCloseEvent *event)
+{
+    if(debuger != nullptr)
+        debuger->close();
+    QMainWindow::closeEvent(event);
+}
+
 
 //void STPlotWindow::closeEvent(QCloseEvent *event)
 //{
