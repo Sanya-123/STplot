@@ -34,10 +34,20 @@ add_subdirectory(stplot-gui)
 if (WIN32)
     #make image copy correct files
 else()
-    add_custom_target(deployment DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui
+    add_custom_target(deployment_CP DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui ${CMAKE_CURRENT_BINARY_DIR}/deployment/stplot-gui
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/lib/*.so ${CMAKE_CURRENT_BINARY_DIR}/deployment/
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/plugins ${CMAKE_CURRENT_BINARY_DIR}/deployment/plugins
     )
+    if(CI_TOOLS_PATH)
+        add_custom_target(deployment_Image DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui deployment_CP
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/resource/appicon.png ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui.png
+            COMMAND ${CI_TOOLS_PATH}/linuxdeploy-x86_64.AppImage --create-desktop-file -e ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui -i stplot-gui.png --appdir AppDir --plugin qt --output appimage
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.AppImage ${CMAKE_CURRENT_BINARY_DIR}/deployment/
+        )
+        add_custom_target(deployment DEPENDS deployment_Image deployment_CP)
+    else()
+        add_custom_target(deployment DEPENDS deployment_CP)
+    endif()
 endif()
 
