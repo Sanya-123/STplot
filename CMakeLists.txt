@@ -30,6 +30,11 @@ set(CMAKE_AUTORCC ON)
 add_subdirectory(deps/QtnProperty)
 add_subdirectory(stplot-gui)
 
+if(NOT QT_QMAKE_EXECUTABLE)
+    set(QT_QMAKE_EXECUTABLE ${CMAKE_PREFIX_PATH}/bin/qmake)
+endif()
+message("QT_QMAKE_EXECUTABLE::${QT_QMAKE_EXECUTABLE}")
+
 #generate runnable image
 if (WIN32)
     #make image copy correct files
@@ -43,7 +48,7 @@ else()
     if(CI_TOOLS_PATH)
         add_custom_target(deployment_Image DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui deployment_CP
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/resource/appicon.png ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui.png
-            COMMAND ${CI_TOOLS_PATH}/linuxdeploy-x86_64.AppImage --create-desktop-file -e ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui -i stplot-gui.png --appdir AppDir --plugin qt --output appimage
+            COMMAND QMAKE=${QT_QMAKE_EXECUTABLE} ${CI_TOOLS_PATH}/linuxdeploy-x86_64.AppImage --create-desktop-file -e ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui -i stplot-gui.png --appdir AppDir --plugin qt --output appimage
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.AppImage ${CMAKE_CURRENT_BINARY_DIR}/deployment/
         )
         add_custom_target(deployment DEPENDS deployment_Image deployment_CP)
