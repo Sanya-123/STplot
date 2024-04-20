@@ -28,7 +28,7 @@ windows:
   script:
     - rm -rf build && mkdir build && cd build
     - export PATH=${CI_MXE_PATH}/usr/bin/:$PATH
-    - ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared-cmake ..
+    - ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared.posix-cmake ..
     - make -j4
   artifacts:
     paths:
