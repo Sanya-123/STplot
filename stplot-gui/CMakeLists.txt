@@ -98,7 +98,15 @@ endif()
 
 set(VERSION_SHORT "3.5.2")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/cmake/modules ${CMAKE_MODULE_PATH})
-option(BUILD_STATIC "Build the static library" ON)
+
+if (WIN32)
+    option(BUILD_STATIC "Build the static library" OFF)
+    set(STLINK_LIB_NAME stlink)
+else()
+    option(BUILD_STATIC "Build the static library" ON)
+    set(STLINK_LIB_NAME stlink-static)
+endif()
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
 set(STLINK_PATH ../deps/stlink-lib/stlink)
