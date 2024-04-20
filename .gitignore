@@ -75,5 +75,3 @@ CMakeLists.txt.user*
 
 /bin/
 /build/
-
-!/windowsLibs/libusb/libusb-1.0.dll
