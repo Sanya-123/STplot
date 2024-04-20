@@ -26,7 +26,6 @@ windows:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - ln -s /mxe/usr/x86_64-w64-mingw32.shared/lib/libpthread.dll.a /mxe/usr/x86_64-w64-mingw32.shared/lib/libpthread.a
     - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake
     - cmake --build build/windows -- 2> ./build/windows/log_build.txt
   artifacts:
