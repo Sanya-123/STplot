@@ -13,15 +13,16 @@ set(PATH_COMMON_QT_LIBS "${CMAKE_CURRENT_LIST_DIR}/deps/commonQtLibs")
 if (WIN32)
     #libs for windows
     include_directories(${CMAKE_SOURCE_DIR}/windowsLibs)
-    set(ZLIB_LIBRARY zlib)
-    set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
+    #set(ZLIB_LIBRARY zlib)
+    #set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
     #set(CMAKE_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
-    add_subdirectory(windowsLibs/zlib)
-    set(LIBUSB_LIBRARY libusb)
-    set(LIBUSB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/libusb-cmake/libusb/libusb)
-    add_subdirectory(windowsLibs/libusb-cmake)
-#    add_subdirectory(windowsLibs/libdwarf-code)
+    #add_subdirectory(windowsLibs/zlib)
+    # add_subdirectory(windowsLibs/libusb-cmake)
+    # add_subdirectory(windowsLibs/libdwarf-code)
+    # set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    set(LIBUSB_LIBRARY /mxe/usr/x86_64-w64-mingw32.static/lib/libusb-1.0.a)
+    set(LIBUSB_INCLUDE_DIR /mxe/usr/x86_64-w64-mingw32.static/include/libusb-1.0/)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     add_subdirectory(deps/varloc)
@@ -62,10 +63,10 @@ else()
 endif()
 
 #some libs
-if (WIN32)
-    add_custom_target(copyLibs DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a ${CMAKE_CURRENT_BINARY_DIR}/lib/liblibusb.a
-    )
-    add_dependencies(stplot-gui copyLibs)
-endif()
+# if (WIN32)
+#     add_custom_target(copyLibs DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a
+#         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a ${CMAKE_CURRENT_BINARY_DIR}/lib/liblibusb.a
+#     )
+#     add_dependencies(stplot-gui copyLibs)
+# endif()
 
