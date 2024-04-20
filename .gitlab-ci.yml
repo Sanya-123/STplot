@@ -26,8 +26,10 @@ windows:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH}
-    - cmake --build build/windows -- 2> ./build/windows/log_build.txt
+    - rm -rf build && mkdir build && cd build
+    - export PATH=${CI_MXE_PATH}/usr/bin/:$PATH
+    - ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared-cmake ..
+    - make -j4
   artifacts:
     paths:
       - ./build/windows/
