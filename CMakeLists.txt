@@ -17,6 +17,11 @@ if (WIN32)
     set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
     #set(CMAKE_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/windowsLibs/zlib)
     add_subdirectory(windowsLibs/zlib)
+    set(LIBUSB_LIBRARY libusb)
+    set(LIBUSB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/libusb-cmake/libusb/libusb)
+    add_subdirectory(windowsLibs/libusb-cmake)
+#    add_subdirectory(windowsLibs/libdwarf-code)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     add_subdirectory(deps/varloc)
@@ -33,7 +38,6 @@ add_subdirectory(stplot-gui)
 if(NOT QT_QMAKE_EXECUTABLE)
     set(QT_QMAKE_EXECUTABLE ${CMAKE_PREFIX_PATH}/bin/qmake)
 endif()
-message("QT_QMAKE_EXECUTABLE::${QT_QMAKE_EXECUTABLE}")
 
 #generate runnable image
 if (WIN32)
@@ -55,5 +59,13 @@ else()
     else()
         add_custom_target(deployment DEPENDS deployment_CP)
     endif()
+endif()
+
+#some libs
+if (WIN32)
+    add_custom_target(copyLibs DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a ${CMAKE_CURRENT_BINARY_DIR}/lib/liblibusb.a
+    )
+    add_dependencies(stplot-gui copyLibs)
 endif()
 

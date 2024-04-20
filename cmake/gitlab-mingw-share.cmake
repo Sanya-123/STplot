@@ -4,6 +4,7 @@ set(CMAKE_SYSTEM_NAME Windows)
 # which compilers to use for C and C++
 set(CMAKE_C_COMPILER   ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared-gcc)
 set(CMAKE_CXX_COMPILER ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared-g++)
+set(CMAKE_RC_COMPILER  ${CI_MXE_PATH}/usr/bin/x86_64-w64-mingw32.shared-windres)
 
 # where is the target environment located
 set(CMAKE_FIND_ROOT_PATH  ${CI_MXE_PATH}/usr/x86_64-w64-mingw32.shared
