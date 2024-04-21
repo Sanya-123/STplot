@@ -477,7 +477,7 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
     if (timeSec > 10){
         foreach (QCPGraph* graph, mapPlots){
             QPen pen = graph->pen();
-            pen.setWidth(4);
+            pen.setWidth(2);
             graph->setPen(pen);
             graph->setScatterStyle(QCPScatterStyle::ScatterShape::ssNone);
         }
