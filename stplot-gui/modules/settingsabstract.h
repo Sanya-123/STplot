@@ -49,7 +49,11 @@ public slots:
 
 
 signals:
+#ifdef WIN32
+    virtual void settingsUpdated() = 0;
+#else
     void settingsUpdated();
+#endif
 
 protected:
     //map settings mname and values

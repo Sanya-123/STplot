@@ -51,6 +51,9 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char *argv[])
 {
+#ifdef QCUSTOMPLOT_USE_OPENGL
+    QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+#endif
     QApplication a(argc, argv);
     qRegisterMetaType< QVector<uint8_t> >( "QVector<uint8_t>" );
     qRegisterMetaType< QVector<uint32_t> >( "QVector<uint32_t>" );

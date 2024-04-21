@@ -189,7 +189,11 @@ include(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(ssp __stack_chk_fail "" _stack_chk_fail_exists)
 if (_stack_chk_fail_exists)
     if (WIN32)
-        set(SSP_LIB -static ssp)
+        if(BUILD_STATIC_STLINK)
+            set(SSP_LIB -static ssp)
+        else()
+            set(SSP_LIB ssp)
+        endif()
     else ()
         set(SSP_LIB ssp)
     endif ()
@@ -335,85 +339,91 @@ endif ()
 # Libraries
 ###
 
+message(STATUS "STLINK STATIC BUILD = ${BUILD_STATIC_STLINK}")
+
 # Set the environment variable LD_LIBRARY_PATH to point to /usr/local/lib (per default).
 execute_process(COMMAND bash -c "export LD_LIBRARY_PATH=${CMAKE_INSTALL_LIBDIR}")
 
+if(BUILD_STATIC_STLINK)
 
-###
-# Shared library
-###
+    ###
+    # Static library
+    ###
 
-# Set library name
-# set(STLINK_LIB_SHARED ${PROJECT_NAME}-shared)
+    # Set library name
+    set(STLINK_LIB_STATIC ${PROJECT_NAME}-static)
+    set(STLINK_LIB_STATIC_OUTPUT_NAME ${PROJECT_NAME})
+    if (MSVC)
+        set(STLINK_LIB_STATIC_OUTPUT_NAME ${PROJECT_NAME}-static)
+    endif()
 
-# add_library(${STLINK_LIB_SHARED} SHARED ${STLINK_HEADERS} ${STLINK_SOURCE})
+    add_library(${STLINK_LIB_STATIC} STATIC ${STLINK_HEADERS} ${STLINK_SOURCE})
 
-# set(STLINK_SHARED_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-# message(STATUS "STLINK_LIB_SHARED: ${STLINK_LIB_SHARED}")
-# message(STATUS "PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
-# message(STATUS "VERSION: ${STLINK_SHARED_VERSION}")
+    set(STLINK_STATIC_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+    message(STATUS "STLINK_LIB_STATIC: ${STLINK_LIB_STATIC}")
+    message(STATUS "PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
+    message(STATUS "VERSION: ${STLINK_STATIC_VERSION}")
 
-# set_target_properties(${STLINK_LIB_SHARED} PROPERTIES
-#         SOVERSION ${PROJECT_VERSION_MAJOR}
-#         VERSION ${STLINK_SHARED_VERSION}
-#         OUTPUT_NAME ${PROJECT_NAME}
-#         )
+    set_target_properties(${STLINK_LIB_STATIC} PROPERTIES
+            SOVERSION ${PROJECT_VERSION_MAJOR}
+            VERSION ${STLINK_STATIC_VERSION}
+            OUTPUT_NAME ${STLINK_LIB_STATIC_OUTPUT_NAME}
+            )
 
-# # Link shared library
-# if (WIN32) # ... with Windows libraries
-#     target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB} wsock32 ws2_32)
-# else ()
-#     target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB})
-# endif ()
+    # Link static library
+    if (WIN32) # ... with Windows libraries
+        target_link_libraries(${STLINK_LIB_STATIC} ${LIBUSB_LIBRARY} ${SSP_LIB} wsock32 ws2_32)
+    else ()
+        target_link_libraries(${STLINK_LIB_STATIC} ${LIBUSB_LIBRARY} ${SSP_LIB})
+    endif ()
 
-# install(TARGETS ${STLINK_LIB_SHARED}
-#         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-#         )
-
-# # Copy libusb DLL-library to binary output folder
-# if (WIN32)
-# file(COPY ${LIBUSB_WIN_OUTPUT_FOLDER}/MinGW64/dll/libusb-1.0.dll
-#      DESTINATION ${CMAKE_INSTALL_BINDIR})
-# file(COPY ${LIBUSB_WIN_OUTPUT_FOLDER}/MinGW64/dll/libusb-1.0.dll
-#      DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
-# endif ()
+    install(TARGETS ${STLINK_LIB_STATIC} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 
-###
-# Static library
-###
+else()
 
-# Set library name
-set(STLINK_LIB_STATIC ${PROJECT_NAME}-static)
-set(STLINK_LIB_STATIC_OUTPUT_NAME ${PROJECT_NAME})
-if (MSVC)
-    set(STLINK_LIB_STATIC_OUTPUT_NAME ${PROJECT_NAME}-static)
+    ###
+    # Shared library
+    ###
+
+    #Set library name
+    set(STLINK_LIB_SHARED ${PROJECT_NAME}-shared)
+
+    add_library(${STLINK_LIB_SHARED} SHARED ${STLINK_HEADERS} ${STLINK_SOURCE})
+
+    set(STLINK_SHARED_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+    message(STATUS "STLINK_LIB_SHARED: ${STLINK_LIB_SHARED}")
+    message(STATUS "PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
+    message(STATUS "VERSION: ${STLINK_SHARED_VERSION}")
+
+    set_target_properties(${STLINK_LIB_SHARED} PROPERTIES
+            SOVERSION ${PROJECT_VERSION_MAJOR}
+            VERSION ${STLINK_SHARED_VERSION}
+            OUTPUT_NAME ${PROJECT_NAME}
+            )
+
+    # Link shared library
+    if (WIN32) # ... with Windows libraries
+        target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB} wsock32 ws2_32)
+    else ()
+        target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB})
+    endif ()
+
+    # install(TARGETS ${STLINK_LIB_SHARED}
+    #         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    #         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    #         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    #         )
+
+    # Copy libusb DLL-library to binary output folder
+    # if (WIN32)
+    # file(COPY ${LIBUSB_WIN_OUTPUT_FOLDER}/MinGW64/dll/libusb-1.0.dll
+    #      DESTINATION ${CMAKE_INSTALL_BINDIR})
+    # file(COPY ${LIBUSB_WIN_OUTPUT_FOLDER}/MinGW64/dll/libusb-1.0.dll
+    #      DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
+    # endif ()
+
 endif()
-
-add_library(${STLINK_LIB_STATIC} STATIC ${STLINK_HEADERS} ${STLINK_SOURCE})
-
-set(STLINK_STATIC_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-message(STATUS "STLINK_LIB_STATIC: ${STLINK_LIB_STATIC}")
-message(STATUS "PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
-message(STATUS "VERSION: ${STLINK_STATIC_VERSION}")
-
-set_target_properties(${STLINK_LIB_STATIC} PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${STLINK_STATIC_VERSION}
-        OUTPUT_NAME ${STLINK_LIB_STATIC_OUTPUT_NAME}
-        )
-
-# Link static library
-if (WIN32) # ... with Windows libraries
-    target_link_libraries(${STLINK_LIB_STATIC} ${LIBUSB_LIBRARY} ${SSP_LIB} wsock32 ws2_32)
-else ()
-    target_link_libraries(${STLINK_LIB_STATIC} ${LIBUSB_LIBRARY} ${SSP_LIB})
-endif ()
-
-install(TARGETS ${STLINK_LIB_STATIC} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
 
 ###
 # Build toolset executables

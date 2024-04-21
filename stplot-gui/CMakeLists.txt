@@ -9,8 +9,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport Script)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network SerialPort PrintSupport Script)
+message(STATUS "OpenGL = ${USE_OPENGL} ")
+if(USE_OPENGL)
+    find_package(OpenGL)
+    set(QT_OPENGL_PACKAGE OpenGL)
+    set(OPENGL_LIBS "Qt${QT_VERSION_MAJOR}::OpenGL ${OPENGL_LIBRARIES}")
+    add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+endif()
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -99,12 +106,10 @@ endif()
 set(VERSION_SHORT "3.5.2")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/cmake/modules ${CMAKE_MODULE_PATH})
 
-if (WIN32)
-    option(BUILD_STATIC "Build the static library" OFF)
-    set(STLINK_LIB_NAME stlink)
-else()
-    option(BUILD_STATIC "Build the static library" ON)
+if (BUILD_STATIC_STLINK)
     set(STLINK_LIB_NAME stlink-static)
+else()
+    set(STLINK_LIB_NAME stlink-shared)
 endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
@@ -146,9 +151,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Script
+    ${OPENGL_LIBS}
     qtadvanceddocking
 #    xcb
-    stlink-static
+    ${STLINK_LIB_NAME}
     QtnProperty
 )
 

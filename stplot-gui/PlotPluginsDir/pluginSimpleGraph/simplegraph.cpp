@@ -26,6 +26,9 @@ SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     ui->setupUi(this);
 
     plotWidget = new QCustomPlot(this);
+
+    plotWidget->setOpenGl(true);
+
     defaultPlotInit(plotWidget);
     plotWidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables  | QCP::iMultiSelect | QCP::iSelectLegend);
 
@@ -467,6 +470,28 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
             mapTrackers[plots[i]]->setGraphKey(x);
             mapTrackers[plots[i]]->updatePosition();
             mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
+        }
+    }
+    // limit number of drawn dots to optimize speed
+    double timeSec = plotWidget->xAxis->range().size();
+    if (timeSec > 10){
+        foreach (QCPGraph* graph, mapPlots){
+            QPen pen = graph->pen();
+            pen.setWidth(4);
+            graph->setPen(pen);
+            graph->setScatterStyle(QCPScatterStyle::ScatterShape::ssNone);
+        }
+    }
+    else{
+        QMap<VarChannel*,QCPGraph*>::const_iterator i = mapPlots.constBegin();
+        while (i != mapPlots.constEnd()) {
+            QCPGraph* graph = i.value();
+            VarChannel* ch = i.key();
+            QPen pen = graph->pen();
+            pen.setWidth(ch->lineWidth());
+            graph->setPen(pen);
+            graph->setScatterStyle((QCPScatterStyle::ScatterShape)ch->dotStyle());
+            ++i;
         }
     }
     plotWidget->update();
