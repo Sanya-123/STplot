@@ -11,10 +11,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 message(STATUS "OpenGL = ${USE_OPENGL} ")
 if(USE_OPENGL)
+    set(OpenGL_GL_PREFERENCE GLVND)
     find_package(OpenGL)
     set(QT_OPENGL_PACKAGE OpenGL)
-    set(OPENGL_LIBS "Qt${QT_VERSION_MAJOR}::OpenGL ${OPENGL_LIBRARIES}")
     add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+    set(OPENGL_LIBS "Qt${QT_VERSION_MAJOR}::OpenGL")
 endif()
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
@@ -144,7 +145,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 add_subdirectory(PlotPluginsDir)
 
-
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
@@ -152,6 +152,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Script
     ${OPENGL_LIBS}
+    ${OPENGL_LIBRARIES}
     qtadvanceddocking
 #    xcb
     ${STLINK_LIB_NAME}
