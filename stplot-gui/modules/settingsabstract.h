@@ -40,20 +40,17 @@ public slots:
             if(mapSettings[name].type() == val.type())
             {
                 mapSettings[name] = val;
+#ifndef WIN32
                 emit settingsUpdated();
+#endif
             }
         }
     }
 
     virtual void restoreDefoultSetings() {mapSettings = mapSettingsDefauold; emit settingsUpdated();}
 
-
 signals:
-#ifdef WIN32
-    virtual void settingsUpdated() = 0;
-#else
     void settingsUpdated();
-#endif
 
 protected:
     //map settings mname and values
