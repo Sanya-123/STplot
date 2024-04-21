@@ -2,15 +2,13 @@ cmake_minimum_required(VERSION 3.5)
 
 project(stplot LANGUAGES CXX C)
 
-#set(CMAKE_AUTOUIC ON)
-#set(CMAKE_AUTOMOC ON)
-#set(CMAKE_AUTORCC ON)
+option(USE_OPENGL "Use opengl" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/deps/varloc/dwarves/cmake/modules")
 
 set(PATH_COMMON_QT_LIBS "${CMAKE_CURRENT_LIST_DIR}/deps/commonQtLibs")
 
-option(USE_OPENGL "Use opengl" OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 if (WIN32)
     #libs for windows
@@ -23,12 +21,10 @@ if (WIN32)
     # add_subdirectory(windowsLibs/libdwarf-code)
     # set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     option(BUILD_STATIC_STLINK "Build the static library" OFF)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-    set(LIBUSB_LIBRARY /mxe/usr/x86_64-w64-mingw32.shared.posix/lib/libusb-1.0.dll.a)
-    set(LIBUSB_INCLUDE_DIR /mxe/usr/x86_64-w64-mingw32.shared.posix/include/libusb-1.0/)
+    # set(LIBUSB_LIBRARY /mxe/usr/x86_64-w64-mingw32.shared.posix/lib/libusb-1.0.dll.a)
+    # set(LIBUSB_INCLUDE_DIR /mxe/usr/x86_64-w64-mingw32.shared.posix/include/libusb-1.0/)
 else()
     option(BUILD_STATIC_STLINK "Build the static library" ON)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     add_subdirectory(deps/varloc)
 endif()
 
