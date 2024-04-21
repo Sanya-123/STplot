@@ -16,15 +16,6 @@
 [submodule "stplot-gui/widgets/DebugerWindow"]
 	path = stplot-gui/widgets/DebugerWindow
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/debugerwindow.git
-[submodule "windowsLibs/zlib"]
-	path = windowsLibs/zlib
-	url = https://github.com/madler/zlib.git
 [submodule "deps/varloc"]
 	path = deps/varloc
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/varloc.git
-[submodule "windowsLibs/libusb-cmake"]
-	path = windowsLibs/libusb-cmake
-	url = https://github.com/libusb/libusb-cmake.git
-[submodule "windowsLibs/libdwarf-code"]
-	path = windowsLibs/libdwarf-code
-	url = https://github.com/davea42/libdwarf-code.git
