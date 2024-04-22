@@ -28,6 +28,7 @@ windows:
   script:
     - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH}
     - cmake --build build/windows -j$(nproc) --
+    - cmake --build build/windows --target install
   artifacts:
     paths:
       - ./build/windows/
