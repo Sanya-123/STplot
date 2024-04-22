@@ -24,6 +24,10 @@ else()
     option(BUILD_STATIC_STLINK "Build stlink static library" ON)
 endif()
 
+if(USE_OPENGL)
+    add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+endif()
+
 add_subdirectory(deps/stlink-lib)
 
 set(CMAKE_AUTOUIC ON)
