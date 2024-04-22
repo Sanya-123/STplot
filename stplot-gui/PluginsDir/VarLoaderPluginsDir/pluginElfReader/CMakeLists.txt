@@ -17,15 +17,16 @@ if (WIN32)
         elfreader.h elfreader.cpp
     )
 else()
+    add_subdirectory(varloc)
     add_library(${PLUGIN_NAME} SHARED
         ${PATH_INTERFACE}/varreaderinterface.h
         elfreader.h elfreader.cpp
-        ${CMAKE_SOURCE_DIR}/deps/varloc/varloc.h
-        ${CMAKE_SOURCE_DIR}/deps/varloc/varloc.c
+        varloc/varloc.h
+        varloc/varloc.c
     )
 endif()
 
-target_include_directories(${PLUGIN_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/deps/varloc/dwarves ${CMAKE_SOURCE_DIR}/deps/varloc)
+target_include_directories(${PLUGIN_NAME} PRIVATE varloc/dwarves varloc)
 if (UNIX)
     target_link_libraries(${PLUGIN_NAME} PRIVATE dwarves)
 endif()

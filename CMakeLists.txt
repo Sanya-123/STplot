@@ -22,7 +22,6 @@ if (WIN32)
 else()
     option(USE_OPENGL "Use OpenGL" ON)
     option(BUILD_STATIC_STLINK "Build stlink static library" ON)
-    add_subdirectory(deps/varloc)
 endif()
 
 add_subdirectory(deps/stlink-lib)
