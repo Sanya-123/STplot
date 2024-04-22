@@ -139,13 +139,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ViewManager
     widgets/PlotWidget
     widgets/DebugerWindow
-    PluginsDir
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps
   )
-
-add_subdirectory(PluginsDir)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets

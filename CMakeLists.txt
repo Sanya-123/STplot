@@ -31,6 +31,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 add_subdirectory(deps/QtnProperty)
 #add_subdirectory(stplot-gui/modules/VarChannel)
+add_subdirectory(deps/PluginsDir)
 add_subdirectory(stplot-gui)
 
 if(NOT QT_QMAKE_EXECUTABLE)

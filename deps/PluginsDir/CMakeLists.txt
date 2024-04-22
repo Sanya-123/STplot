@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(PLUGINS_PATH ${CMAKE_CURRENT_BINARY_DIR}/../plugins)
+set(PLUGINS_PATH ${CMAKE_BINARY_DIR}/stplot-gui/plugins)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
