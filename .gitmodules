@@ -16,9 +16,9 @@
 [submodule "stplot-gui/widgets/DebugerWindow"]
 	path = stplot-gui/widgets/DebugerWindow
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/debugerwindow.git
-[submodule "deps/varloc"]
-	path = deps/PluginsDir/VarLoaderPluginsDir/pluginElfReader/varloc
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/varloc.git
 [submodule "deps/PluginsDir/STplotVarCommon"]
 	path = deps/PluginsDir/STplotVarCommon
 	url = git@gitlab2.pekauto.com:development/firmware/libs/stplotvarcommon.git
+[submodule "deps/PluginsDir/VarLoaderPluginsDir"]
+	path = deps/PluginsDir/VarLoaderPluginsDir
+	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/stplotvarloader.git
