@@ -3,7 +3,6 @@
 
 #define DEBUG_VIEW 0
 
-#ifndef Q_OS_WINDOWS
 VarModel::VarModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -44,7 +43,7 @@ void VarModel::deselect_node(varloc_node_t* node)
 }
 
 void VarModel::apply_for_each_child(varloc_node_t* root,
-                                    void (VarModel::*func)(varloc_node_t*), bool first = true)
+                                    void (VarModel::*func)(varloc_node_t*), bool first)
 {
     if (root == NULL){
         return;
@@ -286,6 +285,5 @@ int VarModel::rowCount(const QModelIndex &parent) const
     }
     return row_n + 1;
 }
-#endif
 
 

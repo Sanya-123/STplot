@@ -5,10 +5,9 @@
 #include <QModelIndex>
 #include <QVariant>
 extern "C" {
-#include "varloc.h"
+#include "varcommon.h"
 }
 
-#ifndef Q_OS_WINDOWS
 class VarModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -39,9 +38,8 @@ private:
     varloc_node_t *rootItem;
     void select_node(varloc_node_t* node);
     void deselect_node(varloc_node_t* node);
-    void apply_for_each_child(varloc_node_t* root, void (VarModel::*func)(varloc_node_t*), bool first);
+    void apply_for_each_child(varloc_node_t* root, void (VarModel::*func)(varloc_node_t*), bool first = true);
 
 };
-#endif
 
 #endif // VARMODEL_H

@@ -19,3 +19,6 @@
 [submodule "deps/varloc"]
 	path = deps/varloc
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/varloc.git
+[submodule "deps/STplotVarCommon"]
+	path = deps/STplotVarCommon
+	url = git@gitlab2.pekauto.com:development/firmware/libs/stplotvarcommon.git

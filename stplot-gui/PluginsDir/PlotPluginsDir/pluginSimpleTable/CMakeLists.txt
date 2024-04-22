@@ -12,17 +12,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # BEGIN PLUGIN
 add_library(${PLUGIN_NAME} SHARED
-    ${PATH_PLOT_INTERFACE}/settingsabstract.h
-    ${PATH_PLOT_INTERFACE}/plotinterface.h
-    #TODO build var chanale as lib
-    ${PATH_VARCHANNEL}/varchannel.h
-    ${PATH_VARCHANNEL}/varchannel.cpp
+    ${PATH_INTERFACE}/settingsabstract.h
+    ${PATH_INTERFACE}/plotinterface.h
     simpletable.h simpletable.cpp simpletable.ui
 )
 
 set_target_properties(${PLUGIN_NAME} PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${PLUGINS_PATH}"
+    LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_PATH}
 )
 
-target_compile_definitions(${PLUGIN_NAME} PRIVATE PLUGINFLASH_LIBRARY)
+if (WIN32)
+    install(TARGETS ${PLUGIN_NAME} DESTINATION ${PLUGINS_PATH})
+endif()
 # END PLUGIN

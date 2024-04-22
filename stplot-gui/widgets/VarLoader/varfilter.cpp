@@ -1,7 +1,7 @@
 #include "varfilter.h"
 #include <QtDebug>
 extern "C" {
-#include "varloc.h"
+#include "varcommon.h"
 }
 
 VarFilter::VarFilter(QObject *parent) :

@@ -5,15 +5,18 @@
 #include <QFileSystemWatcher>
 #include "varmodel.h"
 #include "varfilter.h"
+#include "varreaderinterface.h"
 
 extern "C" {
-#include "varloc.h"
+#include "varcommon.h"
 }
 #include <QSettings>
 
 namespace Ui {
 class VarLoader;
 }
+
+#define MINIMUM_PLUGIN_READER_HEADER_VERSION          0x00000000
 
 class VarLoader : public QWidget
 {
@@ -24,36 +27,33 @@ public:
     ~VarLoader();
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
-#ifndef Q_OS_WINDOWS
     bool isElfLoaded();
-#endif
 
 public slots:
-#ifndef Q_OS_WINDOWS
-    void openElf();
-    void updateElf(const QString &);
-    void loadElf();
+    void openTree();
+    void updateTree(const QString &);
+    void loadTree();
+    void saveTree();
     void addVariables();
     void applyFilter(const QString &);
     void collapseTree();
     void expandTree();
-#endif
 
 signals:
     void variableAdded(varloc_node_t*);
     void variablesUpdated(varloc_node_t*);
 
 private:
-#ifndef Q_OS_WINDOWS
     void loadVariables(const QString &);
-#endif
     Ui::VarLoader *ui;
-#ifndef Q_OS_WINDOWS
     VarFilter *proxyModel;
     // QSortFilterProxyModel *proxyModel;
     VarModel *varModel;
-#endif
     QFileSystemWatcher watcher;
+    QList<VarReadInterfacePlugin*> pluginsReader;
+    QString allowReadFiles;
+    QString allowWriteFiles;
+    QMap<QString, VarReadInterfacePlugin*> mapPluginFile;
 };
 
 #endif // VARLOADER_H

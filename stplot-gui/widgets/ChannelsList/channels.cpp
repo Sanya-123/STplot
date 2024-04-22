@@ -235,7 +235,6 @@ QVector<VarChannel *> *Channels::getListMathChanales() const
     return m_channelsMath;
 }
 
-#ifndef Q_OS_WINDOWS
 void Channels::reloadChannels(varloc_node_t* root){
 
     bool update_allowed = false;
@@ -303,7 +302,6 @@ void Channels::add_channel(varloc_node_t* node){
 
     emit m_channelModel->layoutChanged();
 }
-#endif
 
 void Channels::addPlot()
 {

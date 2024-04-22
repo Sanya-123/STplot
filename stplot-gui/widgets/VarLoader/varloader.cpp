@@ -13,22 +13,52 @@ VarLoader::VarLoader(QWidget *parent) :
     ui(new Ui::VarLoader)
 {
     ui->setupUi(this);
-#ifndef Q_OS_WINDOWS
+
+    pluginsReader = loadPlugin<VarReadInterfacePlugin>(MINIMUM_PLUGIN_READER_HEADER_VERSION, VAR_READER_INTERFACE_HEADER_VERSION);
+
+    allowReadFiles.clear();
+    allowWriteFiles.clear();
+    foreach (VarReadInterfacePlugin *plugin, pluginsReader) {
+        mapPluginFile[plugin->getFileExtensions()] = plugin;
+        if(plugin->allowMode() & QIODevice::ReadOnly)
+        {
+            allowReadFiles.append(QString("%1 (%2);;").arg(plugin->getName(), plugin->getFileExtensions()));
+        }
+        if(plugin->allowMode() & QIODevice::WriteOnly)
+        {
+            allowWriteFiles.append(QString("%1 (%2);;").arg(plugin->getName(), plugin->getFileExtensions()));
+        }
+    }
+
+    //remove lst ;
+    if(!allowReadFiles.isEmpty())
+        allowReadFiles.remove(allowReadFiles.size()-2, 2);
+    else
+        ui->loadButton->setEnabled(false);
+    if(!allowWriteFiles.isEmpty())
+        allowWriteFiles.remove(allowWriteFiles.size()-2, 2);
+    else
+        ui->saveButton->setEnabled(false);
+
+    qDebug () << "allowReadFiles:" << allowReadFiles;
+    qDebug () << "allowWriteFiles:" << allowWriteFiles;
+
+
     proxyModel = new VarFilter(this);
     // proxyModel = new QSortFilterProxyModel(this);
     varModel = new VarModel(this);
-    connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::openElf);
-    connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::loadElf);
+    connect(ui->pushButton_selectFile, &QPushButton::clicked, this, &VarLoader::openTree);
+    connect(ui->loadButton, &QPushButton::clicked, this, &VarLoader::loadTree);
     connect(ui->addButton, &QPushButton::clicked, this, &VarLoader::addVariables);
     connect(ui->expandButton, &QToolButton::clicked, this, &VarLoader::expandTree);
     connect(ui->collapseButton, &QToolButton::clicked, this, &VarLoader::collapseTree);
     connect(ui->searchField, &QLineEdit::textChanged, this, &VarLoader::applyFilter);
-#endif
+    connect(ui->saveButton, &QPushButton::clicked, this, &VarLoader::saveTree);
+    connect(&watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(updateTree(const QString&)));
 }
 
 VarLoader::~VarLoader()
 {
-#ifndef Q_OS_WINDOWS
     if (varModel->getModelRoot() != NULL){
         ui->treeView->setModel(NULL);
         proxyModel->setSourceModel(NULL);
@@ -36,7 +66,6 @@ VarLoader::~VarLoader()
     }
     delete proxyModel;
     delete varModel;
-#endif
     delete ui;
 }
 
@@ -51,7 +80,6 @@ void VarLoader::restoreSettings(QSettings *settings)
     ui->lineEdit_file->setText(settings->value("elffile").toString());
 }
 
-#ifndef Q_OS_WINDOWS
 void VarLoader::expandTree(){
     ui->treeView->expandAll();
 }
@@ -90,10 +118,10 @@ void VarLoader::addVariables()
     ui->treeView->viewport()->update();
 }
 
-void VarLoader::openElf()
+void VarLoader::openTree()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-                    tr("ELF file"), ui->lineEdit_file->text(), tr("ELF Files (*.elf)"));
+                    tr("Tree file"), ui->lineEdit_file->text(), allowReadFiles);
     if (!fileName.isEmpty())
     {
         watcher.removePath(ui->lineEdit_file->text());
@@ -101,12 +129,17 @@ void VarLoader::openElf()
     }
 }
 
-void VarLoader::loadElf()
+void VarLoader::loadTree()
 {
     loadVariables(ui->lineEdit_file->text());
 }
 
-void VarLoader::updateElf(const QString& path)
+void VarLoader::saveTree()
+{
+    //TODO implement
+}
+
+void VarLoader::updateTree(const QString& path)
 {
     QMessageBox msgBox;
     msgBox.setText("The ELF file was modified.");
@@ -140,8 +173,31 @@ void VarLoader::loadVariables(const QString & fileName)
         varloc_delete_tree(varModel->getModelRoot());
     }
 
-    varloc_node_t* tree_root = varloc_open_elf(filepath);
-    if (tree_root == NULL){
+    varloc_node_t* tree_root = nullptr;
+
+
+    QFileInfo fileInfo(fileName);
+    QString _fileName = fileInfo.fileName();
+
+
+    QList<QString> fileFormats = mapPluginFile.keys();
+    foreach (QString format, fileFormats) {
+        QRegExp rx(format);
+        //TODO check QRegExp filetsr
+        rx.setPatternSyntax(QRegExp::Wildcard);
+        if(rx.exactMatch(_fileName))
+        {
+            tree_root = mapPluginFile[format]->readTree(fileName);
+        }
+
+        //if plugin is note exactMatch or plugin is note load tree check next plugin
+        //it is posible taht couple plagit use same suffix but different format
+        if (tree_root != nullptr)
+            break;
+    }
+
+
+    if (tree_root == nullptr){
         return;
     }
     varModel->setModelRoot(tree_root);
@@ -153,8 +209,6 @@ void VarLoader::loadVariables(const QString & fileName)
     ui->treeView->setColumnWidth(0,300);
 
     watcher.addPath(fileName);
-    QObject::connect(&watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(updateElf(const QString&)));
 
     emit variablesUpdated(tree_root);
 }
-#endif

@@ -51,9 +51,6 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/chanalecustomeditor.h
         widgets/ChannelsList/chanalecustomeditor.cpp
         widgets/ChannelsList/chanalecustomeditor.ui
-        # modules/settingsabstract.h
-        modules/plotwidgetabstract.h
-        modules/plotinterface.h
         modules/ReadWriteDevice/stlinkdevice.h
         modules/ReadWriteDevice/stlinkdevice.cpp
         modules/ReadManager/readloop.h
@@ -64,13 +61,17 @@ set(PROJECT_SOURCES
         modules/ReadWriteDevice/stmstudiofiledevice.cpp
         modules/ReadWriteDevice/fimesavereaddevice.h
         modules/ReadWriteDevice/fimesavereaddevice.cpp
-        modules/ReadWriteDevice/readwritedevice.h
         modules/ReadWriteDevice/shnet_socket_device.h
         modules/ReadWriteDevice/shnet_socket_device.cpp
-        modules/VarChannel/varchannel.h
-        modules/VarChannel/varchannel.cpp
         modules/SimpleReader/simplereader.cpp
         modules/SimpleReader/simplereader.h
+        ${PATH_STPLOT_COMMON}/varchannel.h
+        ${PATH_STPLOT_COMMON}/plotinterface.h
+        ${PATH_STPLOT_COMMON}/plotwidgetabstract.h
+        ${PATH_STPLOT_COMMON}/readwritedevice.h
+        ${PATH_STPLOT_COMMON}/settingsabstract.h
+        ${PATH_STPLOT_COMMON}/stplotpluginloader.h
+        ${PATH_STPLOT_COMMON}/varreaderinterface.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.h
         ${PATH_COMMON_QT_LIBS}/qcustomplot.cpp
 
@@ -117,6 +118,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
 set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/deps/varChanaleCommon
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
     ${CMAKE_SOURCE_DIR}/deps/varloc
     ${CMAKE_SOURCE_DIR}/deps/PEK_Libs/inc
@@ -127,7 +129,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules
     modules/SimpleReader
-    modules/VarChannel
+    ${PATH_STPLOT_COMMON}
     modules/ReadManager
     modules/ReadWriteDevice
     widgets
@@ -137,13 +139,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ViewManager
     widgets/PlotWidget
     widgets/DebugerWindow
-    PlotPluginsDir
+    PluginsDir
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps
   )
 
-add_subdirectory(PlotPluginsDir)
+add_subdirectory(PluginsDir)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
@@ -157,25 +159,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 #    xcb
     ${STLINK_LIB_NAME}
     QtnProperty
+    VarChannel
 )
 
 if (UNIX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE varloc xcb)
+    target_link_libraries(${PROJECT_NAME} PRIVATE xcb)
 endif()
 
 target_link_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/lib
 )
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    BUILD_TIME="${BUILD_TIME}"
-    BUILD_DATE="${BUILD_DATE}"
-    GIT_COMMIT="${GIT_COMMIT}"
-    VERSION_MAJOR=${VERSION_MAJOR}
-    VERSION_MINOR=${VERSION_MINOR}
-    VERSION_BUILD=${SUBVERSION}
-)
-
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

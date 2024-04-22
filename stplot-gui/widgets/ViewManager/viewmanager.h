@@ -39,7 +39,6 @@ signals:
     //TODO add update list graphsignals
 
 private:
-    void loadPlugin();
 
 private slots:
     void addPotToPlot(VarChannel* var, int numPlot, bool en);

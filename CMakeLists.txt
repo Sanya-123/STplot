@@ -4,8 +4,18 @@ project(stplot LANGUAGES CXX C)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/deps/varloc/dwarves/cmake/modules")
 set(PATH_COMMON_QT_LIBS "${CMAKE_CURRENT_LIST_DIR}/deps/commonQtLibs")
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
+if(WIN32)
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
+endif()
+
+add_subdirectory(deps/STplotVarCommon)
+set(PATH_STPLOT_COMMON ${CMAKE_SOURCE_DIR}/deps/STplotVarCommon)
 if (WIN32)
     option(USE_OPENGL "Use OpenGL" OFF)
     option(BUILD_STATIC_STLINK "Build stlink static library" OFF)
@@ -21,6 +31,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 add_subdirectory(deps/QtnProperty)
+#add_subdirectory(stplot-gui/modules/VarChannel)
 add_subdirectory(stplot-gui)
 
 if(NOT QT_QMAKE_EXECUTABLE)
@@ -50,10 +61,11 @@ else()
 endif()
 
 #some libs
-# if (WIN32)
-#     add_custom_target(copyLibs DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a
-#         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a ${CMAKE_CURRENT_BINARY_DIR}/lib/liblibusb.a
-#     )
-#     add_dependencies(stplot-gui copyLibs)
-# endif()
+if (WIN32)
+    install(TARGETS QtnProperty DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)
+#    add_custom_target(copyLibs DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a
+#        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.a ${CMAKE_CURRENT_BINARY_DIR}/lib/liblibusb.a
+#    )
+#    add_dependencies(stplot-gui copyLibs)
+endif()
 

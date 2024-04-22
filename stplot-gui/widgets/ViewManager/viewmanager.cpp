@@ -5,13 +5,14 @@
 #include <QPluginLoader>
 #include <QMenu>
 #include "settingsdialog.h"
+#include "stplotpluginloader.h"
 
 ViewManager::ViewManager(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ViewManager), dockContainer(nullptr), menuView(nullptr), chanales(nullptr)
 {
     ui->setupUi(this);
-    loadPlugin();
+    pluginsPlot = loadPlugin<PlotWidgetInterfacePlugin>(MINIMUM_PLUGIN_PLOT_HEADER_VERSION, PLOT_INTERFACE_HEADER_VERSION);
     //add availeble graph to cobobocx
     for(int i = 0 ; i < pluginsPlot.size(); i++)
     {
@@ -108,72 +109,6 @@ void ViewManager::setChanales(Channels *newChanales)
     if(chanales != nullptr)
     {
         connect(chanales, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)), this, SLOT(addPotToPlot(VarChannel*,int,bool)));
-    }
-}
-
-void ViewManager::loadPlugin()
-{
-    PlotWidgetInterfacePlugin *_interface;
-    QDir pluginsDir(QDir::currentPath());
-#if defined(Q_OS_WIN)
-    if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
-        pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS") {
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-    }
-#endif
-
-    if(!pluginsDir.cd("./plugins"))
-        pluginsDir.cd("../plugins");
-
-    qDebug() << "Plugin path:" << pluginsDir.absolutePath();
-
-    const QStringList entries = pluginsDir.entryList(QDir::Files);//get list plugins files
-
-    for (const QString &fileName : entries) {
-        qDebug() << "Try load plugin:" << fileName;
-        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));//load file as plugin
-        QObject *plugin = pluginLoader.instance();//get object plugin
-        if (plugin) {
-            _interface = qobject_cast<PlotWidgetInterfacePlugin *>(plugin);//check type plugin
-            if (_interface)//!0 if type correct
-            {
-                VersionUnion _version;
-                _version.version32 = _interface->getVersion();
-                qDebug() << "OK plugin:" << _interface->getName() <<
-                            QString::asprintf(";v%d.%d.%d", _version.versionS.major, _version.versionS.minor, _version.versionS.build);
-
-                _version.versionS.build = 0;//do note abalize build version just major and minor
-
-                //check version
-                if(_version.version32 >= MINIMUM_PLUGIN_PLOT_HEADER_VERSION)
-                {
-                    if(_version.version32 <= PLOT_INTERFACE_HEADER_VERSION)//maximum avaleble version
-                        pluginsPlot.append(_interface);
-                    else
-                    {
-                        qDebug() << "App is too old for curent plugin please rebuild it";
-                        pluginLoader.unload();
-                    }
-                }
-                else
-                {
-                    qDebug() << "Plugin is too old please rebuild it";
-                    pluginLoader.unload();
-                }
-            }
-            else
-            {
-                qDebug() << "unload plugin:" << fileName;
-                pluginLoader.unload();
-            }
-        }
-        else{
-            qDebug() << "Failed loading plugin";
-        }
     }
 }
 

@@ -5,7 +5,7 @@
 #include <QSortFilterProxyModel>
 #include "DockManager.h"
 extern "C" {
-#include "varloc.h"
+#include "varcommon.h"
 }
 #include "varloader.h"
 #include "channels.h"
