@@ -6,6 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -17,8 +18,8 @@ if(USE_OPENGL)
     add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
     set(OPENGL_LIBS "Qt${QT_VERSION_MAJOR}::OpenGL")
 endif()
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets ${QT_OPENGL_PACKAGE} Network SerialPort PrintSupport Script Svg)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -80,6 +81,12 @@ set(PROJECT_SOURCES
         widgets/DebugerWindow/debugerfiltermodel.h widgets/DebugerWindow/debugerfiltermodel.cpp
         widgets/DebugerWindow/debugmessadge.h widgets/DebugerWindow/debugmessadge.cpp widgets/DebugerWindow/debugmessadge.ui
         widgets/DebugerWindow/debugerfilter.h
+        widgets/Settings/settingswindow.h widgets/Settings/settingswindow.cpp widgets/Settings/settingswindow.ui
+
+        #build styles maybe move it into libs
+        ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src/acss_globals.h
+        ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src/QtAdvancedStylesheet.h
+        ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src/QtAdvancedStylesheet.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -116,11 +123,14 @@ endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
+add_custom_target(copyStyles ALL DEPENDS stplot-gui
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/styles ${CMAKE_CURRENT_BINARY_DIR}/styles
+)
+
 set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/deps/varChanaleCommon
+    ${PATH_STPLOT_COMMON}
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
-    ${CMAKE_SOURCE_DIR}/deps/varloc
     ${CMAKE_SOURCE_DIR}/deps/PEK_Libs/inc
     ${STLINK_PATH}/src/stlink-lib
     ${LIBUSB_INCLUDE_DIR}
@@ -139,6 +149,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ViewManager
     widgets/PlotWidget
     widgets/DebugerWindow
+    widgets/DebugerWindow
+    widgets/Settings
+    ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps
@@ -150,6 +163,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Script
+    Qt${QT_VERSION_MAJOR}::Svg
     ${OPENGL_LIBS}
     ${OPENGL_LIBRARIES}
     qtadvanceddocking

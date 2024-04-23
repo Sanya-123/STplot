@@ -105,6 +105,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
     connect(&readSelector, SIGNAL(activated(int)), this, SLOT(setReadDevice(int)));
     connect(channelsView, SIGNAL(requestWriteData(uint32_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint32_t,varloc_location_t)));
+    connect(ui->actionMainConfig, SIGNAL(triggered(bool)), this, SLOT(showSettingsWindows()));
 
 
     viewManager->setDockContainer(ui->dockContainer);
@@ -116,6 +117,14 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     //init default read device
     readManager.setReadDevicece(&stlinkDevice);
     readManager.addSaveDevice(&stmStudioSaveDevicec);
+
+    //init style
+    advancedStylesheet.setStylesDirPath(QDir::currentPath() + "/styles/");
+    advancedStylesheet.setOutputDirPath(QDir::currentPath() + "/stylesoutput");
+    advancedStylesheet.setCurrentStyle("qt_material");
+    advancedStylesheet.setDefaultTheme();
+    currentSettings.theme = advancedStylesheet.currentTheme();
+//    updateStyle();
 
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");
@@ -256,12 +265,27 @@ void STPlotWindow::openSettingsReader()
     }
 }
 
+void STPlotWindow::showSettingsWindows()
+{
+    SettingsWindow settingsWindow(this);
+    settingsWindow.setSettings(currentSettings);
+    settingsWindow.show();
+
+    if(settingsWindow.exec())
+    {//pres OK
+        settingsWindow.getSettings(currentSettings);
+        updateStyle();
+    }
+
+}
+
 void STPlotWindow::applySettings(QSettings &settings)
 {
     //NOTE do not forget clean some stuff like gruphs that should me implementer in restore settings
 
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
+    currentSettings.theme = settings.value("windows/theme", "none").toString();
 
     settings.beginGroup("varloader");
     varloader->restoreSettings(&settings);
@@ -283,6 +307,8 @@ void STPlotWindow::applySettings(QSettings &settings)
     }
 
     ui->dockContainer->restoreState(settings.value("windows/docker/state").toByteArray());
+
+    updateStyle();
 }
 
 void STPlotWindow::writeSettings(QSettings &settings)
@@ -290,6 +316,7 @@ void STPlotWindow::writeSettings(QSettings &settings)
     settings.setValue("windows/state", saveState());
     settings.setValue("windows/geometry", saveGeometry());
     settings.setValue("windows/docker/state", ui->dockContainer->saveState());
+    settings.setValue("windows/theme", currentSettings.theme);
     //chanale
     settings.beginGroup("channels");
     channelsView->saveSettings(&settings);
@@ -354,6 +381,18 @@ void STPlotWindow::closeEvent(QCloseEvent *event)
     if(debuger != nullptr)
         debuger->close();
     QMainWindow::closeEvent(event);
+}
+
+void STPlotWindow::updateStyle()
+{
+    advancedStylesheet.setCurrentTheme(currentSettings.theme);
+    advancedStylesheet.updateStylesheet();
+    qApp->setStyleSheet(advancedStylesheet.styleSheet());
+    if(currentSettings.theme == "none")
+    {
+        qApp->setPalette(this->style()->standardPalette());
+        qApp->setStyleSheet("");
+    }
 }
 
 

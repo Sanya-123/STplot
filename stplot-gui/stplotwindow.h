@@ -20,6 +20,8 @@ extern "C" {
 #include "simplereader.h"
 #include "shnet_socket_device.h"
 #include "debugerwindow.h"
+#include "settingswindow.h"
+#include "QtAdvancedStylesheet.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -44,6 +46,7 @@ public slots:
     void saveSettings();
     void saveSettingsAs();
     void openSettingsReader();
+    void showSettingsWindows();
 //    void connect();
 
 private:
@@ -52,6 +55,7 @@ private:
     void saveSettingsToFile(QString fileName);
     void initReadDevice();
     void closeEvent(QCloseEvent *event);
+    void updateStyle();
 
 private:
     Ui::STPlotWindow *ui;
@@ -78,6 +82,12 @@ private:
         QWidget *configWidget;
     };
     QList<struct ReadDeviceInstance> listReadDeviceInstance;
+
+    acss::QtAdvancedStylesheet advancedStylesheet;
+    SettingsWindow::SettingsMainWindow currentSettings;
+
+    //easys wayr to tes allow SettingsWindow to get prival warible amd get setting from it
+    friend class SettingsWindow;
 };
 
 

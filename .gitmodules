@@ -22,3 +22,6 @@
 [submodule "deps/PluginsDir/VarLoaderPluginsDir"]
 	path = deps/PluginsDir/VarLoaderPluginsDir
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/stplotvarloader.git
+[submodule "deps/styles/Qt-Advanced-Stylesheets"]
+	path = deps/styles/Qt-Advanced-Stylesheets
+	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Stylesheets.git
