@@ -173,6 +173,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     VarChannel
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE ACSS_STATIC)
+
 if (UNIX)
     target_link_libraries(${PROJECT_NAME} PRIVATE xcb)
 endif()

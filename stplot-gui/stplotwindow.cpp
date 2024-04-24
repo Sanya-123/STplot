@@ -126,6 +126,9 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     currentSettings.theme = advancedStylesheet.currentTheme();
 //    updateStyle();
 
+    //init settengs
+    settingsWindow = new SettingsWindow(this, this);
+
     //restore settings
     QSettings settings("STdebuger", "STplotDebuger");
     applySettings(settings);
@@ -265,18 +268,17 @@ void STPlotWindow::openSettingsReader()
     }
 }
 
+void STPlotWindow::applySettingsSlot()
+{
+    settingsWindow->getSettings(currentSettings);
+    updateStyle();
+}
+
 void STPlotWindow::showSettingsWindows()
 {
-    SettingsWindow settingsWindow(this);
-    settingsWindow.setSettings(currentSettings);
-    settingsWindow.show();
-
-    if(settingsWindow.exec())
-    {//pres OK
-        settingsWindow.getSettings(currentSettings);
-        updateStyle();
-    }
-
+    settingsWindow->setSettings(currentSettings);
+    settingsWindow->show();
+    settingsWindow->exec();
 }
 
 void STPlotWindow::applySettings(QSettings &settings)
@@ -385,13 +387,16 @@ void STPlotWindow::closeEvent(QCloseEvent *event)
 
 void STPlotWindow::updateStyle()
 {
-    advancedStylesheet.setCurrentTheme(currentSettings.theme);
-    advancedStylesheet.updateStylesheet();
-    qApp->setStyleSheet(advancedStylesheet.styleSheet());
     if(currentSettings.theme == "none")
     {
         qApp->setPalette(this->style()->standardPalette());
         qApp->setStyleSheet("");
+    }
+    else
+    {
+        advancedStylesheet.setCurrentTheme(currentSettings.theme);
+        advancedStylesheet.updateStylesheet();
+        qApp->setStyleSheet(advancedStylesheet.styleSheet());
     }
 }
 

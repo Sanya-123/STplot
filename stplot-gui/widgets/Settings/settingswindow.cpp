@@ -10,6 +10,9 @@ SettingsWindow::SettingsWindow(STPlotWindow *mainWondow, QWidget *parent) :
     ui->comboBox_theme->addItem("none");
     ui->comboBox_theme->addItems(mainWondow->advancedStylesheet.themes());
 //    qDebug() << mainWondow->advancedStylesheet.themes();
+    connect(ui->pushButton_apply, SIGNAL(clicked(bool)), this, SIGNAL(applySettings()));
+    connect(ui->pushButton_apply, SIGNAL(clicked(bool)), mainWondow, SLOT(applySettingsSlot()));
+    connect(this, SIGNAL(accepted()), mainWondow, SLOT(applySettingsSlot()));
 }
 
 SettingsWindow::~SettingsWindow()

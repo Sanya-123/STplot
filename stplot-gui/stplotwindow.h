@@ -46,6 +46,7 @@ public slots:
     void saveSettings();
     void saveSettingsAs();
     void openSettingsReader();
+    void applySettingsSlot();
     void showSettingsWindows();
 //    void connect();
 
@@ -85,6 +86,7 @@ private:
 
     acss::QtAdvancedStylesheet advancedStylesheet;
     SettingsWindow::SettingsMainWindow currentSettings;
+    SettingsWindow *settingsWindow;
 
     //easys wayr to tes allow SettingsWindow to get prival warible amd get setting from it
     friend class SettingsWindow;

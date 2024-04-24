@@ -2,6 +2,7 @@
 #define SETTINGSWINDOW_H
 
 #include <QDialog>
+#include <QStyleFactory> //QStyleFactory::keys() - get alailebel styles
 
 namespace Ui {
 class SettingsWindow;
@@ -22,6 +23,9 @@ public:
     ~SettingsWindow();
     void setSettings(SettingsMainWindow settings);
     void getSettings(SettingsMainWindow &settings);
+
+signals:
+    void applySettings();
 
 private:
     Ui::SettingsWindow *ui;
