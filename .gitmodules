@@ -25,3 +25,6 @@
 [submodule "deps/styles/Qt-Advanced-Stylesheets"]
 	path = deps/styles/Qt-Advanced-Stylesheets
 	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Stylesheets.git
+[submodule "windowsLibs/libusb-cmake"]
+	path = windowsLibs/libusb-cmake
+	url = https://github.com/libusb/libusb-cmake.git

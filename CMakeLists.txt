@@ -12,6 +12,11 @@ if(WIN32)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
+    include_directories(${CMAKE_SOURCE_DIR}/windowsLibs)
+    set(LIBUSB_LIBRARY ${CMAKE_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.dll.a)
+    set(LIBUSB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/libusb-cmake/libusb/libusb)
+    add_subdirectory(windowsLibs/libusb-cmake)
+
 endif()
 
 add_subdirectory(deps/PluginsDir/STplotVarCommon)

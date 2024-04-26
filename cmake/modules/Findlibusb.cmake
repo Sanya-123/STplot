@@ -53,18 +53,22 @@ elseif (WIN32 OR (EXISTS "/etc/debian_version" AND MINGW)) # Windows or MinGW-to
         set(ARCH 32)
     endif ()
 
+
     FIND_PATH(
         LIBUSB_INCLUDE_DIR NAMES libusb.h
         HINTS include/
-        PATH_SUFFIXES libusb-1.0/
-     )
+        PATH_SUFFIXES libusb-1.0
+        NO_DEFAULT_PATH
+        NO_CMAKE_FIND_ROOT_PATH
+    )
 
-     set(LIBUSB_NAME usb-1.0 libusb-1.0.dll.a)
-     find_library(
-        LIBUSB_LIBRARY NAMES ${LIBUSB_NAME}
-        HINTS lib/
-     )
-
+    set(LIBUSB_NAME usb-1.0)
+    find_library(
+    LIBUSB_LIBRARY NAMES ${LIBUSB_NAME}
+    HINTS lib/
+    NO_DEFAULT_PATH
+    NO_CMAKE_FIND_ROOT_PATH
+    )
 
     # if (WIN32 AND NOT EXISTS "/etc/debian_version") # Skip this for Debian...
     #     # Preparations for installing libusb library
