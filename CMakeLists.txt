@@ -8,6 +8,7 @@ set(PATH_COMMON_QT_LIBS "${CMAKE_CURRENT_LIST_DIR}/deps/commonQtLibs")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 if(WIN32)
+    set(BUILD_SHARED_LIBS ON)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui)
@@ -16,7 +17,6 @@ if(WIN32)
     set(LIBUSB_LIBRARY ${CMAKE_BINARY_DIR}/windowsLibs/libusb-cmake/libusb-1.0.dll.a)
     set(LIBUSB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/windowsLibs/libusb-cmake/libusb/libusb)
     add_subdirectory(windowsLibs/libusb-cmake)
-
 endif()
 
 add_subdirectory(deps/PluginsDir/STplotVarCommon)
