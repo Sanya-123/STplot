@@ -54,6 +54,9 @@ private:
     QString allowReadFiles;
     QString allowWriteFiles;
     QMap<QString, VarReadInterfacePlugin*> mapPluginFile;
+    QMap<QString, VarReadInterfacePlugin*> mapPluginFilters;
+    QString oldSaveFileName;
+    varloc_node_t* rootTree;
 };
 
 #endif // VARLOADER_H

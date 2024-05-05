@@ -16,17 +16,32 @@ VarLoader::VarLoader(QWidget *parent) :
 
     pluginsReader = loadPlugin<VarReadInterfacePlugin>(MINIMUM_PLUGIN_READER_HEADER_VERSION, VAR_READER_INTERFACE_HEADER_VERSION);
 
+    //sort plugin by priority
+    for(int i = 0; i < pluginsReader.size(); i++)
+    {
+        for(int j = i + 1; j < pluginsReader.size(); j++)
+        {
+            if(pluginsReader[j]->getPriority() > pluginsReader[i]->getPriority())
+            {
+                pluginsReader.swapItemsAt(i, j);
+            }
+        }
+    }
+
+
     allowReadFiles.clear();
     allowWriteFiles.clear();
     foreach (VarReadInterfacePlugin *plugin, pluginsReader) {
+        QString filter = QString("%1 (%2)").arg(plugin->getName(), plugin->getFileExtensions());
         mapPluginFile[plugin->getFileExtensions()] = plugin;
+        mapPluginFilters[filter] = plugin;
         if(plugin->allowMode() & QIODevice::ReadOnly)
         {
-            allowReadFiles.append(QString("%1 (%2);;").arg(plugin->getName(), plugin->getFileExtensions()));
+            allowReadFiles.append(filter + ";;");
         }
         if(plugin->allowMode() & QIODevice::WriteOnly)
         {
-            allowWriteFiles.append(QString("%1 (%2);;").arg(plugin->getName(), plugin->getFileExtensions()));
+            allowWriteFiles.append(filter + ";;");
         }
     }
 
@@ -72,12 +87,14 @@ VarLoader::~VarLoader()
 void VarLoader::saveSettings(QSettings *settings)
 {
     settings->setValue("elffile", ui->lineEdit_file->text());
+    settings->setValue("savefilename", oldSaveFileName);
 }
 
 void VarLoader::restoreSettings(QSettings *settings)
 {
     //maybe clean some stuff
     ui->lineEdit_file->setText(settings->value("elffile").toString());
+    oldSaveFileName = settings->value("savefilename").toString();
 }
 
 void VarLoader::expandTree(){
@@ -136,7 +153,28 @@ void VarLoader::loadTree()
 
 void VarLoader::saveTree()
 {
+    QString selectedFilter;
     //TODO implement
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Tree"),
+                               oldSaveFileName, allowWriteFiles, &selectedFilter);
+
+    if(!fileName.isEmpty())
+    {
+        if(mapPluginFilters.contains(selectedFilter))
+        {
+            VarReadInterfacePlugin *savePlugin = mapPluginFilters[selectedFilter];
+            //check file sufix
+            QRegExp rx(savePlugin->getFileExtensions());
+            rx.setPatternSyntax(QRegExp::Wildcard);
+            if(!rx.exactMatch(fileName))
+            {//NOTE it will note work with hard suffix
+                fileName.append(savePlugin->getFileExtensions().remove("*"));
+            }
+            oldSaveFileName = fileName;
+            savePlugin->saveTree(rootTree, oldSaveFileName);
+        }
+    }
+
 }
 
 void VarLoader::updateTree(const QString& path)
@@ -183,7 +221,6 @@ void VarLoader::loadVariables(const QString & fileName)
     QList<QString> fileFormats = mapPluginFile.keys();
     foreach (QString format, fileFormats) {
         QRegExp rx(format);
-        //TODO check QRegExp filetsr
         rx.setPatternSyntax(QRegExp::Wildcard);
         if(rx.exactMatch(_fileName))
         {
@@ -200,6 +237,7 @@ void VarLoader::loadVariables(const QString & fileName)
     if (tree_root == nullptr){
         return;
     }
+    rootTree = tree_root;
     varModel->setModelRoot(tree_root);
     proxyModel->setSourceModel(varModel);
     proxyModel->setRecursiveFilteringEnabled(true);
