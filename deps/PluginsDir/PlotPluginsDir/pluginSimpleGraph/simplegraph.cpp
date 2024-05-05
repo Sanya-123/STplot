@@ -48,12 +48,9 @@ SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
 
     legendTime = new QCPTextElement(plotWidget);
     legendTime->setLayer(plotWidget->legend->layer()); // place text element on same layer as legend, or it ends up below legend
-    legendTime->setText(QTime::currentTime().toString());
-    // legendTitle->setFont(QFont("sans", 7, QFont::Bold));
-    // then we add it to the QCPLegend (which is a subclass of QCPLayoutGrid):
-    // if (plotWidget->legend->hasElement(0, 0)) // if top cell isn't empty, insert an empty row at top
-        // plotWidget->legend->insertRow(0);
-    plotWidget->legend->addElement(legendTime); // place the text element into the empty cell
+    legendTime->setText(QTime::currentTime().toString(Qt::DateFormat::ISODateWithMs));
+    legendTime->setFont(QFont("mono", 11, QFont::Bold));
+    plotWidget->legend->addElement(legendTime);
 
     rightMousePressed = false;
     firstRedraw = true;
@@ -478,7 +475,7 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
             mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n"
                     + QString::number(mapTrackers[plots[i]]->position->value()));
         }
-        legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString());
+        legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString(Qt::DateFormat::ISODateWithMs));
     }
     // limit number of drawn dots to optimize speed
     double timeSec = plotWidget->xAxis->range().size();
