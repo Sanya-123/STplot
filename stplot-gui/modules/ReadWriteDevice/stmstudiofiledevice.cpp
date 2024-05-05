@@ -377,7 +377,10 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
 
         for(int i = 2; i < listVaribels.size(); i++)
         {
-            readChanales[i - 2]->pushValue(listVaribels[i].toFloat(), time);
+            VarChannel* ch = readChanales[i - 2];
+            if(ch != nullptr){
+                ch->pushValue(listVaribels[i].toFloat(), time);
+            }
         }
     }
 
