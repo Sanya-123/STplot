@@ -32,8 +32,7 @@ SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     defaultPlotInit(plotWidget);
     plotWidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables  | QCP::iMultiSelect | QCP::iSelectLegend);
 
-    //legeng
-//    legendValues = new QCPTextElement(plotWidget, "test");
+    //legend
     plotWidget->legend->setVisible(true);
     subLayout = new QCPLayoutGrid;
     plotWidget->plotLayout()->addElement(0, 1, subLayout);
@@ -42,12 +41,16 @@ SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     subLayout->addElement(1, 0, new QCPLayoutElement);
 //    subLayout->addElement(2, 0, legendValues);
     subLayout->setRowStretchFactor(0, 0.01); // make legend cell (in row 0) take up as little vertical space as possible
-
     plotWidget->plotLayout()->setColumnStretchFactor(1, 0.001);
     plotWidget->legend->setSelectableParts(QCPLegend::spItems);
-
     subLayout->setVisible(false);
     plotWidget->plotLayout()->take(subLayout);
+
+    legendTime = new QCPTextElement(plotWidget);
+    legendTime->setLayer(plotWidget->legend->layer()); // place text element on same layer as legend, or it ends up below legend
+    legendTime->setText(QTime::currentTime().toString(Qt::DateFormat::ISODateWithMs));
+    legendTime->setFont(QFont("mono", 11, QFont::Bold));
+    plotWidget->legend->addElement(legendTime);
 
     rightMousePressed = false;
     firstRedraw = true;
@@ -469,8 +472,10 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
     //        double _x = x;
             mapTrackers[plots[i]]->setGraphKey(x);
             mapTrackers[plots[i]]->updatePosition();
-            mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n" + QString::number(mapTrackers[plots[i]]->position->value()));
+            mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n"
+                    + QString::number(mapTrackers[plots[i]]->position->value()));
         }
+        legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString(Qt::DateFormat::ISODateWithMs));
     }
     // limit number of drawn dots to optimize speed
     double timeSec = plotWidget->xAxis->range().size();

@@ -54,7 +54,7 @@ private:
 //    QString name;
     QCustomPlot *plotWidget;
     QCPLayoutGrid *subLayout;
-//    QCPTextElement *legendValues;
+    QCPTextElement *legendTime;
     QMap<VarChannel*,QCPGraph*> mapPlots;
     QMap<VarChannel*,QCPItemTracer*> mapTrackers;
     SimpleGraphSettings settings;

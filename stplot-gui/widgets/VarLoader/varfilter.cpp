@@ -1,5 +1,4 @@
 #include "varfilter.h"
-#include <QtDebug>
 extern "C" {
 #include "varcommon.h"
 }
@@ -22,20 +21,25 @@ bool VarFilter::filterAcceptsRow(int source_row, const QModelIndex &source_paren
         if (filterAcceptsRowItself(parent.row(), grandparent)){
             return true;
         }
-        if (filterAcceptsRowItself(grandparent.row(), grandparent)){    // if parent is top level node there is some mess
+        varloc_node_t *item = static_cast<varloc_node_t*>(parent.internalPointer());
+        if(QString::fromStdString(item->name).contains(filterString)){
             return true;
         }
-
-        parent = parent.parent();
+        parent = grandparent;
     }
 
-    //accept if any of the children is accepted
-    if (hasAcceptedChildren(source_row, source_parent)) {
-        return true;
-    }
+    //accept if any of the children is accepted - Looks like done automatically
+    // if (hasAcceptedChildren(source_row, source_parent)) {
+    //     return true;
+    // }
 
     return false;
 
+}
+
+void VarFilter::setFilterFixedString(const QString &pattern){
+    filterString = pattern;
+    return QSortFilterProxyModel::setFilterFixedString(pattern);
 }
 
 bool VarFilter::filterAcceptsRowItself(int source_row, const QModelIndex &source_parent) const
