@@ -114,13 +114,6 @@ int STlinkDevice::execReadDevice()
     if(!sl)
         return -1;
 
-    struct {
-        float _f;
-        uint8_t _8[4];
-        uint8_t _16[2];
-        uint8_t _32;
-    }combiner;
-
     for(int i = 0; i < readSeuqence.size(); i++)
     {
         int32_t res = stlink_read_mem32(sl, readSeuqence[i].addres, readSeuqence[i].readSize);
@@ -136,7 +129,7 @@ int STlinkDevice::execReadDevice()
     return 0;
 }
 
-int STlinkDevice::writeDataDevice(uint32_t data, varloc_location_t location)
+int STlinkDevice::writeDataDevice(uint64_t data, varloc_location_t location)
 {//TODO for bit array read data then overwrite bing then write
     if(!sl)
         return -1;

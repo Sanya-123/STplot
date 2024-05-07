@@ -25,7 +25,7 @@ public:
 
 public slots:
     void stopRead();
-    void requestWriteData(uint32_t data, varloc_location_t location);
+    void requestWriteData(uint64_t data, varloc_location_t location);
 
 signals:
     void stopingRead();

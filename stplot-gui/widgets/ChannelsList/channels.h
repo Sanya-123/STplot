@@ -33,7 +33,7 @@ public slots:
 
 signals:
     void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
-    void requestWriteData(uint32_t data, varloc_location_t location);
+    void requestWriteData(uint64_t data, varloc_location_t location);
 
 private:
     void saveSettingsChanaleCommon(QSettings *settings, VarChannel* chanale);

@@ -110,7 +110,7 @@ void Channels::restoreSettings(QSettings *settings)
 
     //reset states
     for (int i = 0; i < m_channels->size(); ++i) {
-        disconnect(m_channels->at(i), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
+        disconnect(m_channels->at(i), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         delete m_channels->at(i);
     }
     m_channels->clear();
@@ -155,7 +155,7 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setLineWidth(lineWidth);
         chanale->setTotalSizePlot(totalSizePlot);
         m_channels->push_back(chanale);
-        connect(chanale, SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
+        connect(chanale, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         for(int j = 0; j < listPlot.size(); j++)
         {
             if(listPlot[j])
@@ -292,7 +292,7 @@ void Channels::add_channel(varloc_node_t* node){
     }
     //set colour from sequence
     m_channels->push_back(new VarChannel(node, colorSetSequese[curentColorSet++], curentDotStyle++));
-    connect(m_channels->last(), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
+    connect(m_channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
     //reset sequnce colour set
     if(curentColorSet >= colorSetSequese.size())
         curentColorSet = 0;
@@ -339,7 +339,7 @@ void Channels::saveSettingsChanaleLocation(QSettings *settings, VarChannel *chan
     settings->setValue("base", loc.address.base);
     settings->setValue("offset_bits", loc.address.offset_bits);
     settings->setValue("size_bits", loc.address.size_bits);
-    settings->setValue("mask", loc.mask);
+    settings->setValue("mask", (quint64)loc.mask);
     settings->endGroup();
 }
 
@@ -370,7 +370,7 @@ varloc_location_t Channels::restoreSettingsChanaleLocation(QSettings *settings)
     loc.address.base = settings->value("base").toUInt();
     loc.address.offset_bits = settings->value("offset_bits").toUInt();
     loc.address.size_bits = settings->value("size_bits").toUInt();
-    loc.mask = settings->value("mask", 0).toUInt();
+    loc.mask = settings->value("mask", 0).toULongLong();
     settings->endGroup();
 
     return loc;
@@ -429,7 +429,16 @@ void Channels::on_pushButton_deleteChanale_clicked()
     int curentElement = ui->treeView->currentIndex().row();
     if((curentElement >= 0) && (curentElement < m_channels->size()))
     {
-        disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint32_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint32_t,varloc_location_t)));
+        for(int i = 0; i < m_channels->at(curentElement)->getTotalSizePlot(); i++)
+        {
+            if(m_channels->at(curentElement)->isEnableOnPlot(i))
+            {
+                m_channels->at(curentElement)->setEnableOnPlot(i, false);
+                emit addingChanaleToPlot(m_channels->at(curentElement), i, false);
+            }
+        }
+
+        disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         m_channels->remove(curentElement);
         emit m_channelModel->layoutChanged();
     }
@@ -470,6 +479,15 @@ void Channels::on_pushButton_deleteMathChanale_clicked()
     int curentElement = ui->treeView_customChanale->currentIndex().row();
     if((curentElement >= 0) && (curentElement < m_channelsMath->size()))
     {
+        for(int i = 0; i < m_channelsMath->at(curentElement)->getTotalSizePlot(); i++)
+        {
+            if(m_channelsMath->at(curentElement)->isEnableOnPlot(i))
+            {
+                m_channelsMath->at(curentElement)->setEnableOnPlot(i, false);
+                emit addingChanaleToPlot(m_channelsMath->at(curentElement), i, false);
+            }
+        }
+
         m_channelsMath->remove(curentElement);
         emit m_channelMathModel->layoutChanged();
     }

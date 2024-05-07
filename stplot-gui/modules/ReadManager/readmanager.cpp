@@ -131,9 +131,20 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
             readAdd.readSize += 4;
             readAdd.vectorChanales.append(readChan);
         }
+        else if(sortChanales[i]->getLocation().address.base == (addres + 8))
+        {
+//            qDebug("next addres :0x%08X", addres + 8);
+            readAdd.readSize += 4;
+            addres += 8;
+            readChan.chanale = sortChanales[i];
+            readChan.offset = readAdd.readSize;
+            readAdd.readSize += 4;
+            readAdd.vectorChanales.append(readChan);
+        }
         else
         {
 //            qDebug("new addres :0x%08X", sortChanales[i]->getLocation().address.base);
+            readAdd.readSize += 4;
             res.append(readAdd);
             readAdd.vectorChanales.clear();
 
@@ -148,7 +159,10 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
     }
 
 
+    readAdd.readSize += 4;
     res.append(readAdd);
+
+//    qDebug() << "tortal read seuq count:" << res.size();
 
     if(sortChannels != nullptr)
     {
@@ -162,18 +176,18 @@ QVector<ReadDeviceObject::ReadAddres> ReadManager::calcReadSeuqence(QVector<VarC
 
 void ReadManager::addressesReedWithTime(uint32_t addres, QVector<uint8_t> data, QDateTime time){
     union __attribute__((packed)){
-        uint8_t _8[4];
-        uint32_t _32;
+        uint8_t _8[8];
+        uint64_t _64;
     }combiner;
 
     ReadDeviceObject::ReadAddres addresSequence = readSeuqencsMap[addres];
 
     for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
     {
-        combiner._32 = 0;
-        memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
+        combiner._64 = 0;
+        memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/8);
 
-        addresSequence.vectorChanales[j].chanale->pushValueRawWithTime(combiner._32, time);
+        addresSequence.vectorChanales[j].chanale->pushValueRawWithTime(combiner._64, time);
     }
 }
 
@@ -205,18 +219,18 @@ void ReadManager::mathDataWithTime(QVector<float> data, QDateTime time)
 void ReadManager::addresRead(uint32_t addres, QVector<uint8_t> data)
 {
     union __attribute__((packed)){
-        uint8_t _8[4];
-        uint32_t _32;
+        uint8_t _8[8];
+        uint64_t _64;
     }combiner;
 
     ReadDeviceObject::ReadAddres addresSequence = readSeuqencsMap[addres];
 
     for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
     {
-        combiner._32 = 0;
-        memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
+        combiner._64 = 0;
+        memcpy(combiner._8, data.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/8);
 
-        addresSequence.vectorChanales[j].chanale->pushValueRaw(combiner._32);
+        addresSequence.vectorChanales[j].chanale->pushValueRaw(combiner._64);
     }
 }
 
@@ -317,7 +331,7 @@ void ReadManager::stopRead()
     loop->stopLoop();
 }
 
-void ReadManager::requestWriteData(uint32_t data, varloc_location_t location)
+void ReadManager::requestWriteData(uint64_t data, varloc_location_t location)
 {
     loop->requestWriteData(data, location);
 }

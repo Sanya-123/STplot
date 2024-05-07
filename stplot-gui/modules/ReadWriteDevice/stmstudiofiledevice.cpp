@@ -96,8 +96,8 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
     values.append(QString::number(time.time().msecsSinceStartOfDay()));
 
     union __attribute__((packed)){
-        uint8_t _8[4];
-        uint32_t _32;
+        uint8_t _8[8];
+        uint64_t _64;
     }combiner;
 
     int numbegChanale = 0;
@@ -112,11 +112,11 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
 
         for(int j = 0 ; j < addresSequence.vectorChanales.size(); j++)
         {
-            combiner._32 = 0;
+            combiner._64 = 0;
             memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
 
             //NOTE maybe move decode_value put of out of this module
-            float valuesFloat = VarChannel::decode_value(combiner._32, locations[numbegChanale]);
+            float valuesFloat = VarChannel::decode_value(combiner._64, locations[numbegChanale]);
             //NOTE add types if you vould like make it compareble with STMstudio
 
             values.append("\t" + QString::number(valuesFloat));

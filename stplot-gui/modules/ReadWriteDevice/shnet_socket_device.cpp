@@ -270,7 +270,7 @@ int SHnetUDPDevice::execReadDevice()
 
 }
 
-int SHnetUDPDevice::writeDataDevice(uint32_t data, varloc_location_t location)
+int SHnetUDPDevice::writeDataDevice(uint64_t data, varloc_location_t location)
 {
     return 0;
 }

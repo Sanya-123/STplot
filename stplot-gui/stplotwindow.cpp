@@ -104,7 +104,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(saveSettings()));
     connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
     connect(&readSelector, SIGNAL(activated(int)), this, SLOT(setReadDevice(int)));
-    connect(channelsView, SIGNAL(requestWriteData(uint32_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint32_t,varloc_location_t)));
+    connect(channelsView, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint64_t,varloc_location_t)));
     connect(ui->actionMainConfig, SIGNAL(triggered(bool)), this, SLOT(showSettingsWindows()));
 
 

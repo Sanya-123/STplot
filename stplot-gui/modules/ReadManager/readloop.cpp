@@ -133,7 +133,7 @@ void ReadLoop::stopLoop()
     stopSignal = true;
 }
 
-void ReadLoop::requestWriteData(uint32_t data, varloc_location_t location)
+void ReadLoop::requestWriteData(uint64_t data, varloc_location_t location)
 {
     requestedWriteData.append(qMakePair(data, location));
 }
@@ -255,8 +255,8 @@ QVector<float> ReadLoop::decodSavedSequence()
     int numbegChanale = 0;
     QVector<float> res;
     union __attribute__((packed)){
-        uint8_t _8[4];
-        uint32_t _32;
+        uint8_t _8[8];
+        uint64_t _64;
     }combiner;
 
     for(int i = 0; i < readSequence.size(); i++)
@@ -274,10 +274,10 @@ QVector<float> ReadLoop::decodSavedSequence()
             if(numbegChanale >= decodeList.size())
                 break;
 
-            combiner._32 = 0;
-            memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/4);
+            combiner._64 = 0;
+            memcpy(combiner._8, saveSequence[i].second.data() + addresSequence.vectorChanales[j].offset, /*addresSequence.vectorChanales[j].varSize*/8);
 
-            float valuesFloat = VarChannel::decode_value(combiner._32, decodeList[numbegChanale]);
+            float valuesFloat = VarChannel::decode_value(combiner._64, decodeList[numbegChanale]);
 
             res.append(valuesFloat);
 
