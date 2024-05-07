@@ -26,10 +26,9 @@ windows:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
-    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH}
-    - cmake --build build/windows --
-    - cmake --build build/windows --target install
+    - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH} -DENABLE_CJSON_TEST=OFF
+    - cmake --build build/windows --target all install deployment
   artifacts:
     paths:
-      - ./build/windows/
+      - ./build/windows/stplot/
     expire_in: 1 week

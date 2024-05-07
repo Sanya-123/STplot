@@ -260,6 +260,9 @@ void SimpleTable::plotSelecting()
     int gpuh = getGruph(sender(), &varChanale);
     if(gpuh == -1 || varChanale == nullptr)
         return;
+
+    ui->tableWidget_table->selectRow(gpuh);
+
 }
 
 void SimpleTable::updateCellValues(int row, int column)

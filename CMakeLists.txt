@@ -10,7 +10,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 if(WIN32)
     set(BUILD_SHARED_LIBS ON)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
-    set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
     set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
     include_directories(${CMAKE_SOURCE_DIR}/windowsLibs)
@@ -68,6 +67,7 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins ${CMAKE_BINARY_DIR}/stplot/plugins
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins/*.dll ${CMAKE_BINARY_DIR}/stplot/plugins/
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/styles ${CMAKE_BINARY_DIR}/stplot/styles
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/install/bin/*.dll ${CMAKE_BINARY_DIR}/stplot/
     )
 else()
     add_custom_target(deployment_CP DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui
