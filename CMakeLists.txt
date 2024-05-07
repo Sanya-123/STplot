@@ -66,7 +66,7 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin/*.dll ${CMAKE_BINARY_DIR}/stplot/
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins ${CMAKE_BINARY_DIR}/stplot/plugins
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins/*.dll ${CMAKE_BINARY_DIR}/stplot/plugins/
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/styles ${CMAKE_BINARY_DIR}/stplot/styles
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/stplot-gui/styles ${CMAKE_BINARY_DIR}/stplot/styles
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/install/bin/*.dll ${CMAKE_BINARY_DIR}/stplot/
     )
 else()
