@@ -22,17 +22,13 @@ add_subdirectory(deps/PluginsDir/STplotVarCommon)
 set(PATH_STPLOT_COMMON ${CMAKE_SOURCE_DIR}/deps/PluginsDir/STplotVarCommon)
 if (WIN32)
     option(USE_OPENGL "Use OpenGL" OFF)
-    option(BUILD_STATIC_STLINK "Build stlink static library" OFF)
 else()
     option(USE_OPENGL "Use OpenGL" ON)
-    option(BUILD_STATIC_STLINK "Build stlink static library" ON)
 endif()
 
 if(USE_OPENGL)
     add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
 endif()
-
-add_subdirectory(deps/stlink-lib)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

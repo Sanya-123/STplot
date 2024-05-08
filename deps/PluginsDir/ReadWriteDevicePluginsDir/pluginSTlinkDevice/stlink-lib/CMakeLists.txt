@@ -186,6 +186,8 @@ find_package(libusb REQUIRED)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
 
+option(BUILD_STATIC_STLINK "Build stlink static library" OFF)
+
 CHECK_LIBRARY_EXISTS(ssp __stack_chk_fail "" _stack_chk_fail_exists)
 if (_stack_chk_fail_exists)
     if (WIN32)

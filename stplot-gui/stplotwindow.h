@@ -11,17 +11,17 @@ extern "C" {
 #include "channels.h"
 #include "viewmanager.h"
 #include "readwritedevice.h"
-#include "stlinkdevice.h"
 #include "readloop.h"
 #include <QThread>
 #include <QTimer>
 #include <QComboBox>
 #include "readmanager.h"
-#include "simplereader.h"
-#include "shnet_socket_device.h"
 #include "debugerwindow.h"
 #include "settingswindow.h"
 #include "QtAdvancedStylesheet.h"
+
+
+#define MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION             0x00000000
 
 
 QT_BEGIN_NAMESPACE
@@ -41,14 +41,12 @@ public slots:
     void startRead();
     void stopedRead();
     void setReadDevice(int);
-    // void read();
     void loadSettings();
     void saveSettings();
     void saveSettingsAs();
     void openSettingsReader();
     void applySettingsSlot();
     void showSettingsWindows();
-//    void connect();
 
 private:
     void applySettings(QSettings &settings);
@@ -65,7 +63,6 @@ private:
     Channels* channelsView;
     VarLoader* varloader;
     ViewManager* viewManager;
-    // QVector<ReadDeviceObject*> readDeviceces;
     QVector<SaveDeviceObject*> saveDeviceces;
     ReadManager readManager;
     QString curentSettingsPath;
@@ -73,9 +70,8 @@ private:
     QComboBox readSelector;
     QToolBar *runToolBar;
     QAction *lastReadWidget;
-    STlinkDevice stlinkDevice;
-    SHnetUDPDevice shnetDevice;
-    STMstudioFileDevice stmStudioSaveDevicec;
+    QList<ReadDeviceObject*> readDeviceList;
+    QList<SaveDeviceObject*> saveDeviceList;
 
     struct ReadDeviceInstance{
         ReadDeviceObject *object;

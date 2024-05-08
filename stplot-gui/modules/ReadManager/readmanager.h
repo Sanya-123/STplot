@@ -6,8 +6,7 @@
 #include <QThread>
 #include "readloop.h"
 #include <QMap>
-#include "fimesavereaddevice.h"
-#include "stmstudiofiledevice.h"
+
 
 class ReadManager : public QObject
 {
@@ -52,7 +51,6 @@ private:
     QThread readLoopThread;
     QVector<SaveDeviceObject*> saveDeviceces;
     ReadDeviceObject *readDevicece;
-//    FimeSaveReadDevice saveLoader;
     QDateTime startTime;
 };
 

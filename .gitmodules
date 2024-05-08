@@ -1,5 +1,5 @@
-[submodule "deps/stlink-lib/stlink"]
-	path = deps/stlink-lib/stlink
+[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSTlinkDevice/stlink-lib/stlink"]
+	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSTlinkDevice/stlink-lib/stlink
 	url = https://github.com/stlink-org/stlink
 [submodule "deps/qt-advanced-docking-system"]
 	path = deps/qt-advanced-docking-system
@@ -10,8 +10,8 @@
 [submodule "deps/QtnProperty"]
 	path = deps/QtnProperty
 	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qtnproperty.git
-[submodule "deps/PEK_Libs"]
-	path = deps/PEK_Libs
+[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSHnetSocketDevice/PEK_Libs"]
+	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSHnetSocketDevice/PEK_Libs
 	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs
 [submodule "stplot-gui/widgets/DebugerWindow"]
 	path = stplot-gui/widgets/DebugerWindow

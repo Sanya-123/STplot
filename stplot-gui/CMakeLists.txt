@@ -52,20 +52,10 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/chanalecustomeditor.h
         widgets/ChannelsList/chanalecustomeditor.cpp
         widgets/ChannelsList/chanalecustomeditor.ui
-        modules/ReadWriteDevice/stlinkdevice.h
-        modules/ReadWriteDevice/stlinkdevice.cpp
         modules/ReadManager/readloop.h
         modules/ReadManager/readloop.cpp
         modules/ReadManager/readmanager.h
         modules/ReadManager/readmanager.cpp
-        modules/ReadWriteDevice/stmstudiofiledevice.h
-        modules/ReadWriteDevice/stmstudiofiledevice.cpp
-        modules/ReadWriteDevice/fimesavereaddevice.h
-        modules/ReadWriteDevice/fimesavereaddevice.cpp
-        modules/ReadWriteDevice/shnet_socket_device.h
-        modules/ReadWriteDevice/shnet_socket_device.cpp
-        modules/SimpleReader/simplereader.cpp
-        modules/SimpleReader/simplereader.h
         ${PATH_STPLOT_COMMON}/varchannel.h
         ${PATH_STPLOT_COMMON}/plotinterface.h
         ${PATH_STPLOT_COMMON}/plotwidgetabstract.h
@@ -115,33 +105,20 @@ endif()
 set(VERSION_SHORT "3.5.2")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/cmake/modules ${CMAKE_MODULE_PATH})
 
-if (BUILD_STATIC_STLINK)
-    set(STLINK_LIB_NAME stlink-static)
-else()
-    set(STLINK_LIB_NAME stlink-shared)
-endif()
-
 add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
 add_custom_target(copyStyles ALL DEPENDS stplot-gui
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/styles ${CMAKE_CURRENT_BINARY_DIR}/styles
 )
 
-set(STLINK_PATH ../deps/stlink-lib/stlink)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${PATH_STPLOT_COMMON}
     ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src
-    ${CMAKE_SOURCE_DIR}/deps/PEK_Libs/inc
-    ${STLINK_PATH}/src/stlink-lib
-    ${LIBUSB_INCLUDE_DIR}
-    ${STLINK_PATH}/inc
     ${CMAKE_BINARY_DIR}/inc
     ${CMAKE_BINARY_DIR}/stlink/inc
     modules
-    modules/SimpleReader
     ${PATH_STPLOT_COMMON}
     modules/ReadManager
-    modules/ReadWriteDevice
     widgets
     widgets/VarLoader
     widgets/SettingsDialog
@@ -167,8 +144,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${OPENGL_LIBS}
     ${OPENGL_LIBRARIES}
     qtadvanceddocking
-#    xcb
-    ${STLINK_LIB_NAME}
     QtnProperty
     VarChannel
 )

@@ -11,20 +11,10 @@
 #include <QToolBar>
 #include <QFileDialog>
 
-
-//#include <iostream>
-//#include <format>
 #include "varmodel.h"
 #include "varloader.h"
-//#include <elfio/elfio_dump.hpp>
 #include "channels.h"
-extern "C" {
-#include "stlink.h"
-#include "usb.h"
-// #include <chipid.h>
-// #include <helper.h>
-// #include "logging,h"
-}
+#include "stplotpluginloader.h"
 
 
 using namespace ads;
@@ -33,9 +23,6 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     : QMainWindow(parent), debuger(debuger)
     , ui(new Ui::STPlotWindow)
 {
-    qApp;
-    //redirect debug data
-//    qInstallMessageHandler(myMessageOutput); // Install the handler
     ui->setupUi(this);
 
     ui->menuView->addAction("Debuger")->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
@@ -86,7 +73,6 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     runToolBar->addWidget(&readSelector);
     runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config", this, SLOT(openSettingsReader()));
     ui->menuView->addAction(runToolBar->toggleViewAction());
-//    lastReadWidget  = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
 
     ui->menuView->addSeparator();
 
@@ -103,7 +89,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(loadSettings()));
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(saveSettings()));
     connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
-    connect(&readSelector, SIGNAL(activated(int)), this, SLOT(setReadDevice(int)));
+    connect(&readSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(setReadDevice(int)));
     connect(channelsView, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint64_t,varloc_location_t)));
     connect(ui->actionMainConfig, SIGNAL(triggered(bool)), this, SLOT(showSettingsWindows()));
 
@@ -115,8 +101,11 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(&redrawTimer, &QTimer::timeout, viewManager, &ViewManager::updateAllViews);
 
     //init default read device
-    readManager.setReadDevicece(&stlinkDevice);
-    readManager.addSaveDevice(&stmStudioSaveDevicec);
+    if(listReadDeviceInstance.size() != 0)
+        readManager.setReadDevicece(listReadDeviceInstance[0].object);
+    foreach (SaveDeviceObject* dev, saveDeviceList) {
+        readManager.addSaveDevice(dev);
+    }
 
     //init style
     advancedStylesheet.setStylesDirPath(QDir::currentPath() + "/styles/");
@@ -149,54 +138,12 @@ void STPlotWindow::setDebuger(DebugerWindow *debuger)
         connect(ui->menuView->actions()[0], SIGNAL(triggered(bool)), debuger, SLOT(show()));
 }
 
-// void STPlotWindow::read(){
-//     if (!simpleReader.isConnected()){
-//         if (simpleReader.connect() < 0){
-//             qInfo( "Error connecting stlink" );
-//         }
-//         simpleReader.loadChannels(channelsView->getListChanales());
-//     }
-//     else{
-//         if(simpleReader.readData() < 0){
-//             qInfo( "Error getting data" );
-//         }
-//     }
-
-// }
 void STPlotWindow::setReadDevice(int readDevice){
-//    switch(readDevice){
-//        case 0:
-//            readManager.setReadDevicece(&stlinkDevice);
-////            runToolBar->removeAction(lastReadWidget);
-////            lastReadWidget = runToolBar->addWidget(stlinkDevice.getReadDevConfigWidget());
-//            qDebug() << "Read device STLINK";
-//            break;
-//        case 1:
-//            readManager.setReadDevicece(&shnetDevice);
-////            runToolBar->removeAction(lastReadWidget);
-////            lastReadWidget = runToolBar->addWidget(shnetDevice.getReadDevConfigWidget());
-//            qDebug() << "Read device UDP";
-//            break;
-//        case 2:
-//            readManager.setReadDevicece(&stmStudioSaveDevicec);
-////            runToolBar->removeAction(lastReadWidget);
-////            lastReadWidget = runToolBar->addWidget(stmStudioSaveDevicec.getReadDevConfigWidget());
-//            qDebug() << "Read device STMstudio file";
-//            break;
-//        default:
-//            break;
-//    }
-
     if(readDevice < listReadDeviceInstance.size())
     {
         readManager.setReadDevicece(listReadDeviceInstance[readDevice].object);
-        qDebug() << "Read device " << listReadDeviceInstance[readDevice].name;
+//        qDebug() << "Read device " << listReadDeviceInstance[readDevice].name;
     }
-
-
-
-//    runToolBar->removeAction(lastReadWidget);
-//    lastReadWidget = runToolBar->addWidget(listReadDeviceInstance[readDevice].configWidget);
 }
 
 void STPlotWindow::startRead()
@@ -288,6 +235,7 @@ void STPlotWindow::applySettings(QSettings &settings)
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
     currentSettings.theme = settings.value("windows/theme", "none").toString();
+    readSelector.setCurrentIndex(settings.value("device/selectedreaddev").toInt());
 
     settings.beginGroup("varloader");
     varloader->restoreSettings(&settings);
@@ -319,6 +267,7 @@ void STPlotWindow::writeSettings(QSettings &settings)
     settings.setValue("windows/geometry", saveGeometry());
     settings.setValue("windows/docker/state", ui->dockContainer->saveState());
     settings.setValue("windows/theme", currentSettings.theme);
+    settings.setValue("device/selectedreaddev", readSelector.currentIndex());
     //chanale
     settings.beginGroup("channels");
     channelsView->saveSettings(&settings);
@@ -351,22 +300,30 @@ void STPlotWindow::saveSettingsToFile(QString fileName)
 
 void STPlotWindow::initReadDevice()
 {
+    //load plugin device
+    QList<ReadDeviceInterfacePlugin*> pluginsReadDevice = loadPlugin<ReadDeviceInterfacePlugin>(MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION, READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION);
+    QList<SaveDeviceInterfacePlugin*> pluginsWriteDevice = loadPlugin<SaveDeviceInterfacePlugin>(MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION, READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION);
+
     struct ReadDeviceInstance devRead;
-    devRead.object = &stlinkDevice;
-    devRead.name = "STLink";
-//    devRead.configWidget = stlinkDevice.getReadDevConfigWidget();
-    listReadDeviceInstance.append(devRead);
 
-    devRead.object = &shnetDevice;
-    devRead.name = "UDP";
-//    devRead.configWidget = shnetDevice.getReadDevConfigWidget();
-    listReadDeviceInstance.append(devRead);
+    for(int i = 0; i < pluginsReadDevice.size(); i++)
+    {
+        ReadDeviceObject *readDevie = pluginsReadDevice[i]->createReadDeviceObject();
+        readDeviceList.append(readDevie);
+        devRead.object = readDevie;
+        devRead.name = pluginsReadDevice[i]->getName();
+        listReadDeviceInstance.append(devRead);
+    }
 
-    devRead.object = (ReadDeviceObject *)(&stmStudioSaveDevicec);
-    devRead.name = "STLinkFile";
-//    devRead.configWidget = stmStudioSaveDevicec.getReadDevConfigWidget();
-    listReadDeviceInstance.append(devRead);
-
+    for(int i = 0; i < pluginsWriteDevice.size(); i++)
+    {
+        SaveDeviceObject *saveDevice = pluginsWriteDevice[i]->createWriteDeviceObject();
+//        readDeviceList.append(saveDevice);
+        devRead.object = saveDevice;
+        devRead.name = pluginsWriteDevice[i]->getName();
+        listReadDeviceInstance.append(devRead);
+        saveDeviceList.append(saveDevice);
+    }
 
     for(int i = 0; i < listReadDeviceInstance.size(); i++)
     {
@@ -410,11 +367,4 @@ void STPlotWindow::updateStyle()
 //    }
 //}
 
-//void STPlotWindow::connect(){
-//    stlink_t* sl = NULL;
-//    sl = stlink_open_usb(UDEBUG, CONNECT_HOT_PLUG, NULL, 100000);
-//    // if (sl == NULL){
-//    //     return(-1);
-//    // }
-//}
 
