@@ -28,10 +28,7 @@ target_include_directories(${PLUGIN_NAME} PRIVATE stlink-lib/stlink/inc
     ${LIBUSB_INCLUDE_DIR}
 )
 
-target_link_libraries(${PLUGIN_NAME} PRIVATE stlink)
-target_link_directories(${PLUGIN_NAME} PRIVATE ${CMAKE_BINARY_DIR}/lib)
-
-add_dependencies(${PLUGIN_NAME} stlink-shared)
+target_link_libraries(${PLUGIN_NAME} PRIVATE stlink-shared)
 
 set_target_properties(${PLUGIN_NAME} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_PATH}

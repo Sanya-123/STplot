@@ -28,6 +28,7 @@ windows:
   script:
     - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH} -DENABLE_CJSON_TEST=OFF
     - cmake --build build/windows --target all install deployment
+    - cmake --build build/windows --target deployment # bug this command copy all file just on second iteration 
   artifacts:
     paths:
       - ./build/windows/stplot/
