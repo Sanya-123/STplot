@@ -48,13 +48,6 @@ if (WIN32)
     add_custom_target(deployment
         # copy all stuf for QT
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CI_MXE_PATH}/usr/${CI_MXE_COMPILER_NAME}/qt5/plugins ${CMAKE_BINARY_DIR}/stplot
-        # copy all dll
-        COMMAND ${CI_MXE_PATH}/tools/copydlldeps.sh --infile stplot-gui.exe
-        --destdir ${CMAKE_BINARY_DIR}/stplot/
-        --srcdir ${CMAKE_BINARY_DIR}/stplot-gui/
-        --copy
-        --recursivesrcdir ${CI_MXE_PATH}/usr/${CI_MXE_COMPILER_NAME}/
-        --objdump ${CI_MXE_PATH}/usr/bin/${CI_MXE_COMPILER_NAME}-objdump
         # than copy all my stuff
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/*.exe ${CMAKE_BINARY_DIR}/stplot/
 #        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/*.dll ${CMAKE_BINARY_DIR}/stplot/
@@ -64,6 +57,13 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins/*.dll ${CMAKE_BINARY_DIR}/stplot/plugins/
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/stplot-gui/styles ${CMAKE_BINARY_DIR}/stplot/styles
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/install/bin/*.dll ${CMAKE_BINARY_DIR}/stplot/
+        # copy all dll
+        COMMAND ${CI_MXE_PATH}/tools/copydlldeps.sh --infile stplot-gui.exe
+        --destdir ${CMAKE_BINARY_DIR}/stplot/
+        --srcdir ${CMAKE_BINARY_DIR}/stplot-gui/
+        --copy
+        --recursivesrcdir ${CI_MXE_PATH}/usr/${CI_MXE_COMPILER_NAME}/
+        --objdump ${CI_MXE_PATH}/usr/bin/${CI_MXE_COMPILER_NAME}-objdump
     )
 else()
     add_custom_target(deployment_CP DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stplot-gui/stplot-gui
