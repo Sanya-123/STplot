@@ -4,8 +4,10 @@
 #include <QMessageBox>
 #include <qmath.h>
 #include <unistd.h>
-#include <chanalecustomeditor.h>
+#include "chanalecustomeditor.h"
 #include <QMenu>
+#include "newchanaledialog.h"
+#include <QTimer>
 
 Channels::Channels(QWidget *parent) :
     QWidget(parent),
@@ -158,6 +160,10 @@ void Channels::restoreSettings(QSettings *settings)
 
     curentColorSet = 0;
     curentDotStyle = 0;
+    chanaleProxyModel->setSourceModel(nullptr);
+    chanaleMathProxyModel->setSourceModel(nullptr);
+    chanaleProxyModel->setSourceModel(m_channelModel);
+    chanaleMathProxyModel->setSourceModel(m_channelMathModel);
     emit m_channelModel->layoutChanged();
     emit m_channelMathModel->layoutChanged();
 
@@ -256,6 +262,10 @@ void Channels::restoreSettings(QSettings *settings)
             curentDotStyle = 1;//1 becouse 0 is none style
     }
 
+    chanaleProxyModel->setSourceModel(nullptr);
+    chanaleMathProxyModel->setSourceModel(nullptr);
+    chanaleProxyModel->setSourceModel(m_channelModel);
+    chanaleMathProxyModel->setSourceModel(m_channelMathModel);
     emit m_channelModel->layoutChanged();
     emit m_channelMathModel->layoutChanged();
 //    ui->treeView->update();
@@ -336,6 +346,8 @@ void Channels::add_channel(varloc_node_t* node){
     if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
         curentDotStyle = 1;//1 becouse 0 is none style
 
+    chanaleProxyModel->setSourceModel(nullptr);
+    chanaleProxyModel->setSourceModel(m_channelModel);
     emit m_channelModel->layoutChanged();
 }
 
@@ -476,7 +488,16 @@ void Channels::on_pushButton_deleteChanale_clicked()
 
         disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         m_channels->remove(curentElement);
+        chanaleProxyModel->setSourceModel(nullptr);
+        chanaleProxyModel->setSourceModel(m_channelModel);
         emit m_channelModel->layoutChanged();
+        if(curentElement > 0)
+        {//scrol to element
+//            ui->treeView->setCurrentIndex(m_channelModel->index(curentElement - 1, 0));
+//            ui->treeView->scrollTo(m_channelModel->index(curentElement - 1, 0));
+            QTimer::singleShot(10, [this, curentElement]{ui->treeView->scrollTo(m_channelModel->index(curentElement - 1, 0));});
+        }
+        ui->treeView->viewport()->update();
     }
 }
 
@@ -505,6 +526,8 @@ void Channels::on_pushButton_addMathChanale_clicked()
         if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
             curentDotStyle = 1;//1 becouse 0 is none style
 
+        chanaleMathProxyModel->setSourceModel(nullptr);
+        chanaleMathProxyModel->setSourceModel(m_channelMathModel);
         emit m_channelMathModel->layoutChanged();
 
     }
@@ -525,7 +548,11 @@ void Channels::on_pushButton_deleteMathChanale_clicked()
         }
 
         m_channelsMath->remove(curentElement);
+        chanaleMathProxyModel->setSourceModel(nullptr);
+        chanaleMathProxyModel->setSourceModel(m_channelMathModel);
         emit m_channelMathModel->layoutChanged();
+        if(curentElement > 0)
+            ui->treeView_mathChanale->setCurrentIndex(m_channelMathModel->index(curentElement - 1, 0));
     }
 }
 
@@ -563,6 +590,8 @@ void Channels::openChanaleMenu(const QPoint &point)
     //create menu
     QList<QString> graphNames = modele->getGraphNames();
     QList<QAction*> listActionEnebleGraph;
+    listActionEnebleGraph.append(new QAction("new chanale", this));
+
     for (int i = 0; i < graphNames.size(); i++)
     {
         QString graphName = graphNames[i];
@@ -590,14 +619,56 @@ void Channels::openChanaleMenu(const QPoint &point)
         {
             //set eneble for selected graphs
             int indexSelectGraph = listActionEnebleGraph.indexOf(res);
-            bool isEnableOnGraph = res->isChecked();
-//            qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
-            foreach (VarChannel *chanale, selectedChanales) {
-                chanale->setEnableOnPlot(indexSelectGraph, isEnableOnGraph);
-                emit addingChanaleToPlot(chanale, indexSelectGraph, isEnableOnGraph);
+            if(indexSelectGraph == 0)
+            {//add new chanales
+                if(treeView == ui->treeView_mathChanale)
+                {
+                    on_pushButton_addMathChanale_clicked();
+                }
+                else
+                {
+                    NewChanaleDialog newChanaleDialog(this);
+                    if(newChanaleDialog.exec())
+                    {
+                        QString chanaleName = newChanaleDialog.getName();
+                        varloc_location_t loc;
+                        loc.type = newChanaleDialog.getType();
+                        loc.address.base = newChanaleDialog.getBaseAddres();
+                        loc.address.offset_bits = newChanaleDialog.getOffsetBits();
+                        loc.address.size_bits = newChanaleDialog.getSizeBits();
+                        loc.mask = (((uint64_t)1) << loc.address.size_bits) - 1;
+                        loc.mask = loc.mask << loc.address.offset_bits;
+                        //set colour from sequence
+                        m_channels->push_back(new VarChannel(loc, chanaleName, colorSetSequese[curentColorSet++], curentDotStyle++));
+                        connect(m_channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
+                        //reset sequnce colour set
+                        if(curentColorSet >= colorSetSequese.size())
+                            curentColorSet = 0;
+
+                        if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
+                            curentDotStyle = 1;//1 becouse 0 is none style
+
+                        chanaleProxyModel->setSourceModel(nullptr);
+                        chanaleProxyModel->setSourceModel(m_channelModel);
+                        ui->treeView->viewport()->update();
+                        //scrol to element
+                        ui->treeView->scrollToBottom();
+                    }
+                }
+            }
+            else
+            {
+                //0 element is add gruph
+                indexSelectGraph = indexSelectGraph - 1;
+                bool isEnableOnGraph = res->isChecked();
+    //            qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
+                foreach (VarChannel *chanale, selectedChanales) {
+                    chanale->setEnableOnPlot(indexSelectGraph, isEnableOnGraph);
+                    emit addingChanaleToPlot(chanale, indexSelectGraph, isEnableOnGraph);
+                }
             }
 
-            treeView->viewport()->update();
+            emit modele->layoutChanged();
 
         }
     }

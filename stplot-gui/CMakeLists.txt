@@ -52,6 +52,9 @@ set(PROJECT_SOURCES
         widgets/ChannelsList/chanalecustomeditor.h
         widgets/ChannelsList/chanalecustomeditor.cpp
         widgets/ChannelsList/chanalecustomeditor.ui
+        widgets/ChannelsList/newchanaledialog.h
+        widgets/ChannelsList/newchanaledialog.cpp
+        widgets/ChannelsList/newchanaledialog.ui
         modules/ReadManager/readloop.h
         modules/ReadManager/readloop.cpp
         modules/ReadManager/readmanager.h
