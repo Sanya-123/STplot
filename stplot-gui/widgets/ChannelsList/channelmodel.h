@@ -26,6 +26,8 @@ public:
     static QStringList getLineStyle();
     static QStringList getLineWidth();
 
+    QList<QString> getGraphNames() const;
+
 public slots:
     void addPlot();
     void deletePlot(int number);

@@ -6,6 +6,7 @@
 #include "channelmodel.h"
 #include <QSettings>
 #include "chanaleitemdelegate.h"
+#include <QSortFilterProxyModel>
 
 namespace Ui {
 class Channels;
@@ -57,6 +58,7 @@ private slots:
     void on_pushButton_addMathChanale_clicked();
 
     void on_pushButton_deleteMathChanale_clicked();
+    void openChanaleMenu(const QPoint &point);
 
 private:
     Ui::Channels *ui;
@@ -64,6 +66,8 @@ private:
     ChannelModel *m_channelMathModel;
     QVector<VarChannel*> *m_channels;
     QVector<VarChannel*> *m_channelsMath;
+    QSortFilterProxyModel *chanaleProxyModel;
+    QSortFilterProxyModel *chanaleMathProxyModel;
 //    ChanaleItemDelegate iteamDeclarater;
     //sequnce sent color for new gruph
     QList<QColor> colorSetSequese;

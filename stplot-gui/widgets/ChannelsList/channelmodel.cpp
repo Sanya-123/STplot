@@ -347,3 +347,8 @@ void ChannelModel::setEnablePlot(VarChannel *chanale, int numGruph, bool en)
     chanale->setEnableOnPlot(numGruph, en);
     emit changeEnablePlo(chanale, numGruph, en);
 }
+
+QList<QString> ChannelModel::getGraphNames() const
+{
+    return graphNames;
+}

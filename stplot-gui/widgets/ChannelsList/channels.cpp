@@ -5,6 +5,7 @@
 #include <qmath.h>
 #include <unistd.h>
 #include <chanalecustomeditor.h>
+#include <QMenu>
 
 Channels::Channels(QWidget *parent) :
     QWidget(parent),
@@ -13,16 +14,21 @@ Channels::Channels(QWidget *parent) :
     ui->setupUi(this);
     m_channels = new QVector<VarChannel*>();
     m_channelsMath = new QVector<VarChannel*>();
+    chanaleProxyModel = new QSortFilterProxyModel(this);
+    chanaleMathProxyModel = new QSortFilterProxyModel(this);
 
     m_channelModel = new ChannelModel(m_channels, false, this);
     m_channelMathModel = new ChannelModel(m_channelsMath, true, this);
 
     ui->treeView->setItemDelegate(new ChanaleItemDelegate(false, this));
 //    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
-    ui->treeView->setModel(m_channelModel);
+    chanaleProxyModel->setSourceModel(m_channelModel);
+//    proxyModel->setRecursiveFilteringEnabled(true);
+    ui->treeView->setModel(chanaleProxyModel);
 
-    ui->treeView_customChanale->setItemDelegate(new ChanaleItemDelegate(true, this, m_channels));
-    ui->treeView_customChanale->setModel(m_channelMathModel);
+    ui->treeView_mathChanale->setItemDelegate(new ChanaleItemDelegate(true, this, m_channels));
+    chanaleMathProxyModel->setSourceModel(m_channelMathModel);
+    ui->treeView_mathChanale->setModel(chanaleMathProxyModel);
 
 //    ui->tableView->setItemDelegateForColumn(1, cbid);
 
@@ -35,11 +41,39 @@ Channels::Channels(QWidget *parent) :
 
 
     connect(m_channelMathModel, &ChannelModel::updateViewport,
-            ui->treeView_customChanale->viewport(), QOverload<>::of(&QWidget::update));
+            ui->treeView_mathChanale->viewport(), QOverload<>::of(&QWidget::update));
 
     connect(m_channelMathModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 
-    connect(ui->treeView_customChanale, SIGNAL(clicked(QModelIndex)), m_channelMathModel, SLOT(selectChanale(QModelIndex)));
+    connect(ui->treeView_mathChanale, SIGNAL(clicked(QModelIndex)), m_channelMathModel, SLOT(selectChanale(QModelIndex)));
+
+    connect(ui->lineEdit_filterChanale, SIGNAL(textChanged(QString)), chanaleProxyModel, SLOT(setFilterFixedString(QString)));
+    connect(ui->lineEdit_filterMathChanale, SIGNAL(textChanged(QString)), chanaleMathProxyModel, SLOT(setFilterFixedString(QString)));
+
+
+    ui->treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->treeView_mathChanale->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->treeView_mathChanale->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(openChanaleMenu(QPoint)));
+    connect(ui->treeView_mathChanale, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(openChanaleMenu(QPoint)));
+
+    //set eneble sort by first click
+    connect(ui->treeView->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
+    {
+        ui->treeView->header()->setSectionsClickable(false);
+        ui->treeView->setSortingEnabled(true);
+        disconnect(ui->treeView->header(), SIGNAL(sectionClicked(int)));
+    });
+    ui->treeView->header()->setSectionsClickable(true);
+    connect(ui->treeView_mathChanale->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
+    {
+        ui->treeView_mathChanale->header()->setSectionsClickable(false);
+        ui->treeView_mathChanale->setSortingEnabled(true);
+        disconnect(ui->treeView_mathChanale->header(), SIGNAL(sectionClicked(int)));
+    });
+    ui->treeView_mathChanale->header()->setSectionsClickable(true);
 
 
     //init colur sequnce
@@ -74,6 +108,8 @@ Channels::~Channels()
     }
     delete m_channels;
     delete m_channelModel;
+    delete chanaleProxyModel;
+    delete chanaleMathProxyModel;
 }
 
 void Channels::saveSettings(QSettings *settings)
@@ -476,7 +512,7 @@ void Channels::on_pushButton_addMathChanale_clicked()
 
 void Channels::on_pushButton_deleteMathChanale_clicked()
 {
-    int curentElement = ui->treeView_customChanale->currentIndex().row();
+    int curentElement = ui->treeView_mathChanale->currentIndex().row();
     if((curentElement >= 0) && (curentElement < m_channelsMath->size()))
     {
         for(int i = 0; i < m_channelsMath->at(curentElement)->getTotalSizePlot(); i++)
@@ -490,5 +526,85 @@ void Channels::on_pushButton_deleteMathChanale_clicked()
 
         m_channelsMath->remove(curentElement);
         emit m_channelMathModel->layoutChanged();
+    }
+}
+
+void Channels::openChanaleMenu(const QPoint &point)
+{
+    QTreeView *treeView = qobject_cast<QTreeView*>(sender());
+    ChannelModel *modele = nullptr;
+    QVector<VarChannel*> *chanales = nullptr;
+    if(treeView == ui->treeView)
+    {
+        modele = m_channelModel;
+        chanales = m_channels;
+    }
+    else if(treeView == ui->treeView_mathChanale)
+    {
+        modele = m_channelMathModel;
+        chanales = m_channelsMath;
+    }
+    else
+    {
+        return;
+    }
+
+    //get selected chanles
+    QVector<VarChannel*> selectedChanales;
+    QModelIndexList listSelected = treeView->selectionModel()->selectedRows();
+    for(int i = 0; i < listSelected.size(); i++)
+    {
+        if(listSelected[i].row() < chanales->size())
+        {
+            selectedChanales.append(chanales->at(listSelected[i].row()));
+        }
+    }
+
+    //create menu
+    QList<QString> graphNames = modele->getGraphNames();
+    QList<QAction*> listActionEnebleGraph;
+    for (int i = 0; i < graphNames.size(); i++)
+    {
+        QString graphName = graphNames[i];
+        QAction *action = new QAction(graphName, this);
+        action->setCheckable(true);
+        bool isEnablOnAllGraphs = true;
+        //if graps eneble on all graph set checked true else set false
+        foreach (VarChannel *chanale, selectedChanales) {
+            if(!chanale->isEnableOnPlot(i))
+                isEnablOnAllGraphs = false;
+        }
+        action->setChecked(isEnablOnAllGraphs);
+        listActionEnebleGraph.append(action);
+    }
+
+
+    QAction* res = QMenu::exec(listActionEnebleGraph, treeView->viewport()->mapToGlobal(point), nullptr, this);
+    if(res == nullptr)
+    {
+//        qDebug() << "nothing change";
+    }
+    else
+    {
+        if(listActionEnebleGraph.contains(res))
+        {
+            //set eneble for selected graphs
+            int indexSelectGraph = listActionEnebleGraph.indexOf(res);
+            bool isEnableOnGraph = res->isChecked();
+//            qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
+            foreach (VarChannel *chanale, selectedChanales) {
+                chanale->setEnableOnPlot(indexSelectGraph, isEnableOnGraph);
+                emit addingChanaleToPlot(chanale, indexSelectGraph, isEnableOnGraph);
+            }
+
+            treeView->viewport()->update();
+
+        }
+    }
+
+    //delete actions
+    foreach (QAction *action, listActionEnebleGraph)
+    {
+        delete action;
     }
 }

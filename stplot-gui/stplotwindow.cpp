@@ -161,6 +161,7 @@ void STPlotWindow::stopedRead()
     ui->actionStart->setEnabled(true);
     ui->actionStop->setEnabled(false);
     redrawTimer.stop();
+    viewManager->updateAllViews();
 }
 
 void STPlotWindow::loadSettings()
