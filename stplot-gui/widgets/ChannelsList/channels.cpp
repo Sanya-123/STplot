@@ -18,64 +18,69 @@ Channels::Channels(QWidget *parent) :
     m_channelsMath = new QVector<VarChannel*>();
     chanaleProxyModel = new QSortFilterProxyModel(this);
     chanaleMathProxyModel = new QSortFilterProxyModel(this);
-
     m_channelModel = new ChannelModel(m_channels, false, this);
     m_channelMathModel = new ChannelModel(m_channelsMath, true, this);
 
+    //init chanales struct
+    chanaleView[ChanalesView].treeView = ui->treeView;
+    chanaleView[ChanalesView].channels = m_channels;
+    chanaleView[ChanalesView].channelModel = m_channelModel;
+    chanaleView[ChanalesView].chanaleProxyModel = chanaleProxyModel;
+    chanaleView[MathChanalesView].treeView = ui->treeView_mathChanale;
+    chanaleView[MathChanalesView].channels = m_channelsMath;
+    chanaleView[MathChanalesView].channelModel = m_channelMathModel;
+    chanaleView[MathChanalesView].chanaleProxyModel = chanaleMathProxyModel;
+
     ui->treeView->setItemDelegate(new ChanaleItemDelegate(false, this));
-//    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
-    chanaleProxyModel->setSourceModel(m_channelModel);
-//    proxyModel->setRecursiveFilteringEnabled(true);
-    ui->treeView->setModel(chanaleProxyModel);
-
     ui->treeView_mathChanale->setItemDelegate(new ChanaleItemDelegate(true, this, m_channels));
-    chanaleMathProxyModel->setSourceModel(m_channelMathModel);
-    ui->treeView_mathChanale->setModel(chanaleMathProxyModel);
+//    ui->tableView->setItemDelegateForColumn(3, m_channelModel->makeIteamLineStye(this));
 
-//    ui->tableView->setItemDelegateForColumn(1, cbid);
+    for(int i = 0; i < TotalSizeChanalesView; i++)
+    {
+        chanaleView[i].chanaleProxyModel->setSourceModel(chanaleView[i].channelModel);
+        chanaleView[i].treeView->setModel(chanaleView[i].chanaleProxyModel);
 
-    connect(m_channelModel, &ChannelModel::updateViewport,
-            ui->treeView->viewport(), QOverload<>::of(&QWidget::update));
+        connect(chanaleView[i].channelModel, &ChannelModel::updateViewport,
+                chanaleView[i].treeView->viewport(), QOverload<>::of(&QWidget::update));
 
-    connect(m_channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
+        connect(chanaleView[i].channelModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
 
-    connect(ui->treeView, SIGNAL(clicked(QModelIndex)), m_channelModel, SLOT(selectChanale(QModelIndex)));
+        connect(chanaleView[i].treeView, SIGNAL(clicked(QModelIndex)), chanaleView[i].channelModel, SLOT(selectChanale(QModelIndex)));
 
+        chanaleView[i].treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    connect(m_channelMathModel, &ChannelModel::updateViewport,
-            ui->treeView_mathChanale->viewport(), QOverload<>::of(&QWidget::update));
+        chanaleView[i].treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(m_channelMathModel, SIGNAL(changeEnablePlo(VarChannel*,int,bool)), this, SIGNAL(addingChanaleToPlot(VarChannel*,int,bool)));
+        connect(chanaleView[i].treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(openChanaleMenu(QPoint)));
 
-    connect(ui->treeView_mathChanale, SIGNAL(clicked(QModelIndex)), m_channelMathModel, SLOT(selectChanale(QModelIndex)));
+        //set eneble sort by first click
+        connect(chanaleView[i].treeView->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
+        {
+            chanaleView[i].treeView->header()->setSectionsClickable(false);
+            chanaleView[i].treeView->setSortingEnabled(true);
+            disconnect(chanaleView[i].treeView->header(), SIGNAL(sectionClicked(int)));
+        });
+        chanaleView[i].treeView->header()->setSectionsClickable(true);
+    }
 
     connect(ui->lineEdit_filterChanale, SIGNAL(textChanged(QString)), chanaleProxyModel, SLOT(setFilterFixedString(QString)));
     connect(ui->lineEdit_filterMathChanale, SIGNAL(textChanged(QString)), chanaleMathProxyModel, SLOT(setFilterFixedString(QString)));
 
-
-    ui->treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->treeView_mathChanale->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-    ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->treeView_mathChanale->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(openChanaleMenu(QPoint)));
-    connect(ui->treeView_mathChanale, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(openChanaleMenu(QPoint)));
-
-    //set eneble sort by first click
-    connect(ui->treeView->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
-    {
-        ui->treeView->header()->setSectionsClickable(false);
-        ui->treeView->setSortingEnabled(true);
-        disconnect(ui->treeView->header(), SIGNAL(sectionClicked(int)));
-    });
-    ui->treeView->header()->setSectionsClickable(true);
-    connect(ui->treeView_mathChanale->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
-    {
-        ui->treeView_mathChanale->header()->setSectionsClickable(false);
-        ui->treeView_mathChanale->setSortingEnabled(true);
-        disconnect(ui->treeView_mathChanale->header(), SIGNAL(sectionClicked(int)));
-    });
-    ui->treeView_mathChanale->header()->setSectionsClickable(true);
+//    //set eneble sort by first click
+//    connect(ui->treeView->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
+//    {
+//        ui->treeView->header()->setSectionsClickable(false);
+//        ui->treeView->setSortingEnabled(true);
+//        disconnect(ui->treeView->header(), SIGNAL(sectionClicked(int)));
+//    });
+//    ui->treeView->header()->setSectionsClickable(true);
+//    connect(ui->treeView_mathChanale->header(), &QHeaderView::sectionClicked, this, [=](int iteraration)
+//    {
+//        ui->treeView_mathChanale->header()->setSectionsClickable(false);
+//        ui->treeView_mathChanale->setSortingEnabled(true);
+//        disconnect(ui->treeView_mathChanale->header(), SIGNAL(sectionClicked(int)));
+//    });
+//    ui->treeView_mathChanale->header()->setSectionsClickable(true);
 
 
     //init colur sequnce
@@ -325,7 +330,6 @@ void Channels::reloadChannels(varloc_node_t* root){
     }
 }
 
-
 void Channels::add_channel(varloc_node_t* node){
 
     varloc_location_t load_loc = var_node_get_load_location(node);
@@ -353,20 +357,20 @@ void Channels::add_channel(varloc_node_t* node){
 
 void Channels::addPlot()
 {
-    m_channelModel->addPlot();
-    m_channelMathModel->addPlot();
+    for(int i = 0 ; i < TotalSizeChanalesView; i++)
+        chanaleView[i].channelModel->addPlot();
 }
 
 void Channels::deletePlot(int number)
 {
-    m_channelModel->deletePlot(number);
-    m_channelMathModel->deletePlot(number);
+    for(int i = 0 ; i < TotalSizeChanalesView; i++)
+        chanaleView[i].channelModel->deletePlot(number);
 }
 
 void Channels::setPlotName(int number, QString name)
 {
-    m_channelModel->setPlotName(number, name);
-    m_channelMathModel->setPlotName(number, name);
+    for(int i = 0 ; i < TotalSizeChanalesView; i++)
+        chanaleView[i].channelModel->setPlotName(number, name);
 }
 
 void Channels::saveSettingsChanaleCommon(QSettings *settings, VarChannel *chanale)
@@ -488,16 +492,8 @@ void Channels::on_pushButton_deleteChanale_clicked()
 
         disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         m_channels->remove(curentElement);
-        chanaleProxyModel->setSourceModel(nullptr);
-        chanaleProxyModel->setSourceModel(m_channelModel);
-        emit m_channelModel->layoutChanged();
-        if(curentElement > 0)
-        {//scrol to element
-//            ui->treeView->setCurrentIndex(m_channelModel->index(curentElement - 1, 0));
-//            ui->treeView->scrollTo(m_channelModel->index(curentElement - 1, 0));
-            QTimer::singleShot(10, [this, curentElement]{ui->treeView->scrollTo(m_channelModel->index(curentElement - 1, 0));});
-        }
-        ui->treeView->viewport()->update();
+        chanaleProxyModel->invalidate();
+//        ui->treeView->viewport()->update();
     }
 }
 
@@ -526,10 +522,7 @@ void Channels::on_pushButton_addMathChanale_clicked()
         if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
             curentDotStyle = 1;//1 becouse 0 is none style
 
-        chanaleMathProxyModel->setSourceModel(nullptr);
-        chanaleMathProxyModel->setSourceModel(m_channelMathModel);
-        emit m_channelMathModel->layoutChanged();
-
+        chanaleMathProxyModel->invalidate();
     }
 }
 
@@ -548,47 +541,36 @@ void Channels::on_pushButton_deleteMathChanale_clicked()
         }
 
         m_channelsMath->remove(curentElement);
-        chanaleMathProxyModel->setSourceModel(nullptr);
-        chanaleMathProxyModel->setSourceModel(m_channelMathModel);
-        emit m_channelMathModel->layoutChanged();
-        if(curentElement > 0)
-            ui->treeView_mathChanale->setCurrentIndex(m_channelMathModel->index(curentElement - 1, 0));
+        chanaleMathProxyModel->invalidate();
     }
 }
 
 void Channels::openChanaleMenu(const QPoint &point)
 {
     QTreeView *treeView = qobject_cast<QTreeView*>(sender());
-    ChannelModel *modele = nullptr;
-    QVector<VarChannel*> *chanales = nullptr;
+//    ChannelModel *modele = nullptr;
+//    QVector<VarChannel*> *chanales = nullptr;
+    ListChanaleView numberChanaleView = TotalSizeChanalesView;
     if(treeView == ui->treeView)
-    {
-        modele = m_channelModel;
-        chanales = m_channels;
-    }
+        numberChanaleView = ChanalesView;
     else if(treeView == ui->treeView_mathChanale)
-    {
-        modele = m_channelMathModel;
-        chanales = m_channelsMath;
-    }
+        numberChanaleView = MathChanalesView;
     else
-    {
         return;
-    }
 
     //get selected chanles
     QVector<VarChannel*> selectedChanales;
     QModelIndexList listSelected = treeView->selectionModel()->selectedRows();
     for(int i = 0; i < listSelected.size(); i++)
     {
-        if(listSelected[i].row() < chanales->size())
+        if(listSelected[i].row() < chanaleView[numberChanaleView].channels->size())
         {
-            selectedChanales.append(chanales->at(listSelected[i].row()));
+            selectedChanales.append(chanaleView[numberChanaleView].channels->at(listSelected[i].row()));
         }
     }
 
     //create menu
-    QList<QString> graphNames = modele->getGraphNames();
+    QList<QString> graphNames = chanaleView[numberChanaleView].channelModel->getGraphNames();
     QList<QAction*> listActionEnebleGraph;
     listActionEnebleGraph.append(new QAction("new chanale", this));
 
@@ -621,7 +603,7 @@ void Channels::openChanaleMenu(const QPoint &point)
             int indexSelectGraph = listActionEnebleGraph.indexOf(res);
             if(indexSelectGraph == 0)
             {//add new chanales
-                if(treeView == ui->treeView_mathChanale)
+                if(numberChanaleView == MathChanalesView)
                 {
                     on_pushButton_addMathChanale_clicked();
                 }
@@ -639,8 +621,12 @@ void Channels::openChanaleMenu(const QPoint &point)
                         loc.mask = (((uint64_t)1) << loc.address.size_bits) - 1;
                         loc.mask = loc.mask << loc.address.offset_bits;
                         //set colour from sequence
-                        m_channels->push_back(new VarChannel(loc, chanaleName, colorSetSequese[curentColorSet++], curentDotStyle++));
-                        connect(m_channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
+                        chanaleView[numberChanaleView].channels->push_back(new
+                                                                           VarChannel(loc, chanaleName,
+                                                                                      colorSetSequese[curentColorSet++],
+                                                                           curentDotStyle++));
+                        connect(chanaleView[numberChanaleView].channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)),
+                                this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
                         //reset sequnce colour set
                         if(curentColorSet >= colorSetSequese.size())
                             curentColorSet = 0;
@@ -648,11 +634,9 @@ void Channels::openChanaleMenu(const QPoint &point)
                         if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
                             curentDotStyle = 1;//1 becouse 0 is none style
 
-                        chanaleProxyModel->setSourceModel(nullptr);
-                        chanaleProxyModel->setSourceModel(m_channelModel);
-                        ui->treeView->viewport()->update();
+                        chanaleView[numberChanaleView].chanaleProxyModel->invalidate();
                         //scrol to element
-                        ui->treeView->scrollToBottom();
+                        chanaleView[numberChanaleView].treeView->scrollToBottom();
                     }
                 }
             }
@@ -661,15 +645,12 @@ void Channels::openChanaleMenu(const QPoint &point)
                 //0 element is add gruph
                 indexSelectGraph = indexSelectGraph - 1;
                 bool isEnableOnGraph = res->isChecked();
-    //            qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
+//                qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
                 foreach (VarChannel *chanale, selectedChanales) {
                     chanale->setEnableOnPlot(indexSelectGraph, isEnableOnGraph);
                     emit addingChanaleToPlot(chanale, indexSelectGraph, isEnableOnGraph);
                 }
             }
-
-            emit modele->layoutChanged();
-
         }
     }
 

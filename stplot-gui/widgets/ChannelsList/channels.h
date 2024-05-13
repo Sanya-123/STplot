@@ -12,6 +12,10 @@ namespace Ui {
 class Channels;
 }
 
+QT_BEGIN_NAMESPACE
+class QTreeView;
+QT_END_NAMESPACE
+
 class Channels : public QWidget
 {
     Q_OBJECT
@@ -61,6 +65,18 @@ private slots:
     void openChanaleMenu(const QPoint &point);
 
 private:
+    enum ListChanaleView{
+        ChanalesView = 0,
+        MathChanalesView,
+        TotalSizeChanalesView
+    };
+    struct
+    {
+        QTreeView *treeView;
+        QVector<VarChannel*> *channels;
+        ChannelModel *channelModel;
+        QSortFilterProxyModel *chanaleProxyModel;
+    }chanaleView[TotalSizeChanalesView];
     Ui::Channels *ui;
     ChannelModel *m_channelModel;
     ChannelModel *m_channelMathModel;
