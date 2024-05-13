@@ -11,7 +11,7 @@ linux:
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
     - cmake -B build/linux -S . -DCMAKE_PREFIX_PATH=${CI_QT_PATH} -DCI_TOOLS_PATH=${CI_TOOLS_PATH}
-    - cmake --build build/linux -j$(nproc) --
+    - cmake --build build/linux -j$(nproc)
     - cmake --build build/linux --target deployment
   artifacts:
     paths:
@@ -27,7 +27,7 @@ windows:
     GIT_SUBMODULE_FORCE_HTTPS: "true"
   script:
     - cmake -B build/windows -S . -DCMAKE_TOOLCHAIN_FILE=./cmake/gitlab-mingw-share.cmake -DCI_MXE_PATH=${CI_MXE_PATH} -DENABLE_CJSON_TEST=OFF
-    - cmake --build build/windows --target all install deployment
+    - cmake --build build/windows --target all install deployment -j$(nproc)
   artifacts:
     paths:
       - ./build/windows/stplot/
