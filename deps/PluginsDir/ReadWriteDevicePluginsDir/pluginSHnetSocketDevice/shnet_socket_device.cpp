@@ -175,7 +175,9 @@ void SHnetUDPDevice::initConfigWidget()
 }
 
 int SHnetUDPDevice::processRequest(debug_msg_t* req){
-    int timeoutTime = QTime::currentTime().msecsSinceStartOfDay() + 5000;
+//    int timeoutTime = QTime::currentTime().msecsSinceStartOfDay() + 5000;
+    QElapsedTimer timeoutTime;
+    timeoutTime.start();
     memcpy(&downlink.data, req, SHNET_DATA_SIZE_BYTES);
     downlink.msg_id++;
     udpSocket->flush();
@@ -184,22 +186,25 @@ int SHnetUDPDevice::processRequest(debug_msg_t* req){
             qDebug() << "Socket write error";
             return -1;
         }
-        QThread::msleep(100);
+//        QThread::msleep(100);
+        if(!udpSocket->waitForReadyRead(2000))
+        {
+            qDebug() << "Socket wait read timeout";
+        }
         int read = udpSocket->read((char*)&uplink, sizeof(SHnet_link_t));
         if (read < 0){
             qDebug() << "Socket read error";
             return -1;
         }
         else if(read > 0){
-
+            if (dataRecieved()){
+                // qDebug() << "Socket recieved data";
+                return 0;
+            }
         }
-        if (dataRecieved()){
-            // qDebug() << "Socket recieved data";
-            return 0;
-        }
-        if (QTime::currentTime().msecsSinceStartOfDay() > timeoutTime){
-            return -1;
+        if (timeoutTime.elapsed() > 5000){
             qDebug() << "Socket read timeout";
+            return -1;
         }
     }
     return -1;
