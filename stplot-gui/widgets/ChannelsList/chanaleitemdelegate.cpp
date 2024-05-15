@@ -5,7 +5,7 @@
 #include <channelmodel.h>
 #include <QColorDialog>
 #include <QLineEdit>
-#include "chanalecustomeditor.h"
+#include "chanalematheditor.h"
 
 ChanaleItemDelegate::ChanaleItemDelegate(bool mathChanale, QObject *parent, QVector<VarChannel *> *chanales)
     : QStyledItemDelegate{parent}, isMathChanale(mathChanale), chanalesList(chanales)
@@ -48,7 +48,7 @@ QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
     else if((index.column() == 1) && isMathChanale)
     {
         QStringList empty;
-        ChanaleCustomEditor *editor = new ChanaleCustomEditor(empty, "", "", parent);
+        ChanaleMathEditor *editor = new ChanaleMathEditor(empty, "", "", parent);
         return editor;
     }
     return QStyledItemDelegate::createEditor(parent, option, index);
@@ -85,7 +85,7 @@ void ChanaleItemDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     }
     else if((index.column() == 1) && isMathChanale)
     {
-        ChanaleCustomEditor *scriptDialog = qobject_cast<ChanaleCustomEditor *>(editor);
+        ChanaleMathEditor *scriptDialog = qobject_cast<ChanaleMathEditor *>(editor);
         if(scriptDialog != nullptr)
         {
             //update editor chanale lists
@@ -127,7 +127,7 @@ void ChanaleItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
     }
     else if((index.column() == 1) && isMathChanale)
     {
-        ChanaleCustomEditor *scriptDialog = qobject_cast<ChanaleCustomEditor *>(editor);
+        ChanaleMathEditor *scriptDialog = qobject_cast<ChanaleMathEditor *>(editor);
         if(scriptDialog != nullptr)
         {
             if(scriptDialog->result() == QDialog::Accepted)

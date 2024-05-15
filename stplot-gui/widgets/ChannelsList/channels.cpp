@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include <qmath.h>
 #include <unistd.h>
-#include "chanalecustomeditor.h"
+#include "chanalematheditor.h"
 #include <QMenu>
 #include "newchanaledialog.h"
 #include <QTimer>
@@ -504,7 +504,7 @@ void Channels::on_pushButton_addMathChanale_clicked()
         chanaleNames << chanale->displayName();
     }
 
-    ChanaleCustomEditor editor(chanaleNames, "", "", this);
+    ChanaleMathEditor editor(chanaleNames, "", "", this);
     editor.show();
     editor.exec();
 

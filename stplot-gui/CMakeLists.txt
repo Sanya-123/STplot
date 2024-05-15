@@ -49,9 +49,9 @@ set(PROJECT_SOURCES
         widgets/ViewManager/viewmanager.h
         widgets/ViewManager/viewmanager.cpp
         widgets/ViewManager/viewmanager.ui
-        widgets/ChannelsList/chanalecustomeditor.h
-        widgets/ChannelsList/chanalecustomeditor.cpp
-        widgets/ChannelsList/chanalecustomeditor.ui
+        widgets/ChannelsList/chanalematheditor.h
+        widgets/ChannelsList/chanalematheditor.cpp
+        widgets/ChannelsList/chanalematheditor.ui
         widgets/ChannelsList/newchanaledialog.h
         widgets/ChannelsList/newchanaledialog.cpp
         widgets/ChannelsList/newchanaledialog.ui

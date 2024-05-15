@@ -1,11 +1,11 @@
-#include "chanalecustomeditor.h"
-#include "ui_chanalecustomeditor.h"
+#include "chanalematheditor.h"
+#include "ui_chanalematheditor.h"
 #include <QAction>
 #include "varchannel.h"
 
-ChanaleCustomEditor::ChanaleCustomEditor(QStringList chanaleNames, QString name, QString oldScript, QWidget *parent) :
+ChanaleMathEditor::ChanaleMathEditor(QStringList chanaleNames, QString name, QString oldScript, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ChanaleCustomEditor)
+    ui(new Ui::ChanaleMathEditor)
 {
     ui->setupUi(this);
     QStringList maths;
@@ -16,6 +16,7 @@ ChanaleCustomEditor::ChanaleCustomEditor(QStringList chanaleNames, QString name,
     maths << "Math.sqrt(";
     maths << "Math.sin(";
     maths << "Math.cos(";
+    maths << "function myFunction(a, b) { return a + b; }";
     foreach (QString element, maths) {
         ui->listWidget_math->addItem(element);
     }
@@ -32,27 +33,27 @@ ChanaleCustomEditor::ChanaleCustomEditor(QStringList chanaleNames, QString name,
         ui->lineEdit_name->setDisabled(true);
 }
 
-ChanaleCustomEditor::~ChanaleCustomEditor()
+ChanaleMathEditor::~ChanaleMathEditor()
 {
     delete ui;
 }
 
-QString ChanaleCustomEditor::getName()
+QString ChanaleMathEditor::getName()
 {
     return ui->lineEdit_name->text();
 }
 
-QString ChanaleCustomEditor::getScipt()
+QString ChanaleMathEditor::getScipt()
 {
     return ui->textEdit_script->toPlainText();
 }
 
-void ChanaleCustomEditor::setScript(QString script)
+void ChanaleMathEditor::setScript(QString script)
 {
     ui->textEdit_script->setText(script);
 }
 
-void ChanaleCustomEditor::updateChanaleNames(QStringList chanaleNames)
+void ChanaleMathEditor::updateChanaleNames(QStringList chanaleNames)
 {
     ui->listWidget_names->clear();
     foreach (QString element, chanaleNames) {
@@ -61,7 +62,7 @@ void ChanaleCustomEditor::updateChanaleNames(QStringList chanaleNames)
     }
 }
 
-void ChanaleCustomEditor::iteamCliced(QListWidgetItem* iteam)
+void ChanaleMathEditor::iteamCliced(QListWidgetItem* iteam)
 {
     ui->textEdit_script->textCursor().insertText(iteam->text());
     ui->textEdit_script->setFocus();
