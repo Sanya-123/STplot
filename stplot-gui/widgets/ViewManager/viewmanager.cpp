@@ -134,8 +134,20 @@ PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, Q
     if(dockContainer != nullptr)
         dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
 
-    if(menuView != nullptr)
-        menuView->addAction(widgetDocker->toggleViewAction());
+    QAction * actionConfigSettings = new QAction("settings", widgetDocker);
+    connect(actionConfigSettings, &QAction::triggered, this, [=](){
+        //show then edit
+        SettingsDialog *sett = new SettingsDialog(widgetPlot->gedSettings());
+        sett->show();
+        sett->exec();
+        delete sett;
+    });
+
+    QList<QAction*> actions = widgetDocker->titleBarActions();
+    actions.append(actionConfigSettings);
+    widgetDocker->setTitleBarActions(actions);
+
+
     //add to chanal modele
     if(chanales != nullptr)
         chanales->addPlot();
@@ -243,6 +255,8 @@ void ViewManager::on_pushButton_open_selected_plot_setings_clicked()
         SettingsDialog *sett = new SettingsDialog(firstElementSettings);
         sett->show();
         sett->exec();
+
+        delete sett;
 
         //apply setings for all next elements
         for(int i = 1; i < iteams.size(); i++)
