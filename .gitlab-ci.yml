@@ -15,7 +15,7 @@ linux:
     - cmake --build build/linux --target deployment
   artifacts:
     paths:
-      - ./build/linux/
+      - ./build/linux/deployment/
     expire_in: 1 week
 windows:
   stage: build_windows
