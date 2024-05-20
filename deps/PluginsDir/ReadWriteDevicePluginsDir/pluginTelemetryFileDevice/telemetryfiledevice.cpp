@@ -59,23 +59,10 @@ int TelemetryFileDevice::execReadDevice()
 {
     return -1;
 }
-int TelemetryFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time)
-{
-    return -1;
-}
-int TelemetryFileDevice::execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time)
-{
-    return -1;
-}
 
 QWidget *TelemetryFileDevice::getReadDevConfigWidget()
 {
     return configReadWidget;
-}
-
-QWidget *TelemetryFileDevice::getSaveDevConfigWidget()
-{
-    return configSaveWidget;
 }
 
 #include <QDebug>

@@ -322,7 +322,7 @@ void STPlotWindow::initReadDevice()
 //        readDeviceList.append(saveDevice);
         devRead.object = saveDevice;
         devRead.name = pluginsWriteDevice[i]->getName();
-        listReadDeviceInstance.append(devRead);
+//        listReadDeviceInstance.append(devRead);//remoe it bucouse not each save device coud be as read dev
         saveDeviceList.append(saveDevice);
     }
 

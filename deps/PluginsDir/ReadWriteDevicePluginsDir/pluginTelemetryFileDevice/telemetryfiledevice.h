@@ -7,7 +7,7 @@
 #include <QWidget>
 #include <QLineEdit>
 
-class TelemetryFileDevice : public SaveDeviceObject
+class TelemetryFileDevice : public ReadDeviceObject
 {
     Q_OBJECT
 public:
@@ -16,11 +16,8 @@ public:
     bool isFileDevice();
     int initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence);
     void stopDev();
-    int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time);
-    int execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time);
     int execReadDevice();
     QWidget* getReadDevConfigWidget();
-    QWidget* getSaveDevConfigWidget();
 
     int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
 
