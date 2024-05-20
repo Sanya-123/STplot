@@ -28,3 +28,6 @@
 [submodule "windowsLibs/libusb-cmake"]
 	path = windowsLibs/libusb-cmake
 	url = https://github.com/libusb/libusb-cmake.git
+[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs"]
+	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs
+	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs.git

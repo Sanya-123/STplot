@@ -21,6 +21,10 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_PATH}
 )
 
+# elf application with struct
+add_subdirectory(nav_dev_tree)
+
+
 if (WIN32)
     install(TARGETS ${PLUGIN_NAME} DESTINATION ${PLUGINS_PATH})
 endif()
