@@ -69,6 +69,7 @@ else()
     add_custom_target(deployment_CP DEPENDS ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui ${CMAKE_BINARY_DIR}/deployment/stplot-gui
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/lib/*.so ${CMAKE_BINARY_DIR}/deployment/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/lib/*.so.* ${CMAKE_BINARY_DIR}/deployment/
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins/ ${CMAKE_BINARY_DIR}/deployment/plugins
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/plugins/* ${CMAKE_BINARY_DIR}/deployment/plugins/
     )

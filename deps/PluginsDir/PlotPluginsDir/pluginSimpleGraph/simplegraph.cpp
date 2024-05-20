@@ -14,6 +14,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(par
     mapSettingsDefauold["legend.enLegend"] = false;
     mapSettingsDefauold["scale.windowSec"] = 5.0;
     mapSettingsDefauold["scale.simpleMode"] = false;
+    mapSettingsDefauold["openGL.enOpenGL"] = true;
 
 //    mapSettings = mapSettingsDefauold;
     restoreDefoultSetings();
@@ -344,6 +345,10 @@ void SimpleGraph::settingsChanged()
             plotWidget->plotLayout()->take(subLayout);
         }
     }
+
+    bool useOpenGl = map["openGL.enOpenGL"].toBool();
+    if(plotWidget->openGl() != useOpenGl)
+        plotWidget->setOpenGl(useOpenGl);
 //    plotWidget->legend->setVisible(map["enLegend"].toBool());
 
     plotWidget->update();
