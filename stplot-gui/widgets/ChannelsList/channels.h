@@ -19,7 +19,11 @@ QT_END_NAMESPACE
 class Channels : public QWidget
 {
     Q_OBJECT
-
+    enum ListChanaleView{
+        ChanalesView = 0,
+        MathChanalesView,
+        TotalSizeChanalesView
+    };
 public:
     explicit Channels(QWidget *parent = nullptr);
     ~Channels();
@@ -55,6 +59,7 @@ private:
 
 
 private slots:
+    void deleteSelectedChanales(ListChanaleView numList);
 //    void on_pushButton_clicked();
 
     void on_pushButton_deleteChanale_clicked();
@@ -65,11 +70,6 @@ private slots:
     void openChanaleMenu(const QPoint &point);
 
 private:
-    enum ListChanaleView{
-        ChanalesView = 0,
-        MathChanalesView,
-        TotalSizeChanalesView
-    };
     struct
     {
         QTreeView *treeView;

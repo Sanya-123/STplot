@@ -66,20 +66,20 @@ QWidget *TelemetryFileDevice::getReadDevConfigWidget()
 }
 
 #include <QDebug>
-int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> chanales){
+int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> chanales, QVector<QTime> *readTimes){
     QDir dir(path);
     QFileInfoList teleFiles = dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoDot);
     for (int j = 0; j < teleFiles.length(); j++){
         QFileInfo file = teleFiles[j];
         if (file.isDir()){
-            int ret = readTelemetryDir(file.absoluteFilePath(), chanales);
+            int ret = readTelemetryDir(file.absoluteFilePath(), chanales, readTimes);
             if (ret != 0){
                 return ret;
             }
         }
         if(file.isFile() && file.suffix() == "t"){
 
-            int ret = readTelemetryFile(file.absoluteFilePath(), chanales);
+            int ret = readTelemetryFile(file.absoluteFilePath(), chanales, readTimes);
             if (ret != 0){
                 return  ret;
             }
@@ -89,7 +89,7 @@ int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> ch
     return 0;
 }
 
-int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel *> chanales){
+int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel *> chanales, QVector<QTime> *readTimes){
     QFile teleRecord(filepath);
     if (!teleRecord.open(QIODevice::ReadOnly)){
         qDebug("Error opening telemetry record");
@@ -122,6 +122,9 @@ int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel 
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(time*1000);
     // qDebug("Tele data found. Size is %d. Time is %f\n", *size, time);
 
+    if(readTimes != nullptr)
+        readTimes->append(dt.time());
+
     // int offset_bits = 0;
     uint32_t* ptr = (uint32_t*)&(pickle.data()[87]);
     for(int i = 0; i < chanales.size(); i++)
@@ -145,7 +148,7 @@ int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel 
 
 int TelemetryFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
 {
-    int ret = readTelemetryDir(folderName->text(), chanales);
+    int ret = readTelemetryDir(folderName->text(), chanales, readTimes);
     stopDev();
     return ret;
 }

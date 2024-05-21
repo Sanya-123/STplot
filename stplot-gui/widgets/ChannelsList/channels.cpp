@@ -122,6 +122,8 @@ Channels::~Channels()
 void Channels::saveSettings(QSettings *settings)
 {
     settings->setValue("splitteChanales", ui->splitter->saveState());
+    settings->setValue("splitteChanalesChanales", ui->splitter_chanale->saveState());
+    settings->setValue("splitteChanalesMathChanales", ui->splitter_mathChanale->saveState());
     settings->beginWriteArray("chanales");
     for (int i = 0; i < m_channels->size(); i++)
     {
@@ -150,6 +152,8 @@ void Channels::saveSettings(QSettings *settings)
 void Channels::restoreSettings(QSettings *settings)
 {
     ui->splitter->restoreState(settings->value("splitteChanales").toByteArray());
+    ui->splitter_chanale->restoreState(settings->value("splitteChanalesChanales").toByteArray());
+    ui->splitter_mathChanale->restoreState(settings->value("splitteChanalesMathChanales").toByteArray());
 
     //reset states
     for (int i = 0; i < m_channels->size(); ++i) {
@@ -459,6 +463,39 @@ QVector<bool> Channels::restoreSettingsChanaleListPlot(QSettings *settings)
     return listPlot;
 }
 
+void Channels::deleteSelectedChanales(ListChanaleView numList)
+{
+    //get selected chanles
+    QModelIndexList listSelected = chanaleView[numList].treeView->selectionModel()->selectedRows();
+    QVector<VarChannel*> selectedChanales;
+
+    for(int i = 0; i < listSelected.size(); i++)
+    {
+        if(listSelected[i].row() < chanaleView[numList].channels->size())
+        {
+            selectedChanales.append(chanaleView[numList].channels->at(listSelected[i].row()));
+        }
+    }
+
+    for(int i = 0; i < selectedChanales.size(); i++)
+    {
+        for(int j = 0; j < selectedChanales[i]->getTotalSizePlot(); j++)
+        {
+            if(selectedChanales[i]->isEnableOnPlot(j))
+            {
+                selectedChanales[i]->setEnableOnPlot(j, false);
+                emit addingChanaleToPlot(selectedChanales[i], j, false);
+            }
+        }
+
+        disconnect(selectedChanales[i], SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
+        if(chanaleView[numList].channels->indexOf(selectedChanales[i]) >= 0)
+            chanaleView[numList].channels->remove(m_channels->indexOf(selectedChanales[i]));
+    }
+
+    chanaleView[numList].chanaleProxyModel->invalidate();
+}
+
 //void Channels::on_pushButton_clicked()
 //{
 //    int curentElement = ui->treeView->currentIndex().row();
@@ -478,23 +515,7 @@ QVector<bool> Channels::restoreSettingsChanaleListPlot(QSettings *settings)
 
 void Channels::on_pushButton_deleteChanale_clicked()
 {
-    int curentElement = ui->treeView->currentIndex().row();
-    if((curentElement >= 0) && (curentElement < m_channels->size()))
-    {
-        for(int i = 0; i < m_channels->at(curentElement)->getTotalSizePlot(); i++)
-        {
-            if(m_channels->at(curentElement)->isEnableOnPlot(i))
-            {
-                m_channels->at(curentElement)->setEnableOnPlot(i, false);
-                emit addingChanaleToPlot(m_channels->at(curentElement), i, false);
-            }
-        }
-
-        disconnect(m_channels->at(curentElement), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
-        m_channels->remove(curentElement);
-        chanaleProxyModel->invalidate();
-//        ui->treeView->viewport()->update();
-    }
+    deleteSelectedChanales(ChanalesView);
 }
 
 void Channels::on_pushButton_addMathChanale_clicked()
@@ -528,21 +549,7 @@ void Channels::on_pushButton_addMathChanale_clicked()
 
 void Channels::on_pushButton_deleteMathChanale_clicked()
 {
-    int curentElement = ui->treeView_mathChanale->currentIndex().row();
-    if((curentElement >= 0) && (curentElement < m_channelsMath->size()))
-    {
-        for(int i = 0; i < m_channelsMath->at(curentElement)->getTotalSizePlot(); i++)
-        {
-            if(m_channelsMath->at(curentElement)->isEnableOnPlot(i))
-            {
-                m_channelsMath->at(curentElement)->setEnableOnPlot(i, false);
-                emit addingChanaleToPlot(m_channelsMath->at(curentElement), i, false);
-            }
-        }
-
-        m_channelsMath->remove(curentElement);
-        chanaleMathProxyModel->invalidate();
-    }
+    deleteSelectedChanales(MathChanalesView);
 }
 
 void Channels::openChanaleMenu(const QPoint &point)

@@ -25,8 +25,8 @@ private slots:
     void openSelectFolder();
 
 private:
-    int readTelemetryFile(QString filepath, QVector<VarChannel *> chanales);
-    int readTelemetryDir(QString path, QVector<VarChannel *> chanales);
+    int readTelemetryFile(QString filepath, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
+    int readTelemetryDir(QString path, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
 
     QWidget *configReadWidget;
     QLineEdit* folderName;

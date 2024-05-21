@@ -89,6 +89,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(loadSettings()));
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(saveSettings()));
     connect(ui->actionSave_as, SIGNAL(triggered(bool)), this, SLOT(saveSettingsAs()));
+    connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(newSettings()));
     connect(&readSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(setReadDevice(int)));
     connect(channelsView, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint64_t,varloc_location_t)));
     connect(ui->actionMainConfig, SIGNAL(triggered(bool)), this, SLOT(showSettingsWindows()));
@@ -200,6 +201,16 @@ void STPlotWindow::saveSettingsAs()
         curentSettingsPath = newSettings;
         saveSettingsToFile(curentSettingsPath);
     }
+}
+
+void STPlotWindow::newSettings()
+{
+    QFile emptyConfig("tmp.conf");
+    emptyConfig.open(QIODevice::WriteOnly);
+    emptyConfig.write(QByteArray());
+    emptyConfig.close();
+    QSettings settings(emptyConfig.fileName(), QSettings::IniFormat);
+    applySettings(settings);
 }
 
 void STPlotWindow::openSettingsReader()

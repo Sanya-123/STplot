@@ -63,7 +63,7 @@ void ReadLoop::readLoop()
                 emit decodedDataWithTime(listDecoded, _t);
 
                 //calc math chanales
-                QVector<float> listMathValues = calcMathChanales(chanaleDisplayNames, listDecoded, &listMathChanales);
+                QVector<float> listMathValues = calcMathChanales(chanaleDisplayNamesReplased, listDecoded, &listMathChanales);
                 emit mathDataWithTime(listMathValues, _t);
 
                 //savde data in file
@@ -196,10 +196,15 @@ QVector<float> ReadLoop::calcMathChanales(QMap<QString, float> mapChanales, QVec
         listChanalesValues.append(mapChanales[listChanalesName[i]]);
     }
 
+    for(int i = 0; i < listChanalesName.size(); i++)
+    {
+        REPLEASE_DOT_VAR_NAME(listChanalesName[i]);
+    }
+
     return calcMathChanales(listChanalesName, listChanalesValues, listMathChanales);
 }
 
-QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesName, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales)
+QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales)
 {
     //https://doc.qt.io/qt-5/qtscript-index.html
 
@@ -212,14 +217,12 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesName, QVect
         return res;
 
     QScriptEngine myEngine;
-    for(int i = 0; i < listChanalesName.size(); i++)
+    for(int i = 0; i < listChanalesNameReplaced.size(); i++)
     {
         if(i >= listChanalesValues.size())
             break;
 
-        REPLEASE_DOT_VAR_NAME(listChanalesName[i]);
-
-        myEngine.globalObject().setProperty(listChanalesName[i], listChanalesValues[i]);
+        myEngine.globalObject().setProperty(listChanalesNameReplaced[i], listChanalesValues[i]);
     }
 
     for(int i = 0; i < listMathChanales->size(); i++)
@@ -237,15 +240,19 @@ void ReadLoop::calcDecodList(QVector<VarChannel *> *channels)
     decodeList.clear();
     chanaleDisplayNames.clear();
     chanaleNames.clear();
+    chanaleDisplayNamesReplased.clear();
 
     if(channels != nullptr)
     {
         for(int i = 0; i < channels->size(); i++)
         {
-            chanaleDisplayNames << channels->at(i)->displayName();
+            QString chanaleName = channels->at(i)->displayName();
+            chanaleDisplayNames << chanaleName;
             chanaleNames << channels->at(i)->getName();
             varloc_location_t loc = channels->at(i)->getLocation();
             decodeList.append(loc);
+            REPLEASE_DOT_VAR_NAME(chanaleName);
+            chanaleDisplayNamesReplased << chanaleName;
         }
     }
 }

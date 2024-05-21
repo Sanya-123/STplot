@@ -44,6 +44,7 @@ public slots:
     void loadSettings();
     void saveSettings();
     void saveSettingsAs();
+    void newSettings();
     void openSettingsReader();
     void applySettingsSlot();
     void showSettingsWindows();

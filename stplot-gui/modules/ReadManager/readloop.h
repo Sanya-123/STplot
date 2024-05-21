@@ -21,7 +21,7 @@ public:
 
     static QMap<QString, float> fillMapValues(QStringList chanaleNames, QVector<float> values);
     static QVector<float> calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString,QString>> *listMathChanales);
-    static QVector<float> calcMathChanales(QList<QString> listChanalesName, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales);
+    static QVector<float> calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales);
 
 
 public slots:
@@ -57,6 +57,7 @@ private:
 
     //use for calc math
     QList<QString> chanaleDisplayNames;
+    QList<QString> chanaleDisplayNamesReplased;
     QList<QString> chanaleNames;
     QVector<QPair<QString,QString>> listMathChanales;
 
