@@ -47,6 +47,8 @@ void ReadLoop::readLoop()
 //        QElapsedTimer timer;
 //        timer.start();
 
+        QVector<QMap<QString, float>> vectorOldValues;
+
         //main loop of read data
         do{
             //read value
@@ -63,7 +65,8 @@ void ReadLoop::readLoop()
                 emit decodedDataWithTime(listDecoded, _t);
 
                 //calc math chanales
-                QVector<float> listMathValues = calcMathChanales(chanaleDisplayNamesReplased, listDecoded, &listMathChanales);
+                QVector<float> listMathValues = calcMathChanales(chanaleDisplayNamesReplased, listDecoded,
+                                                                 &listMathChanales, &vectorOldValues);
                 emit mathDataWithTime(listMathValues, _t);
 
                 //savde data in file
@@ -181,7 +184,8 @@ QMap<QString, float> ReadLoop::fillMapValues(QStringList chanaleNames, QVector<f
     return res;
 }
 
-QVector<float> ReadLoop::calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString, QString>> *listMathChanales)
+QVector<float> ReadLoop::calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString, QString>> *listMathChanales,
+                                          QVector<QMap<QString, float> > *vectorOldValues)
 {
 //    QList<QString> chanaleNames
 //    QScriptEngine myEngine;
@@ -201,10 +205,11 @@ QVector<float> ReadLoop::calcMathChanales(QMap<QString, float> mapChanales, QVec
         REPLEASE_DOT_VAR_NAME(listChanalesName[i]);
     }
 
-    return calcMathChanales(listChanalesName, listChanalesValues, listMathChanales);
+    return calcMathChanales(listChanalesName, listChanalesValues, listMathChanales, vectorOldValues);
 }
 
-QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales)
+QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues,
+                                          QVector<QPair<QString,QString>> *listMathChanales, QVector<QMap<QString, float>> *vectorOldValues)
 {
     //https://doc.qt.io/qt-5/qtscript-index.html
 
@@ -216,6 +221,8 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplace
     if(listMathChanales->size() == 0)
         return res;
 
+    QMap<QString, float> mapOldData;
+
     QScriptEngine myEngine;
     for(int i = 0; i < listChanalesNameReplaced.size(); i++)
     {
@@ -223,13 +230,63 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplace
             break;
 
         myEngine.globalObject().setProperty(listChanalesNameReplaced[i], listChanalesValues[i]);
+        mapOldData[listChanalesNameReplaced[i]] = listChanalesValues[i];
+    }
+
+    if(vectorOldValues != nullptr)
+    {
+        //NOTE it is will break if try to work on different threads
+        static QVector<QMap<QString, float>> *_vectorOldValues = nullptr;
+        static QMap<QString, float> *_mapOldData = nullptr;
+
+        _vectorOldValues = vectorOldValues;
+        _mapOldData = &mapOldData;
+
+        //prevoius value function
+        auto prevValue = [/*vectorOldValues, mapOldData*/] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
+        {
+            Q_UNUSED(engine);
+            QScriptValue chanaleName = context->argument(0);
+            QScriptValue delayValue = context->argument(1);
+            QScriptValue res(0.0);
+            if(delayValue.toUInt32() > 0)
+            {
+                if(_vectorOldValues->size() >= delayValue.toUInt32())
+                {
+                    //find chanale
+                    if(_vectorOldValues->at(delayValue.toUInt32() - 1).contains(chanaleName.toString()))
+                        res = _vectorOldValues->at(delayValue.toUInt32() - 1)[chanaleName.toString()];
+                }
+            }
+            else
+            {
+                if(_mapOldData->contains(chanaleName.toString()))
+                    res = _mapOldData->value(chanaleName.toString());
+            }
+
+
+            return res;
+        };
+        QScriptEngine::FunctionSignature prevValueLambdaPtr = prevValue;
+        QScriptValue fun = myEngine.newFunction(prevValueLambdaPtr);
+        myEngine.globalObject().setProperty("prevValue", fun);
     }
 
     for(int i = 0; i < listMathChanales->size(); i++)
     {
         QString script = listMathChanales->at(i).second;
-//        script = script.replace(".", "_");
-        res.append(myEngine.evaluate(script).toNumber());
+        float valueScript = myEngine.evaluate(script).toNumber();
+        res.append(valueScript);
+        mapOldData[listMathChanales->at(i).first] = valueScript;
+    }
+
+    //save old values
+    if(vectorOldValues != nullptr)
+    {
+        vectorOldValues->prepend(mapOldData);
+        if(DEPH_OLD_DATA >= 0)
+            while(vectorOldValues->size() > DEPH_OLD_DATA)
+                vectorOldValues->removeLast();
     }
 
     return res;

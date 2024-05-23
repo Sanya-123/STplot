@@ -17,6 +17,7 @@ ChanaleMathEditor::ChanaleMathEditor(QStringList chanaleNames, QString name, QSt
     maths << "Math.sin(";
     maths << "Math.cos(";
     maths << "function myFunction(a, b) { return a + b; }";
+    maths << "prevValue(\"<name>\",delay)";
     foreach (QString element, maths) {
         ui->listWidget_math->addItem(element);
     }

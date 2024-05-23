@@ -4,6 +4,8 @@
 #include <QObject>
 #include "readwritedevice.h"
 
+#define DEPH_OLD_DATA               256 /*deph save data; -1 is infinity; 0 is disable */
+
 class ReadLoop : public QObject
 {
     Q_OBJECT
@@ -20,8 +22,10 @@ public:
     void updateMathChanales(QVector<VarChannel *> *mathChanales);
 
     static QMap<QString, float> fillMapValues(QStringList chanaleNames, QVector<float> values);
-    static QVector<float> calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString,QString>> *listMathChanales);
-    static QVector<float> calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues, QVector<QPair<QString,QString>> *listMathChanales);
+    static QVector<float> calcMathChanales(QMap<QString, float> mapChanales, QVector<QPair<QString,QString>> *listMathChanales,
+                                           QVector<QMap<QString, float>> *vectorOldValues = nullptr);
+    static QVector<float> calcMathChanales(QList<QString> listChanalesNameReplaced, QVector<float> listChanalesValues, QVector<QPair<QString, QString> > *listMathChanales,
+                                           QVector<QMap<QString, float>> *vectorOldValues = nullptr);
 
 
 public slots:
