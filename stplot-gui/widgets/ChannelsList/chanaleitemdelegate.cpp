@@ -51,6 +51,14 @@ QWidget *ChanaleItemDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         ChanaleMathEditor *editor = new ChanaleMathEditor(empty, "", "", parent);
         return editor;
     }
+    else if(((index.column() == 6) || (index.column() == 7)) && !isMathChanale)
+    {
+        QDoubleSpinBox *spinbox =  new QDoubleSpinBox(parent);
+        spinbox->setRange(-10000000, 10000000);
+        spinbox->setDecimals(6);
+//        spinbox->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
+        return spinbox;
+    }
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
@@ -101,6 +109,12 @@ void ChanaleItemDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
             scriptDialog->setScript(index.data().toString());
         }
     }
+    else if(((index.column() == 6) || (index.column() == 7)) && !isMathChanale)
+    {
+        QDoubleSpinBox *spinbox = qobject_cast<QDoubleSpinBox *>(editor);
+        if(spinbox != nullptr)
+            spinbox->setValue(index.data().toDouble());
+    }
     else
         return QStyledItemDelegate::setEditorData(editor, index);
 }
@@ -133,6 +147,12 @@ void ChanaleItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
             if(scriptDialog->result() == QDialog::Accepted)
                 model->setData(index, scriptDialog->getScipt());
         }
+    }
+    else if(((index.column() == 6) || (index.column() == 7)) && !isMathChanale)
+    {
+        QDoubleSpinBox *spinbox = qobject_cast<QDoubleSpinBox *>(editor);
+        if(spinbox != nullptr)
+            model->setData(index, spinbox->value());
     }
     else
         return QStyledItemDelegate::setModelData(editor, model, index);

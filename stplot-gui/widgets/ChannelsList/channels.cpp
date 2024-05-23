@@ -158,12 +158,28 @@ void Channels::restoreSettings(QSettings *settings)
     //reset states
     for (int i = 0; i < m_channels->size(); ++i) {
         disconnect(m_channels->at(i), SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
+        for(int j = 0; j < m_channels->at(i)->getTotalSizePlot(); j++)
+        {
+            if(m_channels->at(i)->isEnableOnPlot(j))
+            {
+                m_channels->at(i)->setEnableOnPlot(j, false);
+                emit addingChanaleToPlot(m_channels->at(i), j, false);
+            }
+        }
         delete m_channels->at(i);
     }
     m_channels->clear();
 
     for (int i = 0; i < m_channelsMath->size(); ++i) {
-        delete m_channelsMath->at(i);;
+        for(int j = 0; j < m_channelsMath->at(i)->getTotalSizePlot(); j++)
+        {
+            if(m_channelsMath->at(i)->isEnableOnPlot(j))
+            {
+                m_channelsMath->at(i)->setEnableOnPlot(j, false);
+                emit addingChanaleToPlot(m_channelsMath->at(i), j, false);
+            }
+        }
+        delete m_channelsMath->at(i);
     }
     m_channelsMath->clear();
 
@@ -183,6 +199,7 @@ void Channels::restoreSettings(QSettings *settings)
     int lineStyle;
     QColor lineColor;
     int lineWidth;
+    double offset, mult;
 
     int size = settings->beginReadArray("chanales");
     for (int i = 0; i < size; ++i)
@@ -191,7 +208,8 @@ void Channels::restoreSettings(QSettings *settings)
         //read all setings
 
         restoreSettingsChanaleCommon(settings, &chanaleName, &displayName, &dotStyle,
-                                     &lineStyle, &lineColor, &lineWidth);
+                                     &lineStyle, &lineColor, &lineWidth,
+                                     &offset, &mult);
 
         varloc_location_t loc = restoreSettingsChanaleLocation(settings);
 
@@ -205,6 +223,8 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setLineStyle(lineStyle);
         chanale->setLineWidth(lineWidth);
         chanale->setTotalSizePlot(totalSizePlot);
+        chanale->setOffset(offset);
+        chanale->setMult(mult);
         m_channels->push_back(chanale);
         connect(chanale, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         for(int j = 0; j < listPlot.size(); j++)
@@ -223,7 +243,8 @@ void Channels::restoreSettings(QSettings *settings)
         settings->setArrayIndex(i);
         //read all setings
         restoreSettingsChanaleCommon(settings, &chanaleName, &displayName, &dotStyle,
-                                     &lineStyle, &lineColor, &lineWidth);
+                                     &lineStyle, &lineColor, &lineWidth,
+                                     &offset, &mult);
 
         int totalSizePlot = settings->value("totalSizePlot").toUInt();
 
@@ -237,6 +258,8 @@ void Channels::restoreSettings(QSettings *settings)
         chanale->setLineStyle(lineStyle);
         chanale->setLineWidth(lineWidth);
         chanale->setTotalSizePlot(totalSizePlot);
+        chanale->setOffset(offset);
+        chanale->setMult(mult);
         m_channelsMath->push_back(chanale);
         for(int j = 0; j < listPlot.size(); j++)
         {
@@ -385,6 +408,8 @@ void Channels::saveSettingsChanaleCommon(QSettings *settings, VarChannel *chanal
     settings->setValue("lineStyle", chanale->lineStyle());
     settings->setValue("lineColor", chanale->lineColor());
     settings->setValue("lineWidth", chanale->lineWidth());
+    settings->setValue("offset", chanale->getOffset());
+    settings->setValue("mult", chanale->getMult());
 }
 
 void Channels::saveSettingsChanaleLocation(QSettings *settings, VarChannel *chanale)
@@ -433,7 +458,7 @@ varloc_location_t Channels::restoreSettingsChanaleLocation(QSettings *settings)
 
 }
 
-void Channels::restoreSettingsChanaleCommon(QSettings *settings, QString *chanaleName, QString *displayName, int *dotStyle, int *lineStyle, QColor *lineColor, int *lineWidth)
+void Channels::restoreSettingsChanaleCommon(QSettings *settings, QString *chanaleName, QString *displayName, int *dotStyle, int *lineStyle, QColor *lineColor, int *lineWidth, double *offset, double *mult)
 {
     *chanaleName = settings->value("chanaleName").toString();
     *displayName = settings->value("displayName").toString();
@@ -441,6 +466,8 @@ void Channels::restoreSettingsChanaleCommon(QSettings *settings, QString *chanal
     *lineStyle = settings->value("lineStyle").toUInt();
     *lineColor = settings->value("lineColor").value<QColor>();
     *lineWidth = settings->value("lineWidth").toUInt();
+    *offset = settings->value("offset", 0.0).toDouble();
+    *mult = settings->value("mult", 1.0).toDouble();
 }
 
 QString Channels::restoreSettingsChanaleScript(QSettings *settings)
@@ -580,6 +607,16 @@ void Channels::openChanaleMenu(const QPoint &point)
     QList<QString> graphNames = chanaleView[numberChanaleView].channelModel->getGraphNames();
     QList<QAction*> listActionEnebleGraph;
     listActionEnebleGraph.append(new QAction("new chanale", this));
+    listActionEnebleGraph.append(new QAction("reload chanales", this));
+    QAction *separator = new QAction(this);
+    separator->setSeparator(true);
+    listActionEnebleGraph.append(separator);
+
+    //TODO temporay disable while update math snale is note implemented
+    if(numberChanaleView == MathChanalesView)
+        listActionEnebleGraph[1]->setEnabled(false);
+
+    int offsetConfigActions = listActionEnebleGraph.size();
 
     for (int i = 0; i < graphNames.size(); i++)
     {
@@ -608,49 +645,77 @@ void Channels::openChanaleMenu(const QPoint &point)
         {
             //set eneble for selected graphs
             int indexSelectGraph = listActionEnebleGraph.indexOf(res);
-            if(indexSelectGraph == 0)
+            if(indexSelectGraph < offsetConfigActions)
             {//add new chanales
-                if(numberChanaleView == MathChanalesView)
+                switch(indexSelectGraph)
                 {
-                    on_pushButton_addMathChanale_clicked();
-                }
-                else
-                {
-                    NewChanaleDialog newChanaleDialog(this);
-                    if(newChanaleDialog.exec())
+                    case 0:
                     {
-                        QString chanaleName = newChanaleDialog.getName();
-                        varloc_location_t loc;
-                        loc.type = newChanaleDialog.getType();
-                        loc.address.base = newChanaleDialog.getBaseAddres();
-                        loc.address.offset_bits = newChanaleDialog.getOffsetBits();
-                        loc.address.size_bits = newChanaleDialog.getSizeBits();
-                        loc.mask = (((uint64_t)1) << loc.address.size_bits) - 1;
-                        loc.mask = loc.mask << loc.address.offset_bits;
-                        //set colour from sequence
-                        chanaleView[numberChanaleView].channels->push_back(new
-                                                                           VarChannel(loc, chanaleName,
-                                                                                      colorSetSequese[curentColorSet++],
-                                                                           curentDotStyle++));
-                        connect(chanaleView[numberChanaleView].channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)),
-                                this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
-                        //reset sequnce colour set
-                        if(curentColorSet >= colorSetSequese.size())
-                            curentColorSet = 0;
+                        if(numberChanaleView == MathChanalesView)
+                        {
+                            on_pushButton_addMathChanale_clicked();
+                        }
+                        else
+                        {
+                            NewChanaleDialog newChanaleDialog(this);
+                            if(newChanaleDialog.exec())
+                            {
+                                QString chanaleName = newChanaleDialog.getName();
+                                varloc_location_t loc;
+                                loc.type = newChanaleDialog.getType();
+                                loc.address.base = newChanaleDialog.getBaseAddres();
+                                loc.address.offset_bits = newChanaleDialog.getOffsetBits();
+                                loc.address.size_bits = newChanaleDialog.getSizeBits();
+                                loc.mask = (((uint64_t)1) << loc.address.size_bits) - 1;
+                                loc.mask = loc.mask << loc.address.offset_bits;
+                                //set colour from sequence
+                                chanaleView[numberChanaleView].channels->push_back(new
+                                                                                   VarChannel(loc, chanaleName,
+                                                                                              colorSetSequese[curentColorSet++],
+                                                                                   curentDotStyle++));
+                                connect(chanaleView[numberChanaleView].channels->last(), SIGNAL(requestWriteData(uint64_t,varloc_location_t)),
+                                        this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
+                                //reset sequnce colour set
+                                if(curentColorSet >= colorSetSequese.size())
+                                    curentColorSet = 0;
 
-                        if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
-                            curentDotStyle = 1;//1 becouse 0 is none style
+                                if(curentDotStyle >= MAX_NUMBER_DOT_STYLE)
+                                    curentDotStyle = 1;//1 becouse 0 is none style
 
-                        chanaleView[numberChanaleView].chanaleProxyModel->invalidate();
-                        //scrol to element
-                        chanaleView[numberChanaleView].treeView->scrollToBottom();
+                                chanaleView[numberChanaleView].chanaleProxyModel->invalidate();
+                                //scrol to element
+                                chanaleView[numberChanaleView].treeView->scrollToBottom();
+                            }
+                        }
+                        break;
                     }
+                    case 1:
+                    {
+                        foreach (VarChannel *chanale, selectedChanales) {
+                            chanale->requestClearGraph();
+                            if(numberChanaleView == MathChanalesView)
+                            {
+                                //recalculate math chanales
+                                //TODO implement recalc math chanales
+                            }
+                            else
+                            {
+                                chanale->reloadValues();
+                            }
+
+                            emit requestReplot();
+                        }
+
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
             else
             {
                 //0 element is add gruph
-                indexSelectGraph = indexSelectGraph - 1;
+                indexSelectGraph = indexSelectGraph - offsetConfigActions;
                 bool isEnableOnGraph = res->isChecked();
 //                qDebug() << "indexSelectGraph:" << indexSelectGraph << isEnableOnGraph;
                 foreach (VarChannel *chanale, selectedChanales) {

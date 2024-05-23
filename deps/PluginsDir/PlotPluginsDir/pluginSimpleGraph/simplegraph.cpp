@@ -134,6 +134,7 @@ void SimpleGraph::addPlot(VarChannel *varChanale)
     connect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     connect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     connect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
+    connect(varChanale, SIGNAL(clearGraph()), this, SLOT(plotClear()));
 
     mapPlots[varChanale] = newGruph;
     mapTrackers[varChanale] = newTracker;
@@ -153,6 +154,7 @@ void SimpleGraph::deletePlot(VarChannel *varChanale)
     disconnect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     disconnect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     disconnect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
+    disconnect(varChanale, SIGNAL(clearGraph()), this, SLOT(plotClear()));
 
     QCPGraph* gruph = mapPlots[varChanale];
     QCPItemTracer* tracker = mapTrackers[varChanale];
@@ -367,6 +369,20 @@ void SimpleGraph::plotSelecting()
 
 //    qDebug() << varChanale->displayName();
     //TODO
+
+    plotWidget->update();
+    plotWidget->replot();
+}
+
+void SimpleGraph::plotClear()
+{
+    VarChannel* varChanale;
+    QCPGraph* gpuh = getGruph(sender(), &varChanale);
+    if(gpuh == nullptr || varChanale == nullptr)
+        return;
+
+    QVector<double> zeroAray;
+    gpuh->setData(zeroAray, zeroAray);
 
     plotWidget->update();
     plotWidget->replot();

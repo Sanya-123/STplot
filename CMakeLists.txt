@@ -68,7 +68,7 @@ if (WIN32)
 else()
     add_custom_target(deployment_CP DEPENDS ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui ${CMAKE_BINARY_DIR}/deployment/stplot-gui
-#        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/lib ${CMAKE_BINARY_DIR}/AppDir/usr/lib
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/lib ${CMAKE_BINARY_DIR}/deployment/lib
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/stplot-gui/styles ${CMAKE_BINARY_DIR}/deployment/styles
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/stplot-gui/plugins ${CMAKE_BINARY_DIR}/deployment/plugins
     )
@@ -86,6 +86,8 @@ else()
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/resource/appicon.png ${CMAKE_BINARY_DIR}/stplot-gui.png
             COMMAND QMAKE=${QT_QMAKE_EXECUTABLE} ${CI_TOOLS_PATH}/linuxdeploy-x86_64.AppImage --create-desktop-file -e ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui -i stplot-gui.png --appdir AppDir --plugin qt --output appimage ${LINK_LIBS}
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/*.AppImage ${CMAKE_BINARY_DIR}/deployment/
+            COMMAND echo "LD_LIBRARY_PATH=./lib ./*.AppImage" > ${CMAKE_BINARY_DIR}/deployment/stplot-gui.sh
+            COMMAND chmod +x ${CMAKE_BINARY_DIR}/deployment/stplot-gui.sh
         )
         add_custom_target(deployment DEPENDS deployment_Image deployment_CP)
     else()

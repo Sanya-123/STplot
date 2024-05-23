@@ -43,6 +43,7 @@ private slots:
     void updateDisplayNameGruph();
     void settingsChanged();
     void plotSelecting();
+    void plotClear();
     void limitTimeRange(const QCPRange & newRange, const QCPRange & oldRange);
     void handleMouseMove(QMouseEvent *event);
     void handleMousePress(QMouseEvent *event);

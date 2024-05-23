@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QToolBar>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "varmodel.h"
 #include "varloader.h"
@@ -100,6 +101,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     viewManager->setChanales(channelsView);
 
     connect(&redrawTimer, &QTimer::timeout, viewManager, &ViewManager::updateAllViews);
+    connect(channelsView, SIGNAL(requestReplot()), viewManager, SLOT(updateAllViews()));
 
     //init default read device
     if(listReadDeviceInstance.size() != 0)
@@ -205,12 +207,16 @@ void STPlotWindow::saveSettingsAs()
 
 void STPlotWindow::newSettings()
 {
-    QFile emptyConfig("tmp.conf");
-    emptyConfig.open(QIODevice::WriteOnly);
-    emptyConfig.write(QByteArray());
-    emptyConfig.close();
-    QSettings settings(emptyConfig.fileName(), QSettings::IniFormat);
-    applySettings(settings);
+    if(QMessageBox::question(this, "New config", "All windows, chanales and plots will be clean; Are you ready to create new config?") == QMessageBox::Yes)
+    {
+        QFile emptyConfig("tmp.conf");
+        emptyConfig.open(QIODevice::WriteOnly);
+        emptyConfig.write(QByteArray());
+        emptyConfig.close();
+        QSettings settings(emptyConfig.fileName(), QSettings::IniFormat);
+        applySettings(settings);
+        emptyConfig.remove();
+    }
 }
 
 void STPlotWindow::openSettingsReader()
@@ -351,6 +357,7 @@ void STPlotWindow::closeEvent(QCloseEvent *event)
 {
     if(debuger != nullptr)
         debuger->close();
+    readManager.stopRead();
     QMainWindow::closeEvent(event);
 }
 

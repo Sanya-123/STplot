@@ -43,6 +43,7 @@ public slots:
 signals:
     void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
     void requestWriteData(uint64_t data, varloc_location_t location);
+    void requestReplot();
 
 private:
     void saveSettingsChanaleCommon(QSettings *settings, VarChannel* chanale);
@@ -53,7 +54,8 @@ private:
     varloc_location_t restoreSettingsChanaleLocation(QSettings *settings);
     void restoreSettingsChanaleCommon(QSettings *settings,
                                       QString *chanaleName, QString *displayName, int *dotStyle, int *lineStyle,
-                                      QColor *lineColor, int *lineWidth);
+                                      QColor *lineColor, int *lineWidth,
+                                      double *offset, double *mult);
     QString restoreSettingsChanaleScript(QSettings *settings);
     QVector<bool> restoreSettingsChanaleListPlot(QSettings *settings);
 

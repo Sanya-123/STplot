@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "qcustomplot.h"
 
-#define GRUPH_FERST_COLUMN          6
+#define GRUPH_FERST_COLUMN          (isMathChanale ? 6 : 8)
 
 ChannelModel::ChannelModel(QVector<VarChannel*> *channels, bool mathChanale, QObject *parent)
     : QAbstractTableModel{parent}, numberGraph(0), isMathChanale(mathChanale)
@@ -59,6 +59,12 @@ QVariant ChannelModel::data(const QModelIndex &index, int role) const
         else if(index.column() == 5){
             return QVariant(lineWidths[m_channels->at(index.row())->lineWidth()]);
         }
+        else if(index.column() == 6 && !isMathChanale){
+            return QVariant(m_channels->at(index.row())->getOffset());
+        }
+        else if(index.column() == 7 && !isMathChanale){
+            return QVariant(m_channels->at(index.row())->getMult());
+        }
         else
             return QVariant("");
     }
@@ -104,21 +110,17 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
                 return QVariant("Addres");
         }
         else if(section == 2)
-        {
             return QVariant("LineColor");
-        }
         else if(section == 3)
-        {
             return QVariant("DotStyle");
-        }
         else if(section == 4)
-        {
             return QVariant("LineStyle");
-        }
         else if(section == 5)
-        {
             return QVariant("LineWidth");
-        }
+        else if(section == 6 && !isMathChanale)
+            return QVariant("offset");
+        else if(section == 7 && !isMathChanale)
+            return QVariant("mult");
         else if((section - GRUPH_FERST_COLUMN) <  numberGraph)
         {
             return QVariant(graphNames[section - GRUPH_FERST_COLUMN]);
@@ -173,6 +175,16 @@ bool ChannelModel::setData(const QModelIndex &index, const QVariant &value, int 
         if((index.column() == 1) && isMathChanale)
         {
             m_channels->at(index.row())->setScript(value.toString());
+            return true;
+        }
+        else if(index.column() == 6 && !isMathChanale)
+        {
+            m_channels->at(index.row())->setOffset(value.toDouble());
+            return true;
+        }
+        else if(index.column() == 7 && !isMathChanale)
+        {
+            m_channels->at(index.row())->setMult(value.toDouble());
             return true;
         }
     }
