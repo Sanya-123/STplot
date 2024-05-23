@@ -498,9 +498,11 @@ void Channels::deleteSelectedChanales(ListChanaleView numList)
 
     for(int i = 0; i < listSelected.size(); i++)
     {
-        if(listSelected[i].row() < chanaleView[numList].channels->size())
+        //now it is sorter woe so I ned to tor number in sourse element
+        int indexRow = chanaleView[numList].chanaleProxyModel->mapToSource(listSelected[i]).row();
+        if(indexRow < chanaleView[numList].channels->size())
         {
-            selectedChanales.append(chanaleView[numList].channels->at(listSelected[i].row()));
+            selectedChanales.append(chanaleView[numList].channels->at(indexRow));
         }
     }
 
@@ -517,7 +519,7 @@ void Channels::deleteSelectedChanales(ListChanaleView numList)
 
         disconnect(selectedChanales[i], SIGNAL(requestWriteData(uint64_t,varloc_location_t)), this, SIGNAL(requestWriteData(uint64_t,varloc_location_t)));
         if(chanaleView[numList].channels->indexOf(selectedChanales[i]) >= 0)
-            chanaleView[numList].channels->remove(m_channels->indexOf(selectedChanales[i]));
+            chanaleView[numList].channels->remove(chanaleView[numList].channels->indexOf(selectedChanales[i]));
     }
 
     chanaleView[numList].chanaleProxyModel->invalidate();
