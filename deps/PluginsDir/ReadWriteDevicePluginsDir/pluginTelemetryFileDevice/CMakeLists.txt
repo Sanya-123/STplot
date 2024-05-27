@@ -22,7 +22,9 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
 )
 
 # elf application with struct
-add_subdirectory(nav_dev_tree)
+if(UNIX)
+    add_subdirectory(nav_dev_tree)
+endif()
 
 
 if (WIN32)
