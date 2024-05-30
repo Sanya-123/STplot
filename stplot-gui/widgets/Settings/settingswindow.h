@@ -18,6 +18,7 @@ class SettingsWindow : public QDialog
 public:
     struct SettingsMainWindow{
         QString theme;
+        bool autoclenaOnStart;
     };
     SettingsWindow(STPlotWindow *mainWondow, QWidget *parent = nullptr);
     ~SettingsWindow();

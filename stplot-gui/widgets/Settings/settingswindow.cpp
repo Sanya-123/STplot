@@ -23,9 +23,11 @@ SettingsWindow::~SettingsWindow()
 void SettingsWindow::setSettings(SettingsMainWindow settings)
 {
     ui->comboBox_theme->setCurrentText(settings.theme);
+    ui->checkBox_autoCleanGruph->setChecked(settings.autoclenaOnStart);
 }
 
 void SettingsWindow::getSettings(SettingsMainWindow &settings)
 {
     settings.theme = ui->comboBox_theme->currentText();
+    settings.autoclenaOnStart = ui->checkBox_autoCleanGruph->isChecked();
 }

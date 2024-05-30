@@ -155,8 +155,8 @@ void STPlotWindow::setReadDevice(int readDevice){
 
 void STPlotWindow::startRead()
 {
-//    if(currentSettings.autoclenaOnStart)
-//        channelsView->clearAllChanales();
+    if(currentSettings.autoclenaOnStart)
+        channelsView->clearAllChanales();
     readSelector.setDisabled(true);
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);

@@ -400,6 +400,14 @@ void Channels::setPlotName(int number, QString name)
         chanaleView[i].channelModel->setPlotName(number, name);
 }
 
+void Channels::clearAllChanales()
+{
+    for(int i = 0; i < m_channels->size(); i++)
+        m_channels->at(i)->requestClearGraph();
+    for(int i = 0; i < m_channelsMath->size(); i++)
+        m_channelsMath->at(i)->requestClearGraph();
+}
+
 void Channels::saveSettingsChanaleCommon(QSettings *settings, VarChannel *chanale)
 {
     settings->setValue("chanaleName", chanale->getName());
@@ -607,19 +615,21 @@ void Channels::openChanaleMenu(const QPoint &point)
 
     //create menu
     QList<QString> graphNames = chanaleView[numberChanaleView].channelModel->getGraphNames();
-    QList<QAction*> listActionEnebleGraph;
-    listActionEnebleGraph.append(new QAction("new chanale", this));
-    listActionEnebleGraph.append(new QAction("reload chanales", this));
+    QList<QAction*> listActionsGraph;
+    listActionsGraph.append(new QAction("new chanale", this));
+    listActionsGraph.append(new QAction("reload chanales", this));
+    listActionsGraph.append(new QAction("clear chanales", this));
     QAction *separator = new QAction(this);
     separator->setSeparator(true);
-    listActionEnebleGraph.append(separator);
+    listActionsGraph.append(separator);
 
     //TODO temporay disable while update math snale is note implemented
     if(numberChanaleView == MathChanalesView)
-        listActionEnebleGraph[1]->setEnabled(false);
+        listActionsGraph[1]->setEnabled(false);
 
-    int offsetConfigActions = listActionEnebleGraph.size();
+    int offsetConfigActions = listActionsGraph.size();
 
+    //add eneble on graphs
     for (int i = 0; i < graphNames.size(); i++)
     {
         QString graphName = graphNames[i];
@@ -632,21 +642,21 @@ void Channels::openChanaleMenu(const QPoint &point)
                 isEnablOnAllGraphs = false;
         }
         action->setChecked(isEnablOnAllGraphs);
-        listActionEnebleGraph.append(action);
+        listActionsGraph.append(action);
     }
 
 
-    QAction* res = QMenu::exec(listActionEnebleGraph, treeView->viewport()->mapToGlobal(point), nullptr, this);
+    QAction* res = QMenu::exec(listActionsGraph, treeView->viewport()->mapToGlobal(point), nullptr, this);
     if(res == nullptr)
     {
 //        qDebug() << "nothing change";
     }
     else
     {
-        if(listActionEnebleGraph.contains(res))
+        if(listActionsGraph.contains(res))
         {
             //set eneble for selected graphs
-            int indexSelectGraph = listActionEnebleGraph.indexOf(res);
+            int indexSelectGraph = listActionsGraph.indexOf(res);
             if(indexSelectGraph < offsetConfigActions)
             {//add new chanales
                 switch(indexSelectGraph)
@@ -710,6 +720,10 @@ void Channels::openChanaleMenu(const QPoint &point)
 
                         break;
                     }
+                    case 2:
+                        foreach (VarChannel *chanale, selectedChanales)
+                            chanale->requestClearGraph();
+                        break;
                     default:
                         break;
                 }
@@ -729,7 +743,7 @@ void Channels::openChanaleMenu(const QPoint &point)
     }
 
     //delete actions
-    foreach (QAction *action, listActionEnebleGraph)
+    foreach (QAction *action, listActionsGraph)
     {
         delete action;
     }

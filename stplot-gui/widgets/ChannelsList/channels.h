@@ -39,6 +39,7 @@ public slots:
     void addPlot();
     void deletePlot(int number);
     void setPlotName(int number, QString name);
+    void clearAllChanales();//clean data from chanales
 
 signals:
     void addingChanaleToPlot(VarChannel* var, int numPlot, bool en);
