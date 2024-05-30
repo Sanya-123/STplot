@@ -151,7 +151,7 @@ int STlinkDevice::writeDataDevice(uint64_t data, varloc_location_t location)
     return stlink_write_mem8(sl, location.address.base + location.address.offset_bits/8, location.address.size_bits/8);
 }
 
-QWidget *STlinkDevice::getReadDevConfigWidget()
+QDialog *STlinkDevice::getReadDevConfigDialog()
 {
     return configWidget;
 }

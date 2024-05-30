@@ -6,6 +6,12 @@
 #include <QUdpSocket>
 #include "PEK_debug.h"
 
+QT_BEGIN_NAMESPACE
+class QComboBox;
+class QSpinBox;
+class QLineEdit;
+QT_END_NAMESPACE
+
 class SHnetUDPDevice : public ReadDeviceObject
 {
     Q_OBJECT
@@ -17,7 +23,9 @@ public:
     void stopDev();
     int execReadDevice();
     int writeDataDevice(uint64_t data, varloc_location_t location);
-    QWidget *getReadDevConfigWidget();
+    QDialog *getReadDevConfigDialog();
+    void saveSettings(QSettings *settings);
+    void restoreSettings(QSettings *settings);
 
 // private slots:
     // void readPendingDatagrams();
@@ -48,7 +56,11 @@ private:
     QMap<QString, SHnet_ID_L0> shnetIDMap;
     QVector<uint32_t> addresses;
     QVector<uint32_t> data;
-    QWidget *configWidget;
+    QDialog *configWidget;
+    QComboBox *shnetID0;
+    QSpinBox* shnetID1, *shnetID2, *shnetID3;
+    QLineEdit* serverAddressWidget;
+    QSpinBox* serverPortWidget;
 
 };
 

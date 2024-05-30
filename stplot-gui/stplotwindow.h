@@ -21,7 +21,7 @@ extern "C" {
 #include "QtAdvancedStylesheet.h"
 
 
-#define MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION             0x00000000
+#define MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION             0x00010000
 
 
 QT_BEGIN_NAMESPACE
@@ -64,7 +64,6 @@ private:
     Channels* channelsView;
     VarLoader* varloader;
     ViewManager* viewManager;
-    QVector<SaveDeviceObject*> saveDeviceces;
     ReadManager readManager;
     QString curentSettingsPath;
     QTimer redrawTimer;
@@ -77,9 +76,16 @@ private:
     struct ReadDeviceInstance{
         ReadDeviceObject *object;
         QString name;
-        QWidget *configWidget;
+        QDialog *configDialog;
     };
     QList<struct ReadDeviceInstance> listReadDeviceInstance;
+
+    struct SaveDeviceInstance{
+        SaveDeviceObject *object;
+        QString name;
+        QDialog *configDialog;
+    };
+    QList<struct SaveDeviceInstance> listSaveDeviceInstance;
 
     acss::QtAdvancedStylesheet advancedStylesheet;
     SettingsWindow::SettingsMainWindow currentSettings;

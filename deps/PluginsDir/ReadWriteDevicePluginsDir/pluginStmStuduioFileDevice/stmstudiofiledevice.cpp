@@ -4,21 +4,32 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QDialogButtonBox>
 
 STMstudioFileDevice::STMstudioFileDevice()
 {
     stopDev();
-    configReadWidget = new QWidget;
+    configReadWidget = new QDialog;
     QLabel *labelFile = new QLabel("File:", configReadWidget);
     fileRead = new QLineEdit(configReadWidget);
     QPushButton *buttomSelectFile = new QPushButton("open", configReadWidget);
     connect(buttomSelectFile, SIGNAL(clicked(bool)), this, SLOT(openSelectFile()));
 
+    QDialogButtonBox *dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, configReadWidget);
+    connect(dialogButtonBox, SIGNAL(accepted()), configReadWidget, SLOT(accept()));
+    connect(dialogButtonBox, SIGNAL(rejected()), configReadWidget, SLOT(reject()));
 
-    QHBoxLayout* layout = new QHBoxLayout(configReadWidget);
+    QVBoxLayout* layoutVertical = new QVBoxLayout(configReadWidget);
+
+    QHBoxLayout* layout = new QHBoxLayout;
     layout->addWidget(labelFile);
     layout->addWidget(fileRead);
     layout->addWidget(buttomSelectFile);
+
+    layoutVertical->addLayout(layout);
+    layoutVertical->addWidget(dialogButtonBox);
+
+    configSaveWidget = nullptr;
 }
 
 STMstudioFileDevice::~STMstudioFileDevice()
@@ -280,14 +291,24 @@ int STMstudioFileDevice::execReadDevice()
 //    return 0;
 }
 
-QWidget *STMstudioFileDevice::getReadDevConfigWidget()
+QDialog *STMstudioFileDevice::getReadDevConfigDialog()
 {
     return configReadWidget;
 }
 
-QWidget *STMstudioFileDevice::getSaveDevConfigWidget()
+QDialog *STMstudioFileDevice::getSaveDevConfigDialog()
 {
     return configSaveWidget;
+}
+
+void STMstudioFileDevice::saveSettings(QSettings *settings)
+{
+    settings->setValue("readfile", fileRead->text());
+}
+
+void STMstudioFileDevice::restoreSettings(QSettings *settings)
+{
+    fileRead->setText(settings->value("readfile").toString());
 }
 
 #include <QDebug>
@@ -297,7 +318,24 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
     if(isWriteMode)
         return -2;
 
-    device.setFileName(fileRead->text());
+    int res = 0;
+
+    QStringList fileList = fileRead->text().split(";;");
+    foreach (QString file, fileList) {
+        int resCurentFile = readDeviceFile(file, chanales, readTimes);
+        if(resCurentFile != 0)
+        {
+            qWarning() << "Preblem with read file:" << file << ":" << device.errorString();
+            if(res != 0)
+                res = resCurentFile;
+        }
+    }
+    return res;
+}
+
+int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
+{
+    device.setFileName(fileName);
     if(!device.open(QIODevice::ReadOnly))
         return -3;
 
@@ -392,9 +430,16 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
 
 void STMstudioFileDevice::openSelectFile()
 {
-    QString file = QFileDialog::getOpenFileName(configReadWidget, tr("Select file"), fileRead->text(), "*");
-    if(!file.isEmpty())
-        fileRead->setText(file);
+    QStringList files = QFileDialog::getOpenFileNames(configReadWidget, tr("Select file"), fileRead->text().split(";;")[0], "*");
+    if(files.size())
+    {
+        QString file_name;
+        foreach (QString file, files) {
+            file_name.append(file + ";;");
+        }
+        file_name.remove(file_name.size() - 2, 2);
+        fileRead->setText(file_name);
+    }
 }
 
 int STMstudioFileDevice::initSaveFile()

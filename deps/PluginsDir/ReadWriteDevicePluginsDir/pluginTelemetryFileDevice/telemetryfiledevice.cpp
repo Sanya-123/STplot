@@ -4,21 +4,30 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QDialogButtonBox>
 
 TelemetryFileDevice::TelemetryFileDevice()
 {
     stopDev();
-    configReadWidget = new QWidget;
+    configReadWidget = new QDialog;
     QLabel *labelFile = new QLabel("File:", configReadWidget);
     folderName = new QLineEdit(configReadWidget);
     QPushButton *buttomSelectFolder = new QPushButton("open folder", configReadWidget);
     connect(buttomSelectFolder, SIGNAL(clicked(bool)), this, SLOT(openSelectFolder()));
 
+    QDialogButtonBox *dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, configReadWidget);
+    connect(dialogButtonBox, SIGNAL(accepted()), configReadWidget, SLOT(accept()));
+    connect(dialogButtonBox, SIGNAL(rejected()), configReadWidget, SLOT(reject()));
 
-    QHBoxLayout* layout = new QHBoxLayout(configReadWidget);
+    QVBoxLayout* layoutVertical = new QVBoxLayout(configReadWidget);
+
+    QHBoxLayout* layout = new QHBoxLayout;
     layout->addWidget(labelFile);
     layout->addWidget(folderName);
     layout->addWidget(buttomSelectFolder);
+
+    layoutVertical->addLayout(layout);
+    layoutVertical->addWidget(dialogButtonBox);
 }
 
 TelemetryFileDevice::~TelemetryFileDevice()
@@ -60,9 +69,19 @@ int TelemetryFileDevice::execReadDevice()
     return -1;
 }
 
-QWidget *TelemetryFileDevice::getReadDevConfigWidget()
+QDialog *TelemetryFileDevice::getReadDevConfigDialog()
 {
     return configReadWidget;
+}
+
+void TelemetryFileDevice::saveSettings(QSettings *settings)
+{
+    settings->setValue("readfile", folderName->text());
+}
+
+void TelemetryFileDevice::restoreSettings(QSettings *settings)
+{
+    folderName->setText(settings->value("readfile").toString());
 }
 
 #include <QDebug>

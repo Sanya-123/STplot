@@ -17,7 +17,9 @@ public:
     int initDevise(QVector<struct ReadDeviceObject::ReadAddres> readSeuqence);
     void stopDev();
     int execReadDevice();
-    QWidget* getReadDevConfigWidget();
+    QDialog* getReadDevConfigDialog();
+    void saveSettings(QSettings *settings);
+    void restoreSettings(QSettings *settings);
 
     int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
 
@@ -28,9 +30,8 @@ private:
     int readTelemetryFile(QString filepath, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
     int readTelemetryDir(QString path, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
 
-    QWidget *configReadWidget;
+    QDialog *configReadWidget;
     QLineEdit* folderName;
-    QWidget *configSaveWidget;
     // QFile device;
     // QDateTime startTime;
     QVector<struct ReadDeviceObject::ReadAddres> readSeuqence;

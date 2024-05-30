@@ -19,19 +19,24 @@ public:
     int execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>> saveSequence, QDateTime time);
     int execSaveDevice(QList<QString> chanaleNames, QVector<float> listDecoded, QDateTime time);
     int execReadDevice();
-    QWidget* getReadDevConfigWidget();
-    QWidget* getSaveDevConfigWidget();
+    QDialog* getReadDevConfigDialog();
+    QDialog* getSaveDevConfigDialog();
+    void saveSettings(QSettings *settings);
+    void restoreSettings(QSettings *settings);
 
     int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
+
+private:
+    int readDeviceFile(QString fileName, QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
 
 private slots:
     void openSelectFile();
     int initSaveFile();
 
 private:
-    QWidget *configReadWidget;
+    QDialog *configReadWidget;
     QLineEdit* fileRead;
-    QWidget *configSaveWidget;
+    QDialog *configSaveWidget;
     QFile device;
     QDateTime startTime;
     QVector<struct ReadDeviceObject::ReadAddres> readSeuqence;

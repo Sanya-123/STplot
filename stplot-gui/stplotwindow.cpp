@@ -72,7 +72,8 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
     runToolBar->addWidget(&readSelector);
-    runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config", this, SLOT(openSettingsReader()));
+    runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config (ctrl + O)", this, SLOT(openSettingsReader()))->
+            setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
     ui->menuView->addAction(runToolBar->toggleViewAction());
 
     ui->menuView->addSeparator();
@@ -138,7 +139,10 @@ void STPlotWindow::setDebuger(DebugerWindow *debuger)
 {
     this->debuger = debuger;
     if(debuger != nullptr)
+    {
         connect(ui->menuView->actions()[0], SIGNAL(triggered(bool)), debuger, SLOT(show()));
+        connect(ui->menuView->actions()[0], SIGNAL(triggered(bool)), debuger, SLOT(raise()));
+    }
 }
 
 void STPlotWindow::setReadDevice(int readDevice){
@@ -151,6 +155,8 @@ void STPlotWindow::setReadDevice(int readDevice){
 
 void STPlotWindow::startRead()
 {
+//    if(currentSettings.autoclenaOnStart)
+//        channelsView->clearAllChanales();
     readSelector.setDisabled(true);
     ui->actionStart->setEnabled(false);
     ui->actionStop->setEnabled(true);
@@ -224,11 +230,12 @@ void STPlotWindow::openSettingsReader()
     int index = readSelector.currentIndex();
     if(index < listReadDeviceInstance.size())
     {
-        qDebug() << listReadDeviceInstance[index].name;
-        QWidget *configWidget = listReadDeviceInstance[index].object->getReadDevConfigWidget();
-        if(configWidget != nullptr)
+        QDialog *configDialog = listReadDeviceInstance[index].configDialog;
+        if(configDialog != nullptr)
         {
-            configWidget->show();
+            configDialog->show();
+            configDialog->raise();
+            configDialog->exec();
         }
     }
 }
@@ -253,6 +260,7 @@ void STPlotWindow::applySettings(QSettings &settings)
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
     currentSettings.theme = settings.value("windows/theme", "none").toString();
+    currentSettings.autoclenaOnStart = settings.value("readconfig/autocleanchanales").toBool();
     readSelector.setCurrentIndex(settings.value("device/selectedreaddev").toInt());
 
     settings.beginGroup("varloader");
@@ -265,6 +273,24 @@ void STPlotWindow::applySettings(QSettings &settings)
 
     settings.beginGroup("channels");
     channelsView->restoreSettings(&settings);
+    settings.endGroup();
+
+    //restore RW plugins settings
+    settings.beginGroup("readdevileplugins");
+    for(ReadDeviceInstance dev : listReadDeviceInstance)
+    {
+        settings.beginGroup(dev.name);
+        dev.object->restoreSettings(&settings);
+        settings.endGroup();
+    }
+    settings.endGroup();
+    settings.beginGroup("savedevileplugins");
+    for(SaveDeviceInstance dev : listSaveDeviceInstance)
+    {
+        settings.beginGroup(dev.name);
+        dev.object->restoreSettings(&settings);
+        settings.endGroup();
+    }
     settings.endGroup();
 
     if(debuger != nullptr)
@@ -285,6 +311,7 @@ void STPlotWindow::writeSettings(QSettings &settings)
     settings.setValue("windows/geometry", saveGeometry());
     settings.setValue("windows/docker/state", ui->dockContainer->saveState());
     settings.setValue("windows/theme", currentSettings.theme);
+    settings.setValue("readconfig/autocleanchanales", currentSettings.autoclenaOnStart);
     settings.setValue("device/selectedreaddev", readSelector.currentIndex());
     //chanale
     settings.beginGroup("channels");
@@ -297,6 +324,24 @@ void STPlotWindow::writeSettings(QSettings &settings)
     //varloader
     settings.beginGroup("varloader");
     varloader->saveSettings(&settings);
+    settings.endGroup();
+
+    //save RW plugins settings
+    settings.beginGroup("readdevileplugins");
+    for(ReadDeviceInstance dev : listReadDeviceInstance)
+    {
+        settings.beginGroup(dev.name);
+        dev.object->saveSettings(&settings);
+        settings.endGroup();
+    }
+    settings.endGroup();
+    settings.beginGroup("savedevileplugins");
+    for(SaveDeviceInstance dev : listSaveDeviceInstance)
+    {
+        settings.beginGroup(dev.name);
+        dev.object->saveSettings(&settings);
+        settings.endGroup();
+    }
     settings.endGroup();
 
     if(debuger != nullptr)
@@ -323,6 +368,7 @@ void STPlotWindow::initReadDevice()
     QList<SaveDeviceInterfacePlugin*> pluginsWriteDevice = loadPlugin<SaveDeviceInterfacePlugin>(MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION, READ_WRITE_DEVICE_INTERFACE_HEADER_VERSION);
 
     struct ReadDeviceInstance devRead;
+    struct SaveDeviceInstance devSave;
 
     for(int i = 0; i < pluginsReadDevice.size(); i++)
     {
@@ -330,6 +376,7 @@ void STPlotWindow::initReadDevice()
         readDeviceList.append(readDevie);
         devRead.object = readDevie;
         devRead.name = pluginsReadDevice[i]->getName();
+        devRead.configDialog = readDevie->getReadDevConfigDialog();
         listReadDeviceInstance.append(devRead);
     }
 
@@ -337,19 +384,25 @@ void STPlotWindow::initReadDevice()
     {
         SaveDeviceObject *saveDevice = pluginsWriteDevice[i]->createWriteDeviceObject();
 //        readDeviceList.append(saveDevice);
-        devRead.object = saveDevice;
-        devRead.name = pluginsWriteDevice[i]->getName();
-//        listReadDeviceInstance.append(devRead);//remoe it bucouse not each save device coud be as read dev
+        devSave.object = saveDevice;
+        devSave.name = pluginsWriteDevice[i]->getName();
+        devSave.configDialog = saveDevice->getSaveDevConfigDialog();
+        listSaveDeviceInstance.append(devSave);
         saveDeviceList.append(saveDevice);
     }
 
     for(int i = 0; i < listReadDeviceInstance.size(); i++)
     {
         readSelector.addItem(listReadDeviceInstance[i].name);
-        if(listReadDeviceInstance[i].object->getReadDevConfigWidget() != nullptr)
+        if(listReadDeviceInstance[i].configDialog != nullptr)
         {
-            ui->menuconfing->addAction(listReadDeviceInstance[i].name, listReadDeviceInstance[i].object->getReadDevConfigWidget(), SLOT(show()));
+            ui->menuconfing->addAction(listReadDeviceInstance[i].name, [=] () {
+                listReadDeviceInstance[i].configDialog->show();
+                listReadDeviceInstance[i].configDialog->raise();
+                listReadDeviceInstance[i].configDialog->exec();
+            });
         }
+
     }
 }
 

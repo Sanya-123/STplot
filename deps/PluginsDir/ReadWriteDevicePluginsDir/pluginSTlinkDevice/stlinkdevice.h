@@ -21,7 +21,7 @@ public:
     void stopDev();
     int execReadDevice();
     int writeDataDevice(uint64_t data, varloc_location_t location);
-    QWidget *getReadDevConfigWidget();
+    QDialog *getReadDevConfigDialog();
 
 private:
 //    //addres and waribels with curent addres
@@ -40,7 +40,7 @@ private:
     //dev
     stlink_t* sl = NULL;
 
-    QWidget *configWidget;
+    QDialog *configWidget;
 };
 
 #endif // STLINKDEVICE_H
