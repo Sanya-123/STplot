@@ -3,15 +3,38 @@
 #include "QtnProperty/GUI/PropertyQPen.h"
 #include <QLayout>
 #include <QDebug>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSettings>
+#include <QDir>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 SettingsDialog::SettingsDialog(SettingsAbstract *settings, QWidget *parent)
-    : QDialog{parent}
+    : QDialog{parent},
+    settingsTemplates(QDir::currentPath() + "/" + VIEW_MODE_FILE_NAME, QSettings::IniFormat)
 {
     propertySets = new QtnPropertySet(this);
     propWidget.setPropertySet(propertySets);
 
+    loadSettingsName = new QComboBox(this);
+    saveSettingsName = new QLineEdit(this);
+    loadSettingsButton = new QPushButton("load view", this);
+    saveSettingsButton = new QPushButton("save view", this);
+
+    connect(loadSettingsButton, SIGNAL(clicked(bool)), this, SLOT(loadSettings()));
+    connect(saveSettingsButton, SIGNAL(clicked(bool)), this, SLOT(saveSettings()));
+    connect(loadSettingsName, SIGNAL(currentTextChanged(QString)), saveSettingsName, SLOT(setText(QString)));
+
     QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(&propWidget);
+    layout->addWidget(&propWidget, 0, 0, 1, 2);
+    layout->addWidget(loadSettingsName, 1, 0);
+    layout->addWidget(loadSettingsButton, 1, 1);
+    layout->addWidget(saveSettingsName, 2, 0);
+    layout->addWidget(saveSettingsButton, 2, 1);
+
+    loadSettingsName->addItems(settingsTemplates.allKeys());
 
     this->setLayout(layout);
 
@@ -59,8 +82,11 @@ SettingsDialog::SettingsDialog(SettingsAbstract *settings, QWidget *parent)
 
             if(propBase != nullptr)
             {
-                propBase->setName(name);
+                QString propertyName = name;
+                propertyName.replace(".", "_");//replase it for allow save it
+                mapPpopNameToParName[propertyName] = name;
                 propBase->setDisplayName(displayName);
+                propBase->setName(propertyName);
                 connect(propBase, SIGNAL(propertyDidChange(QtnPropertyChangeReason)), this, SLOT(changeValue(QtnPropertyChangeReason)));
             }
         }
@@ -141,16 +167,23 @@ void SettingsDialog::changeValue(QtnPropertyChangeReason reson)
 
 //        qDebug() << typeid(*propBase).name();
 
+        QString parName = mapPpopNameToParName[propBase->name()];
+
         //get type walyes
         if(typeid(*propBase) == typeid(QtnPropertyQColor))
         {
 //            qDebug() << "QtnPropertyQColor";
-            settings->setValues(propBase->name(), (QColor)((QtnPropertyQColor*)propBase)->value());
+            settings->setValues(parName, (QColor)((QtnPropertyQColor*)propBase)->value());
         }
 
         if(typeid(*propBase) == typeid(QtnPropertyBool))
         {
-            settings->setValues(propBase->name(), (bool)((QtnPropertyBool*)propBase)->value());
+            settings->setValues(parName, (bool)((QtnPropertyBool*)propBase)->value());
+        }
+
+        if(typeid(*propBase) == typeid(QtnPropertyDouble))
+        {
+            settings->setValues(parName, (double)((QtnPropertyDouble*)propBase)->value());
         }
 
         if(typeid(*propBase) == typeid(QtnPropertyQString))
@@ -161,4 +194,44 @@ void SettingsDialog::changeValue(QtnPropertyChangeReason reson)
 //        settings->
     }
 
+}
+
+void SettingsDialog::saveSettings()
+{
+    QString setteingsname = saveSettingsName->text();
+
+    QJsonObject jsonProp;
+    if(!propertySets->toJson(jsonProp))
+    {
+        qCritical() << "Couldn't convert property for save";
+        return;
+    }
+
+    if(!settingsTemplates.contains(setteingsname))
+        loadSettingsName->addItem(setteingsname);
+
+    settingsTemplates.setValue(setteingsname, QJsonDocument(jsonProp).toBinaryData());
+}
+
+void SettingsDialog::loadSettings()
+{
+    QString setteingsname = loadSettingsName->currentText();
+
+    if(settingsTemplates.contains(setteingsname))
+    {
+        QJsonDocument jsonDoc = QJsonDocument::fromBinaryData(settingsTemplates.value(setteingsname).toByteArray());
+        if(!jsonDoc.isObject() || jsonDoc.isEmpty() || jsonDoc.isNull())//check file
+        {
+            qCritical() << "Couldn't read curent config";
+        }
+        else
+        {
+            if(!propertySets->fromJson(jsonDoc.object(), QtnPropertyChangeReasonEdit))
+            {
+                qCritical() << "Couldn't convert property for load";
+            }
+
+//            settings->
+        }
+    }
 }
