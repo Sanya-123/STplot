@@ -33,6 +33,8 @@ SimpleTable::SimpleTable(SettingsAbstract *settings, QWidget *parent) :
 //    connect(ui->tableWidget_table, SIGNAL(cellActivated(int,int)), this, SLOT(updateCellValues(int,int)));
     connect(ui->tableWidget_table->itemDelegate(), SIGNAL(commitData(QWidget*)), this, SLOT(updateCellValues()));
 
+    connect(ui->horizontalScrollBar_delay_offset, SIGNAL(valueChanged(int)), this, SLOT(updatePositionScroll(int)));
+
 
     // ui->tableWidget_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //settings
@@ -68,6 +70,7 @@ void SimpleTable::addPlot(VarChannel *varChanale)
     connect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     connect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     connect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
+    connect(varChanale, SIGNAL(clearGraph()), this, SLOT(clearPlot()));
 
     // mapPlots.append(varChanale);
 
@@ -86,6 +89,7 @@ void SimpleTable::deletePlot(VarChannel *varChanale)
     disconnect(varChanale, SIGNAL(changePlotDotStyle()), this, SLOT(updateDotStyleGruph()));
     disconnect(varChanale, SIGNAL(changeDisplayName()), this, SLOT(updateDisplayNameGruph()));
     disconnect(varChanale, SIGNAL(selectPlot()), this, SLOT(plotSelecting()));
+    disconnect(varChanale, SIGNAL(clearGraph()), this, SLOT(clearPlot()));
 
 
     int numberRow = mapPlots.indexOf(varChanale);
@@ -122,6 +126,9 @@ void SimpleTable::doUpdatePlot()
     int gpuh = getGruph(sender(), &varChanale);
     if(gpuh == -1 || varChanale == nullptr)
         return;
+
+    if((varChanale->getBufferSize() - 1) > (-ui->horizontalScrollBar_delay_offset->minimum()))
+        ui->horizontalScrollBar_delay_offset->setMinimum(-(varChanale->getBufferSize() - 1));
 
     if(!ui->tableWidget_table->isPersistentEditorOpen(ui->tableWidget_table->item(gpuh, 1)))
     {
@@ -265,6 +272,30 @@ void SimpleTable::plotSelecting()
 
 }
 
+void SimpleTable::clearPlot()
+{
+    VarChannel* varChanale;
+    int gpuh = getGruph(sender(), &varChanale);
+    if(gpuh == -1 || varChanale == nullptr)
+        return;
+
+    ui->tableWidget_table->item(gpuh, 1)->setText("0");
+
+    //fing graph with maximum bufer size
+    int maximumRange = 0;
+    for(int i = 0; i < mapPlots.size(); i++)
+    {
+        //spik cleared gruph
+        if(mapPlots[i] == varChanale)
+            continue;
+
+        maximumRange = qMax(maximumRange, mapPlots[i]->getBufferSize());
+    }
+
+    ui->horizontalScrollBar_delay_offset->setMinimum(-(maximumRange - 1));
+
+}
+
 void SimpleTable::updateCellValues(int row, int column)
 {
     qDebug() << row << column;
@@ -278,5 +309,17 @@ void SimpleTable::updateCellValues()
     if(numberChanale < mapPlots.size())
     {
         mapPlots[numberChanale]->writeValues(ui->tableWidget_table->item(numberChanale, 1)->text().toFloat());
+    }
+}
+
+void SimpleTable::updatePositionScroll(int val)
+{
+    //NOTE sliber max value is 1 instead of 0
+    val = qMax(0, -val);//inver potition becouse scroll is from gegative to positive
+    //get last data for each chanales
+    for(int i = 0; i < mapPlots.size(); i++)
+    {
+        double value = mapPlots[i]->getValue(mapPlots[i]->getBufferSize() - val - 1).value;
+        ui->tableWidget_table->item(i, 1)->setText(QString::number(value));
     }
 }

@@ -43,9 +43,11 @@ private slots:
     void updateDisplayNameGruph();
     void settingsChanged();
     void plotSelecting();
+    void clearPlot();
 
     void updateCellValues(int row, int column);
     void updateCellValues();
+    void updatePositionScroll(int val);
 
 //    void showPointToolTip(QMouseEvent *event);
 
