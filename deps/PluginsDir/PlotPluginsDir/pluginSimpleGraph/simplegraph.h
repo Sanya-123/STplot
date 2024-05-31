@@ -32,6 +32,7 @@ public:
 
 private:
     QCPGraph* getGruph(QObject *sender, VarChannel **varChanale);
+    void restoreStyleGraphs();
 
 private slots:
     void doUpdatePlot();
@@ -70,6 +71,9 @@ private:
     QCPRange lastValueRange;
     bool simpleScaleMode;
     double lastTime;
+
+    bool enableOptimizerPoints;
+    bool isOptimizerPoints;
 };
 
 class PluginSimpleGraph : public QObject, PlotWidgetInterfacePlugin

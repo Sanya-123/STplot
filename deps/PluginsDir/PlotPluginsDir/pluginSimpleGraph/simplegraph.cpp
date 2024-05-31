@@ -14,6 +14,7 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(par
     mapSettingsDefauold["legend.enLegend"] = false;
     mapSettingsDefauold["scale.windowSec"] = 5.0;
     mapSettingsDefauold["scale.simpleMode"] = false;
+    mapSettingsDefauold["scale.optimize.points"] = true;
     mapSettingsDefauold["openGL.enOpenGL"] = true;
 
 //    mapSettings = mapSettingsDefauold;
@@ -22,7 +23,8 @@ SimpleGraphSettings::SimpleGraphSettings(QObject *parent) : SettingsAbstract(par
 
 SimpleGraph::SimpleGraph(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
-    ui(new Ui::SimpleGraph), emptyGraphs(true), simpleScaleMode(false), lastTime(0)
+    ui(new Ui::SimpleGraph), emptyGraphs(true), simpleScaleMode(false), lastTime(0),
+    enableOptimizerPoints(true), isOptimizerPoints(false)
 {
     ui->setupUi(this);
 
@@ -184,6 +186,20 @@ QCPGraph *SimpleGraph::getGruph(QObject *_sender, VarChannel** varChanale)
 
 
     return mapPlots[*varChanale];
+}
+
+void SimpleGraph::restoreStyleGraphs()
+{
+    QMap<VarChannel*,QCPGraph*>::const_iterator i = mapPlots.constBegin();
+    while (i != mapPlots.constEnd()) {
+        QCPGraph* graph = i.value();
+        VarChannel* ch = i.key();
+        QPen pen = graph->pen();
+        pen.setWidth(ch->lineWidth());
+        graph->setPen(pen);
+        graph->setScatterStyle((QCPScatterStyle::ScatterShape)ch->dotStyle());
+        ++i;
+    }
 }
 
 void SimpleGraph::doUpdatePlot()
@@ -353,6 +369,13 @@ void SimpleGraph::settingsChanged()
         plotWidget->setOpenGl(useOpenGl);
 //    plotWidget->legend->setVisible(map["enLegend"].toBool());
 
+    enableOptimizerPoints = map["scale.optimize.points"].toBool();
+    if(!enableOptimizerPoints && isOptimizerPoints)
+    {
+        restoreStyleGraphs();
+        isOptimizerPoints = false;
+    }
+
     plotWidget->update();
     plotWidget->replot();
 
@@ -395,7 +418,6 @@ void SimpleGraph::handleMouseRelease(QMouseEvent *event)
 
     if (event->button() == Qt::RightButton){
         rightMousePressed = false;
-        qDebug() << "RMB released";
     }
 }
 
@@ -428,15 +450,13 @@ void SimpleGraph::handleMousePress(QMouseEvent *event)
     }
 
     if (event->button() == Qt::RightButton){
-        qDebug() << "RMB pressed";
         rightMousePressed = true;
         lastClickPos = event->pos();
-        lastTimeRange= plotWidget->xAxis->range();
+        lastTimeRange = plotWidget->xAxis->range();
         lastValueRange = plotWidget->yAxis->range();
     }
     else if (event->button() == Qt::LeftButton){
         if (event->modifiers().testFlag(Qt::ControlModifier)){
-            qDebug() << "Ctrl+LMB pressed";
             plotWidget->rescaleAxes();
         }
     }
@@ -444,11 +464,10 @@ void SimpleGraph::handleMousePress(QMouseEvent *event)
 
 void SimpleGraph::handleMouseMove(QMouseEvent *event)
 {
-    if(simpleScaleMode)
-        return;
+    bool neeadReplot = false;
 
     // handle right click scaling
-    if (rightMousePressed){
+    if (rightMousePressed && (simpleScaleMode == false)){
 
         QCPRange timeRange;
         double last_x =  lastClickPos.x();
@@ -472,6 +491,8 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
         valueRange.normalize();
         plotWidget->yAxis->setRange(valueRange);
         // qDebug() << "ValueScale:" << last_y << new_y << valueRange << delta_f << delta_r;
+
+        neeadReplot = true;
     }
 
     if(subLayout->visible()){
@@ -497,31 +518,40 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
                     + QString::number(mapTrackers[plots[i]]->position->value()));
         }
         legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString(Qt::DateFormat::ISODateWithMs));
+        neeadReplot = true;
     }
-    // limit number of drawn dots to optimize speed
-    double timeSec = plotWidget->xAxis->range().size();
-    if (timeSec > 10){
-        foreach (QCPGraph* graph, mapPlots){
-            QPen pen = graph->pen();
-            pen.setWidth(3);
-            graph->setPen(pen);
-            graph->setScatterStyle(QCPScatterStyle::ScatterShape::ssNone);
+
+    if(enableOptimizerPoints)
+    {
+        // limit number of drawn dots to optimize speed
+        double timeSec = plotWidget->xAxis->range().size();
+        if(isOptimizerPoints == false)
+        {
+            if (timeSec > 10){
+                foreach (QCPGraph* graph, mapPlots){
+                    QPen pen = graph->pen();
+                    pen.setWidth(3);
+                    graph->setPen(pen);
+                    graph->setScatterStyle(QCPScatterStyle::ScatterShape::ssNone);
+                }
+                isOptimizerPoints = true;
+                neeadReplot = true;
+            }
+        }
+        else{
+            if (timeSec < 10){
+                restoreStyleGraphs();
+                isOptimizerPoints = false;
+                neeadReplot = true;
+            }
         }
     }
-    else{
-        QMap<VarChannel*,QCPGraph*>::const_iterator i = mapPlots.constBegin();
-        while (i != mapPlots.constEnd()) {
-            QCPGraph* graph = i.value();
-            VarChannel* ch = i.key();
-            QPen pen = graph->pen();
-            pen.setWidth(ch->lineWidth());
-            graph->setPen(pen);
-            graph->setScatterStyle((QCPScatterStyle::ScatterShape)ch->dotStyle());
-            ++i;
-        }
+
+    if(neeadReplot)
+    {
+        plotWidget->update();
+        plotWidget->replot();
     }
-    plotWidget->update();
-    plotWidget->replot();
 
 }
 
