@@ -56,6 +56,7 @@
     </property>
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
+    <addaction name="actionConfingReader"/>
    </widget>
    <widget class="QMenu" name="menuconfing">
     <property name="title">
@@ -109,6 +110,14 @@
   <action name="actionMainConfig">
    <property name="text">
     <string>Main Config</string>
+   </property>
+  </action>
+  <action name="actionConfingReader">
+   <property name="text">
+    <string>Confing reader</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>

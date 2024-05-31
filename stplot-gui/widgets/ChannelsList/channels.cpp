@@ -403,9 +403,9 @@ void Channels::setPlotName(int number, QString name)
 void Channels::clearAllChanales()
 {
     for(int i = 0; i < m_channels->size(); i++)
-        m_channels->at(i)->requestClearGraph();
+        m_channels->at(i)->requestClearBufer();
     for(int i = 0; i < m_channelsMath->size(); i++)
-        m_channelsMath->at(i)->requestClearGraph();
+        m_channelsMath->at(i)->requestClearBufer();
 }
 
 void Channels::saveSettingsChanaleCommon(QSettings *settings, VarChannel *chanale)
@@ -722,7 +722,7 @@ void Channels::openChanaleMenu(const QPoint &point)
                     }
                     case 2:
                         foreach (VarChannel *chanale, selectedChanales)
-                            chanale->requestClearGraph();
+                            chanale->requestClearBufer();
                         break;
                     default:
                         break;

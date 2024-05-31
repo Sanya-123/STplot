@@ -86,7 +86,6 @@ int STMstudioFileDevice::execSaveDevice(QVector<QPair<uint32_t,QVector<uint8_t>>
         {
             for(int j = 0; j < readSeuqence[i].vectorChanales.size(); j++)
             {
-                //TODO check how it works in anouther thread
                 names.append("\t" + readSeuqence[i].vectorChanales[j].chanale->getName());
 
                 varloc_location_t loc = readSeuqence[i].vectorChanales[j].chanale->getLocation();
@@ -173,7 +172,6 @@ int STMstudioFileDevice::execSaveDevice(QList<QString> chanaleNames, QVector<flo
                     if(addres != 0)
                         break;
 
-                    //TODO check how it works in anouther thread
                     if(readSeuqence[j].vectorChanales[k].chanale->getName() == name)
                     {
                         varloc_location_t loc = readSeuqence[j].vectorChanales[k].chanale->getLocation();
@@ -379,7 +377,6 @@ int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> 
         {
             for(int j = 0; j < readSeuqence[i].vectorChanales.size(); j++)
             {
-                //TODO check how it works in anouther thread
                 namesShouldBe.append("\t" + readSeuqence[i].vectorChanales[j].chanale->displayName());
             }
         }
@@ -391,8 +388,6 @@ int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> 
 
         //get some how startTime
         startTime;
-
-        //TODO map addresses
     }
 
     while(1)

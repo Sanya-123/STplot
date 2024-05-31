@@ -11,6 +11,7 @@
 #include <QToolBar>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QShortcut>
 
 #include "varmodel.h"
 #include "varloader.h"
@@ -62,6 +63,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     //toolbar and menu
     ui->actionStart->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
     ui->actionStop->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+    ui->actionConfingReader->setIcon(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView));
     ui->actionStop->setDisabled(true);
 
     //init list devicec
@@ -72,8 +74,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     runToolBar->addAction(ui->actionStop);
     runToolBar->setObjectName("runToolBar");
     runToolBar->addWidget(&readSelector);
-    runToolBar->addAction(qApp->style()->standardIcon(QStyle::SP_FileDialogDetailedView), "Config (ctrl + O)", this, SLOT(openSettingsReader()))->
-            setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    runToolBar->addAction(ui->actionConfingReader);
     ui->menuView->addAction(runToolBar->toggleViewAction());
 
     ui->menuView->addSeparator();
@@ -86,6 +87,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(varloader, &VarLoader::variableAdded, channelsView, &Channels::add_channel);
     connect(varloader, SIGNAL(variablesUpdated(varloc_node_t*)), channelsView, SLOT(reloadChannels(varloc_node_t*)));
     connect(ui->actionStart, &QAction::triggered, this, &STPlotWindow::startRead);
+    connect(ui->actionConfingReader, &QAction::triggered, this, &STPlotWindow::openSettingsReader);
     connect(&readManager, SIGNAL(stopingRead()), this, SLOT(stopedRead()));
     connect(ui->actionStop, SIGNAL(triggered(bool)), &readManager, SLOT(stopRead()));
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(loadSettings()));
@@ -95,6 +97,16 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     connect(&readSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(setReadDevice(int)));
     connect(channelsView, SIGNAL(requestWriteData(uint64_t,varloc_location_t)), &readManager, SLOT(requestWriteData(uint64_t,varloc_location_t)));
     connect(ui->actionMainConfig, SIGNAL(triggered(bool)), this, SLOT(showSettingsWindows()));
+
+    if(readSelector.count())
+    {
+        connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up), this), &QShortcut::activated, [=](){
+            readSelector.setCurrentIndex((readSelector.currentIndex() + 1)%readSelector.count());
+        });
+        connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down), this), &QShortcut::activated, [=](){
+            readSelector.setCurrentIndex((readSelector.currentIndex() == 0 ? readSelector.count() - 1 : readSelector.currentIndex() - 1));
+        });
+    }
 
 
     viewManager->setDockContainer(ui->dockContainer);
@@ -402,7 +414,6 @@ void STPlotWindow::initReadDevice()
                 listReadDeviceInstance[i].configDialog->exec();
             });
         }
-
     }
 }
 

@@ -154,7 +154,6 @@ void VarLoader::loadTree()
 void VarLoader::saveTree()
 {
     QString selectedFilter;
-    //TODO implement
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Tree"),
                                oldSaveFileName, allowWriteFiles, &selectedFilter);
 
@@ -167,7 +166,7 @@ void VarLoader::saveTree()
             QRegExp rx(savePlugin->getFileExtensions());
             rx.setPatternSyntax(QRegExp::Wildcard);
             if(!rx.exactMatch(fileName))
-            {//NOTE it will note work with hard suffix
+            {//NOTE it will note work with complecate suffix
                 fileName.append(savePlugin->getFileExtensions().remove("*"));
             }
             oldSaveFileName = fileName;
