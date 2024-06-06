@@ -56,6 +56,9 @@ private:
     QVector<VarChannel*> mapPlots;
 //    QMap<VarChannel*,int> mapPlots;
     SimpleTableSettings settings;
+    bool enColor;
+    QColor colorForeground;
+    QColor colorBackground;
 };
 
 class PluginSimpleTable : public QObject, PlotWidgetInterfacePlugin

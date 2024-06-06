@@ -6,7 +6,9 @@
 
 SimpleTableSettings::SimpleTableSettings(QObject *parent) : SettingsAbstract(parent)
 {
-    mapSettingsDefauold["gColor.varColor"] = QColor(Qt::white);
+    mapSettingsDefauold["gColor.enColor"] = false;
+    mapSettingsDefauold["gColor.foregroung"] = QColor(Qt::black);
+    mapSettingsDefauold["gColor.backgroung"] = QColor(Qt::white);
 //    mapSettingsDefauold["gColor.gridColor"] = QColor(140, 140, 140);
 //    mapSettingsDefauold["gColor.subGridColor"] = QColor(80, 80, 80);
 //    mapSettingsDefauold["gColor.bgColor1"] = QColor(80, 80, 80);
@@ -61,6 +63,21 @@ void SimpleTable::addPlot(VarChannel *varChanale)
     ui->tableWidget_table->setItem(rowNumber, 1, new QTableWidgetItem(QString::number(varChanale->getValue())));
 
     ui->tableWidget_table->item(rowNumber, 0)->setFlags(ui->tableWidget_table->item(rowNumber, 0)->flags() & ~(Qt::ItemIsEditable));
+
+    if(enColor)
+    {
+        ui->tableWidget_table->item(rowNumber, 0)->setForeground(varChanale->lineColor());
+        ui->tableWidget_table->item(rowNumber, 1)->setForeground(varChanale->lineColor());
+    }
+    else
+    {
+        ui->tableWidget_table->item(rowNumber, 0)->setForeground(colorForeground);
+        ui->tableWidget_table->item(rowNumber, 1)->setForeground(colorForeground);
+    }
+
+    ui->tableWidget_table->item(rowNumber, 0)->setBackground(colorBackground);
+    ui->tableWidget_table->item(rowNumber, 1)->setBackground(colorBackground);
+
 
 
     connect(varChanale, SIGNAL(updatePlot()), this, SLOT(doUpdatePlot()));
@@ -162,6 +179,12 @@ void SimpleTable::updateColourPlot()
     if(gpuh == -1 || varChanale == nullptr)
         return;
 
+    if(!enColor)
+        return;
+
+    ui->tableWidget_table->item(gpuh, 0)->setForeground(varChanale->lineColor());
+    ui->tableWidget_table->item(gpuh, 1)->setForeground(varChanale->lineColor());
+
 //    QColor lineColor = varChanale->lineColor();
 //    QColor trackColor = QColor(255 - lineColor.red(), 255 - lineColor.green(), 255 - lineColor.blue());
 
@@ -214,50 +237,19 @@ void SimpleTable::settingsChanged()
 {
     QMap<QString, QVariant> map = settings.getSettingsMap();
 
+    enColor = map["gColor.enColor"].toBool();
+    colorForeground = map["gColor.foregroung"].value<QColor>();
+    colorBackground = map["gColor.backgroung"].value<QColor>();
 
-//    plotWidget->xAxis->setBasePen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis->setBasePen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis2->setBasePen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->xAxis->setTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis->setTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis2->setTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->xAxis->setSubTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis->setSubTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->yAxis2->setSubTickPen(QPen(map["gColor.varColor"].value<QColor>(), 1));
-//    plotWidget->xAxis->setTickLabelColor(map["gColor.varColor"].value<QColor>());
-//    plotWidget->yAxis->setTickLabelColor(map["gColor.varColor"].value<QColor>());
-//    plotWidget->yAxis2->setTickLabelColor(map["gColor.varColor"].value<QColor>());
-//    plotWidget->xAxis->grid()->setPen(QPen(map["gColor.gridColor"].value<QColor>(), 1, Qt::DotLine));
-//    plotWidget->yAxis->grid()->setPen(QPen(map["gColor.gridColor"].value<QColor>(), 1, Qt::DotLine));
-//    plotWidget->yAxis2->grid()->setPen(QPen(map["gColor.gridColor"].value<QColor>(), 1, Qt::DotLine));
-//    plotWidget->xAxis->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
-//    plotWidget->yAxis->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
-//    plotWidget->yAxis2->grid()->setSubGridPen(QPen(map["gColor.subGridColor"].value<QColor>(), 1, Qt::DotLine));
+    for(int i = 0; i < mapPlots.size(); i++)
+    {
+        QColor color = enColor ? mapPlots[i]->lineColor() : colorForeground;
+        ui->tableWidget_table->item(i, 0)->setForeground(color);
+        ui->tableWidget_table->item(i, 1)->setForeground(color);
 
-//    QLinearGradient plotGradient;
-//    plotGradient.setStart(0, 0);
-//    plotGradient.setFinalStop(0, 350);
-//    plotGradient.setColorAt(0, map["gColor.bgColor1"].value<QColor>());
-//    plotGradient.setColorAt(1, map["gColor.bgColor2"].value<QColor>());
-//    plotWidget->setBackground(plotGradient);
-
-//    if(map["legend.enLegend"].toBool() != subLayout->visible())
-//    {
-//        if(map["legend.enLegend"].toBool())
-//        {
-//            subLayout->setVisible(true);
-//            plotWidget->plotLayout()->addElement(0, 1, subLayout);
-//        }
-//        else
-//        {
-//            subLayout->setVisible(false);
-//            plotWidget->plotLayout()->take(subLayout);
-//        }
-//    }
-////    plotWidget->legend->setVisible(map["enLegend"].toBool());
-
-//    plotWidget->update();
-//    plotWidget->replot();
+        ui->tableWidget_table->item(i, 0)->setBackground(colorBackground);
+        ui->tableWidget_table->item(i, 1)->setBackground(colorBackground);
+    }
 
 }
 
