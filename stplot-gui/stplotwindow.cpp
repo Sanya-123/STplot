@@ -78,6 +78,8 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     ui->menuView->addAction(runToolBar->toggleViewAction());
 
     ui->menuView->addSeparator();
+    QMenu *plotwView = new QMenu("plots", this);
+    ui->menuView->addMenu(plotwView);
 
     ui->dockContainer->addDockWidget(ads::RightDockWidgetArea, dockWidgetChanaleWivw);
 //    m_DockManager->addDockWidget(ads::LeftDockWidgetArea, DockWidget2);
@@ -110,7 +112,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
 
 
     viewManager->setDockContainer(ui->dockContainer);
-    viewManager->setMenuView(ui->menuView);
+    viewManager->setMenuView(plotwView);
     viewManager->setChanales(channelsView);
 
     connect(&redrawTimer, &QTimer::timeout, viewManager, &ViewManager::updateAllViews);

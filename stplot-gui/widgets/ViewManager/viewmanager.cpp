@@ -134,6 +134,7 @@ PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, Q
     if(dockContainer != nullptr)
         dockContainer->addDockWidget(ads::RightDockWidgetArea, widgetDocker);
 
+    //add action open sitings to title bar
     QAction * actionConfigSettings = new QAction("settings", widgetDocker);
     connect(actionConfigSettings, &QAction::triggered, this, [=](){
         //show then edit
@@ -147,7 +148,9 @@ PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, Q
     actions.append(actionConfigSettings);
     widgetDocker->setTitleBarActions(actions);
 
-
+    //add view to menu
+    if(menuView != nullptr)
+        menuView->addAction(widgetDocker->toggleViewAction());
     //add to chanal modele
     if(chanales != nullptr)
         chanales->addPlot();
