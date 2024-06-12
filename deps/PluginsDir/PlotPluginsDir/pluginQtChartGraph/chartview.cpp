@@ -1,6 +1,5 @@
 #include "chartview.h"
 #include <QLayout>
-#include "initplot.h"
 #include <QDebug>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QDateTimeAxis>
@@ -178,9 +177,11 @@ void ChartViewWidget::redraw(){
     }
     //TODO scale Y axis
 
-//    QDateTime band = axisX->max() - axisX->min();
-//    plotWidget->xAxis->setRange(/*plotWidget->xAxis->range().upper */lastTime, scaleTime, Qt::AlignmentFlag::AlignRight);
-//    plotWidget->replot(QCustomPlot::rpQueuedReplot);
+    quint64 band = axisX->max().toMSecsSinceEpoch() - axisX->min().toMSecsSinceEpoch();
+    QDateTime max = QDateTime(QDate::currentDate(), lastTime);
+    QDateTime min = QDateTime::fromMSecsSinceEpoch(max.toMSecsSinceEpoch() - band);
+    axisX->setRange(min, max);
+    plotWidget->update();
 }
 
 void ChartViewWidget::addPlot(VarChannel *varChanale)
