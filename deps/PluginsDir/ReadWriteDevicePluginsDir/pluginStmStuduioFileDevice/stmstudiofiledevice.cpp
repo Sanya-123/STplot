@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QDialogButtonBox>
+#include <QFileInfo>
 
 STMstudioFileDevice::STMstudioFileDevice()
 {
@@ -311,7 +312,7 @@ void STMstudioFileDevice::restoreSettings(QSettings *settings)
 
 #include <QDebug>
 
-int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
+int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes)
 {
     if(isWriteMode)
         return -2;
@@ -319,8 +320,13 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
     int res = 0;
 
     QStringList fileList = fileRead->text().split(";;");
+    procentSpepForFile = MAX_PROCENT_FILE_DIALOG/fileList.size();
+    curentProcent = 0;
     foreach (QString file, fileList) {
-        int resCurentFile = readDeviceFile(file, chanales, readTimes);
+        if(fileProgress->isCanceled())
+            break;
+        fileProgress->setMessadge(tr("Read file:") + file);
+        int resCurentFile = readDeviceFile(file, chanales, fileProgress, readTimes);
         if(resCurentFile != 0)
         {
             qWarning() << "Preblem with read file:" << file << ":" << device.errorString();
@@ -331,7 +337,7 @@ int STMstudioFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<
     return res;
 }
 
-int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
+int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes)
 {
     device.setFileName(fileName);
     if(!device.open(QIODevice::ReadOnly))
@@ -339,20 +345,29 @@ int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> 
 
     QVector<VarChannel *> readChanales;
 
+    //get procent per byse
+    QFileInfo fileInfo(fileName);
+    float procentPerBytes = procentSpepForFile;
+    if(fileInfo.size() != 0)
+        procentPerBytes = procentSpepForFile/fileInfo.size();
+
 
     if(!isReadMode)//if it is first exec
     {
         //read header
-        device.readLine();
+        curentProcent += device.readLine().size()*procentPerBytes;
         QByteArray dateTime = device.readLine();
-        device.readLine();
-        device.readLine();
-        device.readLine();
-        device.readLine();
+        curentProcent += dateTime.size()*procentPerBytes;
+        curentProcent += device.readLine().size()*procentPerBytes;
+        curentProcent += device.readLine().size()*procentPerBytes;
+        curentProcent += device.readLine().size()*procentPerBytes;
+        curentProcent += device.readLine().size()*procentPerBytes;
         QByteArray names = device.readLine();
         QByteArray addresses = device.readLine();
+        curentProcent += names.size()*procentPerBytes;
+        curentProcent += addresses.size()*procentPerBytes;
         names.remove(names.size() - 1, 1);//remove \n
-//        names.r
+
 
         QList<QByteArray> listName = names.split('\t');
 
@@ -393,6 +408,10 @@ int STMstudioFileDevice::readDeviceFile(QString fileName, QVector<VarChannel *> 
     while(1)
     {
         QByteArray values = device.readLine();
+        curentProcent += values.size()*procentPerBytes;
+        fileProgress->setProgress(curentProcent);
+        if(fileProgress->isCanceled())
+            break;
         if(values.size() <= 0)
             break;
 

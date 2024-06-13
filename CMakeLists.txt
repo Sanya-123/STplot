@@ -17,6 +17,9 @@ if(WIN32)
     add_subdirectory(windowsLibs/libusb-cmake)
 endif()
 
+# list of library for stplot-gui it is shoud be sets in plugins
+#set(MAIN_GUI_LIBR_REQUEST)
+
 add_subdirectory(deps/PluginsDir/STplotVarCommon)
 set(PATH_STPLOT_COMMON ${CMAKE_SOURCE_DIR}/deps/PluginsDir/STplotVarCommon)
 if (WIN32)
@@ -36,6 +39,11 @@ add_subdirectory(deps/QtnProperty)
 #add_subdirectory(stplot-gui/modules/VarChannel)
 add_subdirectory(deps/PluginsDir)
 add_subdirectory(stplot-gui)
+
+## link additional libs for plugins
+##message("libs2:${MAIN_GUI_LIBR_REQUEST}")
+#target_link_libraries(stplot-gui PRIVATE ${MAIN_GUI_LIBR_REQUEST})
+
 
 if(NOT QT_QMAKE_EXECUTABLE)
     set(QT_QMAKE_EXECUTABLE ${CMAKE_PREFIX_PATH}/bin/qmake)

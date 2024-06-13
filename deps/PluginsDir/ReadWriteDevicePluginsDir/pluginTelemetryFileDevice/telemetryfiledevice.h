@@ -21,14 +21,14 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
 
-    int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
+    int readFileDevice(QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes = nullptr);
 
 private slots:
     void openSelectFolder();
 
 private:
     int readTelemetryFile(QString filepath, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
-    int readTelemetryDir(QString path, QVector<VarChannel *> chanales, QVector<QTime> *readTimes);
+    int readTelemetryDir(QString path, QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes);
 
     QDialog *configReadWidget;
     QLineEdit* folderName;

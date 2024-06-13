@@ -19,9 +19,10 @@ extern "C" {
 #include "debugerwindow.h"
 #include "settingswindow.h"
 #include "QtAdvancedStylesheet.h"
+#include "fileprogress.h"
 
 
-#define MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION             0x00010000
+#define MINIMUM_PLUGIN_READ_WRITE_DEVICE_HEADER_VERSION             0x00020000
 
 
 QT_BEGIN_NAMESPACE
@@ -70,6 +71,9 @@ private:
     QComboBox readSelector;
     QToolBar *runToolBar;
     QAction *lastReadWidget;
+    FileProgress fileProgress;
+
+    //read device
     QList<ReadDeviceObject*> readDeviceList;
     QList<SaveDeviceObject*> saveDeviceList;
 
@@ -87,7 +91,10 @@ private:
     };
     QList<struct SaveDeviceInstance> listSaveDeviceInstance;
 
+    //styles
     acss::QtAdvancedStylesheet advancedStylesheet;
+
+    //cettings
     SettingsWindow::SettingsMainWindow currentSettings;
     SettingsWindow *settingsWindow;
 

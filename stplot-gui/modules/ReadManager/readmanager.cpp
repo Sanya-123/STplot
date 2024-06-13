@@ -3,7 +3,8 @@
 //#include <QApplication>
 
 ReadManager::ReadManager(QObject *parent)
-    : QObject{parent}, readDevicece(nullptr), channels(nullptr), mathChannels(nullptr)
+    : QObject{parent}, readDevicece(nullptr), channels(nullptr), mathChannels(nullptr),
+      fileProgress(nullptr)
 {
     loop = new ReadLoop;
     loop->moveToThread(&readLoopThread);
@@ -21,6 +22,12 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
 
     if(readDevicece->isFileDevice())
     {
+        AbstractFileProgress *curentFileProgress;
+        AbstractFileProgress defaoultFileProgress;//if fileProgress is note set use empty progress
+        curentFileProgress = &defaoultFileProgress;
+        if(fileProgress != nullptr)
+            curentFileProgress = fileProgress;
+        curentFileProgress->startProgress();
         //save size vectors before start
         QVector<int> sizeVector;
 
@@ -30,15 +37,17 @@ int ReadManager::runReadLoop(QVector<VarChannel *> *channels, QVector<VarChannel
         }
 
         QVector<QTime> readTimes;
-        int res = readDevicece->readFileDevice(*channels, &readTimes);
+        int res = readDevicece->readFileDevice(*channels, curentFileProgress, &readTimes);
         readDevicece->stopDev();
         if(res != -1)//if this function is supported
         {
             calcMathFileData(sizeVector, channels, mathChannels, readTimes);
             //exec calc math
             emit stopingRead();
+            curentFileProgress->stopProgress();
             return res;
         }
+        curentFileProgress->stopProgress();
     }
 
     this->channels = channels;
@@ -326,6 +335,11 @@ void ReadManager::setReadDevicece(ReadDeviceObject *newReadDevicece)
 void ReadManager::addSaveDevice(SaveDeviceObject *newSaveDevicece)
 {
     saveDeviceces.append(newSaveDevicece);
+}
+
+void ReadManager::setFileProgress(AbstractFileProgress *newFileProgress)
+{
+    fileProgress = newFileProgress;
 }
 
 void ReadManager::stopRead()

@@ -75,6 +75,8 @@ set(PROJECT_SOURCES
         widgets/DebugerWindow/debugmessadge.h widgets/DebugerWindow/debugmessadge.cpp widgets/DebugerWindow/debugmessadge.ui
         widgets/DebugerWindow/debugerfilter.h
         widgets/Settings/settingswindow.h widgets/Settings/settingswindow.cpp widgets/Settings/settingswindow.ui
+        widgets/FileProgress/fileprogress.h widgets/FileProgress/fileprogress.cpp
+        widgets/FileProgress/fileprogresssharememory.h widgets/FileProgress/fileprogresssharememory.cpp
 
         #build styles maybe move it into libs
         ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src/acss_globals.h
@@ -110,6 +112,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/cmake/
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/deps/qt-advanced-docking-system/src qt-ads)
 
+# file progress application
+add_subdirectory(widgets/FileProgress/FileProgressDialog)
+
 add_custom_target(copyStyles ALL DEPENDS stplot-gui
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/styles ${CMAKE_CURRENT_BINARY_DIR}/styles
 )
@@ -129,8 +134,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/ViewManager
     widgets/PlotWidget
     widgets/DebugerWindow
-    widgets/DebugerWindow
     widgets/Settings
+    widgets/FileProgress
     ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src
     ${PATH_COMMON_QT_LIBS}
     ${CMAKE_SOURCE_DIR}/deps/QtnProperty

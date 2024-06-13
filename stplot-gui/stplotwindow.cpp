@@ -124,6 +124,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
     foreach (SaveDeviceObject* dev, saveDeviceList) {
         readManager.addSaveDevice(dev);
     }
+    readManager.setFileProgress(&fileProgress);
 
     //init style
     advancedStylesheet.setStylesDirPath(QDir::currentPath() + "/styles/");

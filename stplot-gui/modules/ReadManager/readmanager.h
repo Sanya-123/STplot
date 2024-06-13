@@ -22,6 +22,8 @@ public:
 
     void addSaveDevice(SaveDeviceObject *newSaveDevicece);
 
+    void setFileProgress(AbstractFileProgress *newFileProgress);
+
 public slots:
     void stopRead();
     void requestWriteData(uint64_t data, varloc_location_t location);
@@ -52,6 +54,8 @@ private:
     QVector<SaveDeviceObject*> saveDeviceces;
     ReadDeviceObject *readDevicece;
     QDateTime startTime;
+
+    AbstractFileProgress* fileProgress;
 };
 
 #endif // READMANAGER_H

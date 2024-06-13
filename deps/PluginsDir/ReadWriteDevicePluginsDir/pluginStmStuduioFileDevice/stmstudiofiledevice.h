@@ -24,10 +24,10 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
 
-    int readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
+    int readFileDevice(QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes = nullptr);
 
 private:
-    int readDeviceFile(QString fileName, QVector<VarChannel *> chanales, QVector<QTime> *readTimes = nullptr);
+    int readDeviceFile(QString fileName, QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes = nullptr);
 
 private slots:
     void openSelectFile();
@@ -43,6 +43,8 @@ private:
     bool isReadMode;//as it class use for save and load dataI should know witch type is now
     bool isWriteMode;
     QVector<varloc_location_t> locations;
+    float procentSpepForFile;
+    float curentProcent;
 };
 
 #endif // STMSTUDIOFILEDEVICE_H

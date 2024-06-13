@@ -85,13 +85,16 @@ void TelemetryFileDevice::restoreSettings(QSettings *settings)
 }
 
 #include <QDebug>
-int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> chanales, QVector<QTime> *readTimes){
+int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes){
     QDir dir(path);
     QFileInfoList teleFiles = dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoDot);
+    fileProgress->setMessadge("Path:" + path);
+    float procentPerElement = MAX_PROCENT_FILE_DIALOG/teleFiles.length();
     for (int j = 0; j < teleFiles.length(); j++){
+        fileProgress->setProgress(procentPerElement*j);
         QFileInfo file = teleFiles[j];
         if (file.isDir()){
-            int ret = readTelemetryDir(file.absoluteFilePath(), chanales, readTimes);
+            int ret = readTelemetryDir(file.absoluteFilePath(), chanales, fileProgress, readTimes);
             if (ret != 0){
                 return ret;
             }
@@ -165,9 +168,9 @@ int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel 
     return 0;
 }
 
-int TelemetryFileDevice::readFileDevice(QVector<VarChannel *> chanales, QVector<QTime> *readTimes)
+int TelemetryFileDevice::readFileDevice(QVector<VarChannel *> chanales, AbstractFileProgress *fileProgress, QVector<QTime> *readTimes)
 {
-    int ret = readTelemetryDir(folderName->text(), chanales, readTimes);
+    int ret = readTelemetryDir(folderName->text(), chanales, fileProgress, readTimes);
     stopDev();
     return ret;
 }
