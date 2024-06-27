@@ -272,6 +272,29 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplace
         myEngine.globalObject().setProperty("prevValue", fun);
     }
 
+    {//unsigned -> signed
+
+        auto uintToInt = [/*vectorOldValues, mapOldData*/] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
+        {
+            Q_UNUSED(engine);
+            QScriptValue value = context->argument(0);
+            uint16_t bitsSize = context->argument(1).toUInt16();
+            if(bitsSize == 0 || bitsSize > 32)
+                return  QScriptValue(0.0);
+
+            uint64_t maxSigned = 1 << (bitsSize - 1);
+            uint64_t maxUnsigned = 1 << (bitsSize);
+            uint32_t valU = value.toUInt32();
+                if(valU > maxSigned)
+                    return QScriptValue((valU - maxUnsigned)*1.0);
+            return value;
+        };
+        QScriptEngine::FunctionSignature uintToIntLambdaPtr = uintToInt;
+        QScriptValue fun = myEngine.newFunction(uintToIntLambdaPtr);
+        myEngine.globalObject().setProperty("uintToInt", fun);
+    }
+
+
     for(int i = 0; i < listMathChanales->size(); i++)
     {
         QString script = listMathChanales->at(i).second;

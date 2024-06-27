@@ -188,7 +188,7 @@ void SettingsDialog::changeValue(QtnPropertyChangeReason reson)
 
         if(typeid(*propBase) == typeid(QtnPropertyQString))
         {
-            qDebug() << "QtnPropertyQString";
+//            qDebug() << "QtnPropertyQString";
         }
 
 //        settings->

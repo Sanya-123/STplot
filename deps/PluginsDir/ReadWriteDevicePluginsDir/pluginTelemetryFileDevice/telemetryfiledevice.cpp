@@ -114,13 +114,13 @@ int TelemetryFileDevice::readTelemetryDir(QString path, QVector<VarChannel *> ch
 int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel *> chanales, QVector<QTime> *readTimes){
     QFile teleRecord(filepath);
     if (!teleRecord.open(QIODevice::ReadOnly)){
-        qDebug("Error opening telemetry record");
+        qWarning("Error opening telemetry record");
         return -3;
     }
     QByteArray pickle = teleRecord.readAll();
     if (pickle.at(80) != 0x71 || pickle.at(81) != 0x04){
 
-        qDebug("Error parsing telemetry record");
+        qWarning("Error parsing telemetry record");
         return -3;
     }
 
@@ -160,7 +160,7 @@ int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel 
                 ch->pushValueRawWithTime(readData, dt);
             }
             else{
-                qDebug("Channel not found in telemetry record - %s", ch->getName().toLocal8Bit().data());
+                qWarning("Channel not found in telemetry record - %s", ch->getName().toLocal8Bit().data());
                 return -3;
             }
         }

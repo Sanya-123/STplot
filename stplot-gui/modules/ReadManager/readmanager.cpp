@@ -273,7 +273,7 @@ QVector<float> ReadManager::getChanaleReedData(QVector<int> sizeVectorBefore, QV
         }
         else
         {
-            chanalesValues.append(channels->at(i)->getValue(sizeVectorBefore[i] + iteration).value);
+            chanalesValues.append(channels->at(i)->getValue(sizeVectorBefore[i] + iteration).rawValue);
         }
     }
 
