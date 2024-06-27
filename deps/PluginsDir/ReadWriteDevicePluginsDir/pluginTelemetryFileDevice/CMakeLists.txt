@@ -23,6 +23,12 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
 
 # elf application with struct
 if(UNIX)
+    option(BUILD_ELF_NAV_DEV_TREE ON)
+else()
+    option(BUILD_ELF_NAV_DEV_TREE OFF)
+endif()
+
+if(BUILD_ELF_NAV_DEV_TREE)
     add_subdirectory(nav_dev_tree)
 endif()
 

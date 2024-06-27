@@ -83,12 +83,12 @@ else()
 
     if(CI_TOOLS_PATH)
 
-        #link all libs
-        file(GLOB libs_link "${CMAKE_BINARY_DIR}/lib/*")
         set(LINK_LIBS "")
-        foreach(lib_link ${libs_link})
-            set(LINK_LIBS ${LINK_LIBS}" -l ${lib_link}")
-        endforeach()
+#        #link all libs
+#        file(GLOB libs_link "${CMAKE_BINARY_DIR}/lib/*")
+#        foreach(lib_link ${libs_link})
+#            set(LINK_LIBS ${LINK_LIBS}" -l ${lib_link}")
+#        endforeach()
 
         add_custom_target(deployment_Image DEPENDS ${CMAKE_BINARY_DIR}/stplot-gui/stplot-gui deployment_CP
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/resource/appicon.png ${CMAKE_BINARY_DIR}/stplot-gui.png
