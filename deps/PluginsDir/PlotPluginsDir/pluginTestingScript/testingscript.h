@@ -8,6 +8,10 @@
 #include <QPushButton>
 #include "highlighter.h"
 
+QT_BEGIN_NAMESPACE
+class QListWidgetItem;
+QT_END_NAMESPACE
+
 namespace Ui {
 class TestingScript;
 }
@@ -42,6 +46,8 @@ private slots:
 
     void on_pushButton_saveScript_clicked();
 
+    void on_listWidget_names_itemClicked(QListWidgetItem *item);
+
 private:
     Ui::TestingScript *ui;
     QVector<VarChannel*> mapPlots;
@@ -49,6 +55,7 @@ private:
     QThread threadScriptExecutor;
     ScriptExecutor *scriptExecutor;
     Highlighter *highlighter;
+    QStringList helpFunctions;
 };
 
 class PluginTestingScript : public QObject, PlotWidgetInterfacePlugin

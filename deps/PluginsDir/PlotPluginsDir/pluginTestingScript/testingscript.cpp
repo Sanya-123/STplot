@@ -49,6 +49,24 @@ TestingScript::TestingScript(SettingsAbstract *settings, QWidget *parent) :
         this->settings.updateValue("script.currentScript", ui->plainTextEdit_scrip->toPlainText());
     });
 
+    //init help functions
+    helpFunctions;
+    helpFunctions << "+";
+    helpFunctions << "-";
+    helpFunctions << "*";
+    helpFunctions << "/";
+    helpFunctions << "main.msg = \"<text>\"";
+    helpFunctions << "Math.sqrt(";
+    helpFunctions << "Math.sin(";
+    helpFunctions << "Math.cos(";
+    helpFunctions << "function myFunction(a, b) { return a + b; }";
+    helpFunctions << "delay(<delay_ms>)";
+    helpFunctions << "setValue(\"<name>\",value)";
+    helpFunctions << "getValue(\"<name>\")";
+    ui->listWidget_names->addItems(helpFunctions);
+
+//    connect(ui->listWidget_names, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(iteamCliced(QListWidgetItem*)));
+
 }
 
 TestingScript::~TestingScript()
@@ -67,6 +85,8 @@ void TestingScript::addPlot(VarChannel *varChanale)
     if(mapPlots.contains(varChanale))//if gpuh alredy maked
         return;
 
+//    ui->listWidget_names->addItem();
+
     mapPlots.append(varChanale);
 }
 
@@ -74,6 +94,8 @@ void TestingScript::deletePlot(VarChannel *varChanale)
 {
     if(!mapPlots.contains(varChanale))//if is note created
         return;
+
+//    ui->listWidget_names->
 
     int numberRow = mapPlots.indexOf(varChanale);
     mapPlots.remove(numberRow);
@@ -149,5 +171,11 @@ void TestingScript::on_pushButton_saveScript_clicked()
             ui->comboBox_scripts->setCurrentText(file);
         }
     }
+}
+
+void TestingScript::on_listWidget_names_itemClicked(QListWidgetItem *item)
+{
+    ui->plainTextEdit_scrip->textCursor().insertText(item->text());
+    ui->plainTextEdit_scrip->setFocus();
 }
 
