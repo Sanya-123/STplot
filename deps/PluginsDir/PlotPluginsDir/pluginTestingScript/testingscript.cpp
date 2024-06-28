@@ -10,6 +10,7 @@ TestingScriptSettings::TestingScriptSettings(QObject *parent) : SettingsAbstract
     mapSettingsDefauold["script.currentScript"] = QString();
     mapSettingsDefauold["script.widget.spliterState"] = QByteArray();
     mapSettingsDefauold["console.font"] = QFont("Sans Serif", 12);
+    mapSettingsDefauold["console.autoclean"] = false;
     mapSettingsDefauold["editor.font"] = QFont();
     mapSettingsDefauold["editor.highlighter.keyword.color"] = QColor(Qt::darkBlue);
     mapSettingsDefauold["editor.highlighter.class.color"] = QColor(Qt::darkMagenta);
@@ -32,7 +33,7 @@ TestingScriptSettings::TestingScriptSettings(QObject *parent) : SettingsAbstract
 
 TestingScript::TestingScript(SettingsAbstract *settings, QWidget *parent) :
     PlotWidgetAbstract(parent),
-    ui(new Ui::TestingScript)
+    ui(new Ui::TestingScript), iterationRepeated(0), infinityRun(false)
 {
     ui->setupUi(this);
 
@@ -46,6 +47,7 @@ TestingScript::TestingScript(SettingsAbstract *settings, QWidget *parent) :
     connect(&threadScriptExecutor, SIGNAL(started()), scriptExecutor, SLOT(executeScript()));
     connect(scriptExecutor, SIGNAL(printMessadge(QString)), ui->plainTextEdit_console, SLOT(appendPlainText(QString)), Qt::QueuedConnection);
     connect(scriptExecutor, SIGNAL(finishExecScript()), this, SLOT(finishExecScript()), Qt::QueuedConnection);
+    connect(this, SIGNAL(abortRun()), scriptExecutor, SLOT(stopScript()));
 //    connect(&threadScriptExecutor, &QThread::finished, this, [=](){ui->pushButton_run->setEnabled(true);});
 
     //settings
@@ -122,9 +124,23 @@ void TestingScript::deletePlot(VarChannel *varChanale)
 
 void TestingScript::finishExecScript()
 {
-    threadScriptExecutor.quit();
-    threadScriptExecutor.wait();
-    ui->pushButton_run->setText("run");
+    if(iterationRepeated)
+        iterationRepeated--;
+    if(infinityRun || iterationRepeated)
+    {
+        threadScriptExecutor.quit();
+        threadScriptExecutor.wait();
+        if(autocleanConsole)
+            ui->plainTextEdit_console->clear();
+        threadScriptExecutor.start();
+    }
+    else
+    {
+        threadScriptExecutor.quit();
+        threadScriptExecutor.wait();
+        ui->pushButton_run->setText("run");
+    }
+
 }
 
 void TestingScript::settingsChanged()
@@ -138,6 +154,8 @@ void TestingScript::settingsChanged()
 
     ui->plainTextEdit_console->setFont(map["console.font"].value<QFont>());
     ui->plainTextEdit_scrip->setFont(map["editor.font"].value<QFont>());
+
+    autocleanConsole = map["console.autoclean"].toBool();
 
 //    QPalette p = ui->plainTextEdit_console->palette();
 //    p.setColor(QPalette::Active, QPalette::Base, Qt::green);
@@ -205,14 +223,20 @@ void TestingScript::on_pushButton_run_clicked()
 {
     if(threadScriptExecutor.isRunning())
     {
-        finishExecScript();
+        infinityRun = 0;
+        iterationRepeated = 0;
+        emit abortRun();
     }
     else
     {
         QScriptSyntaxCheckResult res = scriptExecutor->setScript(ui->plainTextEdit_scrip->toPlainText());
         if(res.state() == QScriptSyntaxCheckResult::Valid)
         {
+            infinityRun = ui->checkBox_infinityRun->isChecked();
+            iterationRepeated = ui->spinBox_iterationRepat->value();
             scriptExecutor->setVarChanales(mapPlots);
+            if(autocleanConsole)
+                ui->plainTextEdit_console->clear();
             threadScriptExecutor.start();
             ui->pushButton_run->setText("stop");
         }

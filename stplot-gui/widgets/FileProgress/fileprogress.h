@@ -15,6 +15,7 @@
  */
 class FileProgress : public AbstractFileProgress
 {
+    Q_OBJECT
 public:
     explicit FileProgress(QObject *parent = nullptr);
     //TODO cancelation flag

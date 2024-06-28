@@ -75,6 +75,8 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         myEngine.globalObject().setProperty("setValue", funSet);
         myEngine.globalObject().setProperty("s", funSet);
     }
+
+    connect(this, SIGNAL(abortRun()), this, SLOT(abourtScript()));
 }
 
 void ScriptExecutor::putMessadge(QString msg)
@@ -93,6 +95,19 @@ void ScriptExecutor::executeScript()
     }
 
     emit finishExecScript();
+}
+
+void ScriptExecutor::stopScript()
+{
+    emit abortRun();
+}
+
+void ScriptExecutor::abourtScript()
+{
+    if(myEngine.isEvaluating())
+    {
+        myEngine.abortEvaluation();
+    }
 }
 
 QScriptSyntaxCheckResult ScriptExecutor::setScript(QString script)

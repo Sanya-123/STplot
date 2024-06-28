@@ -48,6 +48,9 @@ private slots:
 
     void on_listWidget_names_itemClicked(QListWidgetItem *item);
 
+signals:
+    void abortRun();
+
 private:
     Ui::TestingScript *ui;
     QVector<VarChannel*> mapPlots;
@@ -56,6 +59,9 @@ private:
     ScriptExecutor *scriptExecutor;
     Highlighter *highlighter;
     QStringList helpFunctions;
+    int iterationRepeated;
+    bool infinityRun;
+    bool autocleanConsole;
 };
 
 class PluginTestingScript : public QObject, PlotWidgetInterfacePlugin

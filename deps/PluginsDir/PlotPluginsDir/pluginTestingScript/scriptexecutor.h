@@ -28,12 +28,15 @@ public:
 
 public slots:
     void executeScript();
+    void stopScript();
+    void abourtScript();
     QScriptSyntaxCheckResult setScript(QString script);
     void setVarChanales(QVector<VarChannel*> varChanales);
 
 signals:
     void printMessadge(QString msg);
     void finishExecScript();
+    void abortRun();
 
 private:
     QScriptEngine myEngine;
