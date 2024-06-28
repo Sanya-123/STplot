@@ -1,6 +1,7 @@
 #include "settingsdialog.h"
 #include "QtnProperty/GUI/PropertyQColor.h"
 #include "QtnProperty/GUI/PropertyQPen.h"
+#include "QtnProperty/GUI/PropertyQFont.h"
 #include <QLayout>
 #include <QDebug>
 #include <QComboBox>
@@ -71,8 +72,15 @@ SettingsDialog::SettingsDialog(SettingsAbstract *settings, QWidget *parent)
                     propBase = prop;
                     break;
                 }
-                default:
+                case QVariant::Font:
                 {
+                    QtnPropertyQFont* prop = qtnCreateProperty<QtnPropertyQFont>(parentProp);
+                    prop->setValue(var.value<QFont>());
+                    propBase = prop;
+                    break;
+                }
+                default:
+                {//string, stringlist, and bytearray are untouceble
                     QtnPropertyQString* prop = qtnCreateProperty<QtnPropertyQString>(parentProp);
                     prop->setValue(QString("unnoun type"));
                     propBase = prop;
@@ -184,6 +192,11 @@ void SettingsDialog::changeValue(QtnPropertyChangeReason reson)
         if(typeid(*propBase) == typeid(QtnPropertyDouble))
         {
             settings->setValues(parName, (double)((QtnPropertyDouble*)propBase)->value());
+        }
+
+        if(typeid(*propBase) == typeid(QtnPropertyQFont))
+        {
+            settings->setValues(parName, (QFont)((QtnPropertyQFont*)propBase)->value());
         }
 
         if(typeid(*propBase) == typeid(QtnPropertyQString))

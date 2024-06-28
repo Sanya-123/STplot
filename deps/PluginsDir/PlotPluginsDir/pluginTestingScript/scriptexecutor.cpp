@@ -16,6 +16,7 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         QScriptEngine::FunctionSignature delayLambdaPtr = delay;
         QScriptValue fun = myEngine.newFunction(delayLambdaPtr);
         myEngine.globalObject().setProperty("delay", fun);
+        myEngine.globalObject().setProperty("d", fun);
     }
 
     //set pointer to parrat class
@@ -25,6 +26,22 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
     //set object list object
     QScriptValue listObject = myEngine.newQObject(&listVaribelsObject);
     myEngine.globalObject().setProperty("mapVar", listObject);
+
+    {//print
+        //for printing messadge could be used: main.msg = "<msg>"
+        //or print("<msg>"); or p("<msg>")
+        auto printMsg = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
+        {
+            ScriptExecutor *thisObject = (ScriptExecutor*)engine->globalObject().property("main").toQObject();
+            QScriptValue print = context->argument(0);
+            thisObject->putMessadge(print.toString());
+            return QScriptValue(0.0);
+        };
+        QScriptEngine::FunctionSignature printMsgLambdaPtr = printMsg;
+        QScriptValue fun = myEngine.newFunction(printMsgLambdaPtr);
+        myEngine.globalObject().setProperty("print", fun);
+        myEngine.globalObject().setProperty("p", fun);
+    }
 
     {
         //get value function
@@ -39,7 +56,7 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         QScriptEngine::FunctionSignature getValueLambdaPtr = getValue;
         QScriptValue funGet = myEngine.newFunction(getValueLambdaPtr);
         myEngine.globalObject().setProperty("getValue", funGet);
-//        myEngine.globalObject().setProperty("g", funGet);
+        myEngine.globalObject().setProperty("g", funGet);
 
         //set values
         auto setValue = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
@@ -56,7 +73,7 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         QScriptEngine::FunctionSignature setValueLambdaPtr = setValue;
         QScriptValue funSet = myEngine.newFunction(setValueLambdaPtr);
         myEngine.globalObject().setProperty("setValue", funSet);
-//        myEngine.globalObject().setProperty("s", funSet);
+        myEngine.globalObject().setProperty("s", funSet);
     }
 }
 

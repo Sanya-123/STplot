@@ -68,11 +68,13 @@ Highlighter::Highlighter(QTextDocument *parent)
         QStringLiteral("\\bslots\\b"), QStringLiteral("\\bstatic\\b"), QStringLiteral("\\bstruct\\b"),
         QStringLiteral("\\btemplate\\b"), QStringLiteral("\\btypedef\\b"), QStringLiteral("\\btypename\\b"),
         QStringLiteral("\\bunion\\b"), QStringLiteral("\\bunsigned\\b"), QStringLiteral("\\bvirtual\\b"),
-        QStringLiteral("\\bvoid\\b"), QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b")
+        QStringLiteral("\\bvoid\\b"), QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b"),
+        QStringLiteral("\\bvar\\b"), QStringLiteral("\\blet\\b")
     };
     for (const QString &pattern : keywordPatterns) {
         rule.pattern = QRegularExpression(pattern);
         rule.format = keywordFormat;
+        rule.role = HighlighKeyword;
         highlightingRules.append(rule);
 //! [0] //! [1]
     }
@@ -83,6 +85,7 @@ Highlighter::Highlighter(QTextDocument *parent)
     classFormat.setForeground(Qt::darkMagenta);
     rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
     rule.format = classFormat;
+    rule.role = HighlighClass;
     highlightingRules.append(rule);
 //! [2]
 
@@ -90,6 +93,7 @@ Highlighter::Highlighter(QTextDocument *parent)
     singleLineCommentFormat.setForeground(Qt::red);
     rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
+    rule.role = HighlighComent;
     highlightingRules.append(rule);
 
     multiLineCommentFormat.setForeground(Qt::red);
@@ -99,6 +103,9 @@ Highlighter::Highlighter(QTextDocument *parent)
     quotationFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
+    rule.role = HighlighQuotation;
+    highlightingRules.append(rule);
+    rule.pattern = QRegularExpression(QStringLiteral("\'.*\'"));
     highlightingRules.append(rule);
 //! [4]
 
@@ -107,6 +114,7 @@ Highlighter::Highlighter(QTextDocument *parent)
     functionFormat.setForeground(Qt::blue);
     rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
     rule.format = functionFormat;
+    rule.role = HighlighFunctions;
     highlightingRules.append(rule);
 //! [5]
 
@@ -115,6 +123,37 @@ Highlighter::Highlighter(QTextDocument *parent)
     commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 }
 //! [6]
+
+#define APPLY_NEW_FONT_COLOR(_role, _function, _apply)    do {                  \
+    switch (_role) {                                                            \
+        case HighlighKeyword: keywordFormat. _function (_apply); break;         \
+        case HighlighClass: classFormat. _function (_apply); break;             \
+        case HighlighComent:                                                    \
+            singleLineCommentFormat. _function (_apply);                        \
+            multiLineCommentFormat. _function (_apply);                         \
+            break;                                                              \
+        case HighlighQuotation: quotationFormat. _function (_apply); break;     \
+        case HighlighFunctions: functionFormat. _function (_apply); break;      \
+        default: break;                                                         \
+    }                                                                           \
+    for(int i = 0; i < highlightingRules.size(); i++) {                         \
+        if(highlightingRules[i].role == _role) highlightingRules[i].format. _function (_apply); \
+    } \
+}while(0)
+
+void Highlighter::setHighlighFont(HighlighRole role, QFont font)
+{
+    APPLY_NEW_FONT_COLOR(role, setFontItalic, font.italic());
+    APPLY_NEW_FONT_COLOR(role, setFontWeight, font.weight());
+    APPLY_NEW_FONT_COLOR(role, setFontUnderline, font.underline());
+    APPLY_NEW_FONT_COLOR(role, setFontStrikeOut, font.strikeOut());
+    APPLY_NEW_FONT_COLOR(role, setFontKerning, font.kerning());
+}
+
+void Highlighter::setHighlighColor(HighlighRole role, QColor color)
+{
+    APPLY_NEW_FONT_COLOR(role, setForeground, color);
+}
 
 //! [7]
 void Highlighter::highlightBlock(const QString &text)

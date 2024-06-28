@@ -65,7 +65,16 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 
 public:
+    enum HighlighRole{
+        HighlighKeyword,
+        HighlighClass,
+        HighlighComent,
+        HighlighQuotation,
+        HighlighFunctions,
+    };
     Highlighter(QTextDocument *parent = 0);
+    void setHighlighFont(HighlighRole role, QFont font);
+    void setHighlighColor(HighlighRole role, QColor color);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -75,6 +84,7 @@ private:
     {
         QRegularExpression pattern;
         QTextCharFormat format;
+        HighlighRole role;
     };
     QVector<HighlightingRule> highlightingRules;
 

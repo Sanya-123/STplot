@@ -9,6 +9,24 @@ TestingScriptSettings::TestingScriptSettings(QObject *parent) : SettingsAbstract
     mapSettingsDefauold["script.currentFileScripts"] = QString();
     mapSettingsDefauold["script.currentScript"] = QString();
     mapSettingsDefauold["script.widget.spliterState"] = QByteArray();
+    mapSettingsDefauold["console.font"] = QFont("Sans Serif", 12);
+    mapSettingsDefauold["editor.font"] = QFont();
+    mapSettingsDefauold["editor.highlighter.keyword.color"] = QColor(Qt::darkBlue);
+    mapSettingsDefauold["editor.highlighter.class.color"] = QColor(Qt::darkMagenta);
+    mapSettingsDefauold["editor.highlighter.coment.color"] = QColor(Qt::red);
+    mapSettingsDefauold["editor.highlighter.quotation.color"] = QColor(Qt::darkGreen);
+    mapSettingsDefauold["editor.highlighter.function.color"] = QColor(Qt::blue);
+
+    QFont highlighterFont("Sans Serif");
+    highlighterFont.setBold(true);
+    mapSettingsDefauold["editor.highlighter.keyword.font"] = highlighterFont;
+    mapSettingsDefauold["editor.highlighter.class.font"] = highlighterFont;
+    highlighterFont.setBold(false);
+    mapSettingsDefauold["editor.highlighter.coment.font"] = highlighterFont;
+    mapSettingsDefauold["editor.highlighter.quotation.font"] = highlighterFont;
+    highlighterFont.setItalic(true);
+    mapSettingsDefauold["editor.highlighter.function.font"] = highlighterFont;
+
     restoreDefoultSetings();
 }
 
@@ -56,6 +74,7 @@ TestingScript::TestingScript(SettingsAbstract *settings, QWidget *parent) :
     helpFunctions << "*";
     helpFunctions << "/";
     helpFunctions << "main.msg = \"<text>\"";
+    helpFunctions << "print(";
     helpFunctions << "Math.sqrt(";
     helpFunctions << "Math.sin(";
     helpFunctions << "Math.cos(";
@@ -116,6 +135,52 @@ void TestingScript::settingsChanged()
     ui->comboBox_scripts->clear();
     ui->comboBox_scripts->addItems(map["script.fileScripts"].toStringList());
     ui->comboBox_scripts->setCurrentText(map["script.currentFileScripts"].toString());
+
+    ui->plainTextEdit_console->setFont(map["console.font"].value<QFont>());
+    ui->plainTextEdit_scrip->setFont(map["editor.font"].value<QFont>());
+
+//    QPalette p = ui->plainTextEdit_console->palette();
+//    p.setColor(QPalette::Active, QPalette::Base, Qt::green);
+//    ui->plainTextEdit_console->setPalette(p);
+//    ui->plainTextEdit_console->setBackgroundVisible(false);
+//    ui->plainTextEdit_console->repaint();
+//    QTextCharFormat fmt;
+//    fmt.setBackground(QBrush(Qt::green));
+//    ui->plainTextEdit_console->mergeCurrentCharFormat(fmt);
+
+    //update highlight color
+    highlighter->setHighlighColor(Highlighter::HighlighKeyword,
+                                  map["editor.highlighter.keyword.color"].value<QColor>());
+
+    highlighter->setHighlighColor(Highlighter::HighlighClass,
+                                  map["editor.highlighter.class.color"].value<QColor>());
+
+    highlighter->setHighlighColor(Highlighter::HighlighComent,
+                                  map["editor.highlighter.coment.color"].value<QColor>());
+
+    highlighter->setHighlighColor(Highlighter::HighlighQuotation,
+                                  map["editor.highlighter.quotation.color"].value<QColor>());
+
+    highlighter->setHighlighColor(Highlighter::HighlighFunctions,
+                                  map["editor.highlighter.function.color"].value<QColor>());
+
+    //update highlight font
+    highlighter->setHighlighFont(Highlighter::HighlighKeyword,
+                                  map["editor.highlighter.keyword.font"].value<QFont>());
+
+    highlighter->setHighlighFont(Highlighter::HighlighClass,
+                                  map["editor.highlighter.class.font"].value<QFont>());
+
+    highlighter->setHighlighFont(Highlighter::HighlighComent,
+                                  map["editor.highlighter.coment.font"].value<QFont>());
+
+    highlighter->setHighlighFont(Highlighter::HighlighQuotation,
+                                  map["editor.highlighter.quotation.font"].value<QFont>());
+
+    highlighter->setHighlighFont(Highlighter::HighlighFunctions,
+                                  map["editor.highlighter.function.font"].value<QFont>());
+
+    highlighter->rehighlight();
 }
 
 void TestingScript::on_pushButton_selectScrip_clicked()
