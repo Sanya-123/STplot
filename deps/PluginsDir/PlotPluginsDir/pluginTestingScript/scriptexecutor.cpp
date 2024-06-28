@@ -1,24 +1,12 @@
 #include "scriptexecutor.h"
 #include <QThread>
 #include <QDebug>
+#include <QEventLoop>
+#include <QTimer>
 
 ScriptExecutor::ScriptExecutor(QObject *parent)
     : QObject{parent}
 {
-    {//delay function
-        auto delay = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
-        {
-            Q_UNUSED(engine);
-            QScriptValue delayTime = context->argument(0);
-            QThread::msleep(delayTime.toInt32());
-            return QScriptValue(0.0);
-        };
-        QScriptEngine::FunctionSignature delayLambdaPtr = delay;
-        QScriptValue fun = myEngine.newFunction(delayLambdaPtr);
-        myEngine.globalObject().setProperty("delay", fun);
-        myEngine.globalObject().setProperty("d", fun);
-    }
-
     //set pointer to parrat class
     QScriptValue thisObject = myEngine.newQObject(this);
     myEngine.globalObject().setProperty("main", thisObject);
@@ -26,6 +14,29 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
     //set object list object
     QScriptValue listObject = myEngine.newQObject(&listVaribelsObject);
     myEngine.globalObject().setProperty("mapVar", listObject);
+
+    {//delay function
+        auto delay = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
+        {
+            Q_UNUSED(engine);
+            int delayTime = context->argument(0).toInt32();
+            if(delayTime <= 0)
+                return QScriptValue(0.0);
+
+            //use loop instead of QThread::msleep(delayTime);
+            //becouse QThread::msleep is block slots so I didnt resve stop signal till end script
+            QEventLoop loop;
+            ScriptExecutor *thisObject = (ScriptExecutor*)engine->globalObject().property("main").toQObject();
+            connect(thisObject, SIGNAL(abortRun()), &loop, SLOT(quit()));//quit loot also if aboort scripts
+            QTimer::singleShot(delayTime, &loop, SLOT(quit()));
+            loop.exec();
+            return QScriptValue(0.0);
+        };
+        QScriptEngine::FunctionSignature delayLambdaPtr = delay;
+        QScriptValue fun = myEngine.newFunction(delayLambdaPtr);
+        myEngine.globalObject().setProperty("delay", fun);
+        myEngine.globalObject().setProperty("d", fun);
+    }
 
     {//print
         //for printing messadge could be used: main.msg = "<msg>"
@@ -76,6 +87,8 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         myEngine.globalObject().setProperty("s", funSet);
     }
 
+//    myEngine.setProcessEventsInterval(100);
+
     connect(this, SIGNAL(abortRun()), this, SLOT(abourtScript()));
 }
 
@@ -119,9 +132,7 @@ QScriptSyntaxCheckResult ScriptExecutor::setScript(QString script)
 void ScriptExecutor::setVarChanales(QVector<VarChannel *> varChanales)
 {
     listVaribelsObject.clear();
-    mapVar.clear();
     foreach (VarChannel *var, varChanales) {
-        mapVar[var->displayName()] = var;
         listVaribelsObject[var->displayName()] = var;
     }
 }

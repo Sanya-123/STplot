@@ -42,7 +42,6 @@ private:
     QScriptEngine myEngine;
     QString script;
 //    QVector<VarChannel*> *mapPlots;
-    QMap<QString, VarChannel*> mapVar;
     ScriptExecutorListVaribels listVaribelsObject;
 };
 

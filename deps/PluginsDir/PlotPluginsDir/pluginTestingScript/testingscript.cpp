@@ -17,6 +17,8 @@ TestingScriptSettings::TestingScriptSettings(QObject *parent) : SettingsAbstract
     mapSettingsDefauold["editor.highlighter.coment.color"] = QColor(Qt::red);
     mapSettingsDefauold["editor.highlighter.quotation.color"] = QColor(Qt::darkGreen);
     mapSettingsDefauold["editor.highlighter.function.color"] = QColor(Qt::blue);
+    mapSettingsDefauold["script.isInfinity"] = false;
+    mapSettingsDefauold["script.isterationRepear"] = 1.0;
 
     QFont highlighterFont("Sans Serif");
     highlighterFont.setBold(true);
@@ -84,10 +86,8 @@ TestingScript::TestingScript(SettingsAbstract *settings, QWidget *parent) :
     helpFunctions << "delay(<delay_ms>)";
     helpFunctions << "setValue(\"<name>\",value)";
     helpFunctions << "getValue(\"<name>\")";
+    helpFunctions << "if (typeof <variable> === 'undefined')";
     ui->listWidget_names->addItems(helpFunctions);
-
-//    connect(ui->listWidget_names, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(iteamCliced(QListWidgetItem*)));
-
 }
 
 TestingScript::~TestingScript()
@@ -154,6 +154,9 @@ void TestingScript::settingsChanged()
 
     ui->plainTextEdit_console->setFont(map["console.font"].value<QFont>());
     ui->plainTextEdit_scrip->setFont(map["editor.font"].value<QFont>());
+
+    ui->checkBox_infinityRun->setChecked(map["script.isInfinity"].toBool());
+    ui->spinBox_iterationRepat->setValue((int)(map["script.isterationRepear"].toDouble()));
 
     autocleanConsole = map["console.autoclean"].toBool();
 
@@ -234,6 +237,8 @@ void TestingScript::on_pushButton_run_clicked()
         {
             infinityRun = ui->checkBox_infinityRun->isChecked();
             iterationRepeated = ui->spinBox_iterationRepat->value();
+            this->settings.updateValue("script.isInfinity", infinityRun);
+            this->settings.updateValue("script.isterationRepear", iterationRepeated*1.0);
             scriptExecutor->setVarChanales(mapPlots);
             if(autocleanConsole)
                 ui->plainTextEdit_console->clear();
