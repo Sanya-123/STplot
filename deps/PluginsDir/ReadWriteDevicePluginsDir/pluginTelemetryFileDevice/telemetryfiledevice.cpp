@@ -118,6 +118,12 @@ int TelemetryFileDevice::readTelemetryFile(QString filepath, QVector<VarChannel 
         return -3;
     }
     QByteArray pickle = teleRecord.readAll();
+    if(pickle.size() < 598)
+    {
+        qWarning("Error reading telemetry record");
+        return -3;
+    }
+
     if (pickle.at(80) != 0x71 || pickle.at(81) != 0x04){
 
         qWarning("Error parsing telemetry record");

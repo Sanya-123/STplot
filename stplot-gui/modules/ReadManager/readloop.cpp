@@ -285,7 +285,7 @@ QVector<float> ReadLoop::calcMathChanales(QList<QString> listChanalesNameReplace
             uint64_t maxSigned = 1 << (bitsSize - 1);
             uint64_t maxUnsigned = 1 << (bitsSize);
             uint32_t valU = value.toUInt32();
-                if(valU > maxSigned)
+                if(valU >= maxSigned)
                     return QScriptValue((valU - maxUnsigned)*1.0);
             return value;
         };

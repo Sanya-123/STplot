@@ -9,6 +9,8 @@ if (WIN32)
     target_link_options(nav_dev_tree PRIVATE -nodefaultlibs)
 endif()
 
+target_include_directories(nav_dev_tree PRIVATE ${CMAKE_CURRENT_LIST_DIR}/PEK_Libs/inc)
+
 set_target_properties(nav_dev_tree PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_PATH}
     RUNTIME_OUTPUT_NAME nav_dev_tree.elf

@@ -56,29 +56,7 @@ Highlighter::Highlighter(QTextDocument *parent)
 {
     HighlightingRule rule;
 
-    keywordFormat.setForeground(Qt::darkBlue);
-    keywordFormat.setFontWeight(QFont::Bold);
-    const QString keywordPatterns[] = {
-        QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"), QStringLiteral("\\bconst\\b"),
-        QStringLiteral("\\bdouble\\b"), QStringLiteral("\\benum\\b"), QStringLiteral("\\bexplicit\\b"),
-        QStringLiteral("\\bfriend\\b"), QStringLiteral("\\binline\\b"), QStringLiteral("\\bint\\b"),
-        QStringLiteral("\\blong\\b"), QStringLiteral("\\bnamespace\\b"), QStringLiteral("\\boperator\\b"),
-        QStringLiteral("\\bprivate\\b"), QStringLiteral("\\bprotected\\b"), QStringLiteral("\\bpublic\\b"),
-        QStringLiteral("\\bshort\\b"), QStringLiteral("\\bsignals\\b"), QStringLiteral("\\bsigned\\b"),
-        QStringLiteral("\\bslots\\b"), QStringLiteral("\\bstatic\\b"), QStringLiteral("\\bstruct\\b"),
-        QStringLiteral("\\btemplate\\b"), QStringLiteral("\\btypedef\\b"), QStringLiteral("\\btypename\\b"),
-        QStringLiteral("\\bunion\\b"), QStringLiteral("\\bunsigned\\b"), QStringLiteral("\\bvirtual\\b"),
-        QStringLiteral("\\bvoid\\b"), QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b"),
-        QStringLiteral("\\bvar\\b"), QStringLiteral("\\blet\\b")
-    };
-    for (const QString &pattern : keywordPatterns) {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = keywordFormat;
-        rule.role = HighlighKeyword;
-        highlightingRules.append(rule);
-//! [0] //! [1]
-    }
-//! [1]
+//! [0]
 
 //! [2]
     classFormat.setFontWeight(QFont::Bold);
@@ -88,6 +66,15 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.role = HighlighClass;
     highlightingRules.append(rule);
 //! [2]
+
+//! [5]
+    functionFormat.setFontItalic(true);
+    functionFormat.setForeground(Qt::blue);
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
+    rule.format = functionFormat;
+    rule.role = HighlighFunctions;
+    highlightingRules.append(rule);
+//! [5]
 
 //! [3]
     singleLineCommentFormat.setForeground(Qt::red);
@@ -109,20 +96,37 @@ Highlighter::Highlighter(QTextDocument *parent)
     highlightingRules.append(rule);
 //! [4]
 
-//! [5]
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
-    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-    rule.format = functionFormat;
-    rule.role = HighlighFunctions;
-    highlightingRules.append(rule);
-//! [5]
-
 //! [6]
     commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
     commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
-}
 //! [6]
+
+//! [1]
+    //move keyword to donw becouse it is high priority
+    keywordFormat.setForeground(Qt::darkBlue);
+    keywordFormat.setFontWeight(QFont::Bold);
+    const QString keywordPatterns[] = {
+        QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"), QStringLiteral("\\bconst\\b"),
+        QStringLiteral("\\bdouble\\b"), QStringLiteral("\\benum\\b"), QStringLiteral("\\bexplicit\\b"),
+        QStringLiteral("\\bfriend\\b"), QStringLiteral("\\binline\\b"), QStringLiteral("\\bint\\b"),
+        QStringLiteral("\\blong\\b"), QStringLiteral("\\bnamespace\\b"), QStringLiteral("\\boperator\\b"),
+        QStringLiteral("\\bprivate\\b"), QStringLiteral("\\bprotected\\b"), QStringLiteral("\\bpublic\\b"),
+        QStringLiteral("\\bshort\\b"), QStringLiteral("\\bsignals\\b"), QStringLiteral("\\bsigned\\b"),
+        QStringLiteral("\\bslots\\b"), QStringLiteral("\\bstatic\\b"), QStringLiteral("\\bstruct\\b"),
+        QStringLiteral("\\btemplate\\b"), QStringLiteral("\\btypedef\\b"), QStringLiteral("\\btypename\\b"),
+        QStringLiteral("\\bunion\\b"), QStringLiteral("\\bunsigned\\b"), QStringLiteral("\\bvirtual\\b"),
+        QStringLiteral("\\bvoid\\b"), QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b"),
+        QStringLiteral("\\bvar\\b"), QStringLiteral("\\blet\\b"), QStringLiteral("\\bif\\b"),
+        QStringLiteral("\\belse\\b"), QStringLiteral("\\bboolean\\b"), QStringLiteral("\\bwith\\b")
+    };
+    for (const QString &pattern : keywordPatterns) {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = keywordFormat;
+        rule.role = HighlighKeyword;
+        highlightingRules.append(rule);
+    }
+//! [1]
+}
 
 #define APPLY_NEW_FONT_COLOR(_role, _function, _apply)    do {                  \
     switch (_role) {                                                            \

@@ -30,6 +30,7 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
             connect(thisObject, SIGNAL(abortRun()), &loop, SLOT(quit()));//quit loot also if aboort scripts
             QTimer::singleShot(delayTime, &loop, SLOT(quit()));
             loop.exec();
+            disconnect(thisObject, SIGNAL(abortRun()), &loop, SLOT(quit()));
             return QScriptValue(0.0);
         };
         QScriptEngine::FunctionSignature delayLambdaPtr = delay;
@@ -44,8 +45,11 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         auto printMsg = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
         {
             ScriptExecutor *thisObject = (ScriptExecutor*)engine->globalObject().property("main").toQObject();
-            QScriptValue print = context->argument(0);
-            thisObject->putMessadge(print.toString());
+            for(int i = 0; i < context->argumentCount(); i++)
+            {
+                QScriptValue print = context->argument(i);
+                thisObject->putMessadge(print.toString());
+            }
             return QScriptValue(0.0);
         };
         QScriptEngine::FunctionSignature printMsgLambdaPtr = printMsg;
@@ -58,10 +62,18 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         //get value function
         auto getValue = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
         {
+            if(context->argumentCount() != 1)
+            {
+                context->throwError(context->backtrace().last() + "; Error input argumets");
+                return QScriptValue(0.0);
+            }
+
             ScriptExecutorListVaribels *listVar = (ScriptExecutorListVaribels*)engine->globalObject().property("mapVar").toQObject();
             QScriptValue chanaleName = context->argument(0);
             if(listVar->contains(chanaleName.toString()))
                 return QScriptValue(1.0*listVar->value(chanaleName.toString())->getValue());
+            else
+                context->throwError("Error value:" + chanaleName.toString() + " is not exist");
             return QScriptValue(0.0);
         };
         QScriptEngine::FunctionSignature getValueLambdaPtr = getValue;
@@ -72,6 +84,11 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
         //set values
         auto setValue = [] (QScriptContext *context, QScriptEngine *engine) -> QScriptValue
         {
+            if(context->argumentCount() != 2)
+            {
+                context->throwError(context->backtrace().last() + "; Error input argumets");
+                return QScriptValue(0.0);
+            }
             ScriptExecutorListVaribels *listVar = (ScriptExecutorListVaribels*)engine->globalObject().property("mapVar").toQObject();
             QScriptValue chanaleName = context->argument(0);
             QScriptValue chanaleValue = context->argument(1);
@@ -79,6 +96,8 @@ ScriptExecutor::ScriptExecutor(QObject *parent)
             {
                 listVar->value(chanaleName.toString())->writeValues(chanaleValue.toNumber());
             }
+            else
+                context->throwError(context->backtrace().last() + "; Error value:" + chanaleName.toString() + " is not exist");
             return QScriptValue(0.0);
         };
         QScriptEngine::FunctionSignature setValueLambdaPtr = setValue;
@@ -104,7 +123,9 @@ void ScriptExecutor::executeScript()
     if(myEngine.hasUncaughtException())
     {//not each line is executed
         //print error
-        putMessadge(tr("Couldn't execute line:") + QString::number(myEngine.uncaughtExceptionLineNumber()));
+        QString msg = myEngine.uncaughtException().property("message").toString();
+        putMessadge(tr("Couldn't execute line:") + QString::number(myEngine.uncaughtExceptionLineNumber()) +
+                    ":" + msg);
     }
 
     emit finishExecScript();

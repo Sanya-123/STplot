@@ -31,3 +31,6 @@
 [submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs"]
 	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs
 	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs.git
+[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/DV"]
+	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/DV
+	url = git@gitlab2.pekauto.com:development/firmware/libs/dv.git
