@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType< QVector<uint32_t> >( "QVector<float>" );
     qRegisterMetaType< QVector<uint32_t> >( "QVector<double>" );
     qRegisterMetaType< uint32_t >( "uint32_t" );
+    qRegisterMetaType< uint64_t >( "uint64_t" );
+    qRegisterMetaType< varloc_location_t >( "varloc_location_t" );
     DebugerWindow _debuger;
     debuger = &_debuger;
     qInstallMessageHandler(myMessageOutput); // Install the handler
