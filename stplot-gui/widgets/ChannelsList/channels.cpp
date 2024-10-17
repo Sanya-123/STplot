@@ -400,8 +400,10 @@ void Channels::deletePlot(int number)
 
 void Channels::setPlotName(int number, QString name)
 {
-    for(int i = 0 ; i < TotalSizeChanalesView; i++)
+    for(int i = 0 ; i < TotalSizeChanalesView; i++){
+        chanaleView[i].treeView->clearSelection();
         chanaleView[i].channelModel->setPlotName(number, name);
+    }
 }
 
 void Channels::clearAllChanales()
