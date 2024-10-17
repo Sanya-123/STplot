@@ -384,8 +384,10 @@ void Channels::add_channel(varloc_node_t* node){
 
 void Channels::addPlot()
 {
-    for(int i = 0 ; i < TotalSizeChanalesView; i++)
+    for(int i = 0 ; i < TotalSizeChanalesView; i++){
+        chanaleView[i].treeView->clearSelection();
         chanaleView[i].channelModel->addPlot();
+    }
 }
 
 void Channels::deletePlot(int number)
