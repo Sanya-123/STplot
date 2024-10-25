@@ -160,6 +160,34 @@ void STPlotWindow::setDebuger(DebugerWindow *debuger)
     }
 }
 
+void STPlotWindow::loadSettingsFromConfig(QString &path)
+{
+    if (path.isEmpty()){
+        qDebug() << "Clear settings";
+        QFile emptyConfig("tmp.conf");
+        emptyConfig.open(QIODevice::WriteOnly);
+        emptyConfig.write(QByteArray());
+        emptyConfig.close();
+        QSettings settings(emptyConfig.fileName(), QSettings::IniFormat);
+        applySettings(settings);
+        emptyConfig.remove();
+    }
+    else{
+        qDebug() << "Load settings" << path;
+        curentSettingsPath = path;
+        QSettings settings(curentSettingsPath, QSettings::IniFormat);
+        applySettings(settings);
+    }
+
+}
+
+void STPlotWindow::loadVarsFromConfig(QString &path)
+{
+    qDebug() << "Load vars" << path;
+    varloader->loadVariablesFromFile(path);
+}
+
+
 void STPlotWindow::setReadDevice(int readDevice){
     if(readDevice < listReadDeviceInstance.size())
     {
@@ -271,7 +299,6 @@ void STPlotWindow::showSettingsWindows()
 void STPlotWindow::applySettings(QSettings &settings)
 {
     //NOTE do not forget clean some stuff like gruphs that should me implementer in restore settings
-
     restoreGeometry(settings.value("windows/geometry").toByteArray());
     restoreState(settings.value("windows/state").toByteArray());
     currentSettings.theme = settings.value("windows/theme", "none").toString();

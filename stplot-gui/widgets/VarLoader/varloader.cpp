@@ -151,6 +151,12 @@ void VarLoader::loadTree()
     loadVariables(ui->lineEdit_file->text());
 }
 
+void VarLoader::loadVariablesFromFile(const QString &path)
+{
+    ui->lineEdit_file->setText(path);
+    loadVariables(ui->lineEdit_file->text());
+}
+
 void VarLoader::saveTree()
 {
     QString selectedFilter;

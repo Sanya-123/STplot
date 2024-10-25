@@ -28,7 +28,7 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
     bool isElfLoaded();
-
+    void loadVariablesFromFile(const QString &);
 public slots:
     void openTree();
     void updateTree(const QString &);

@@ -37,6 +37,8 @@ public:
     STPlotWindow(DebugerWindow *debuger = nullptr, QWidget *parent = nullptr);
     ~STPlotWindow();
     void setDebuger(DebugerWindow *debuger);
+    void loadSettingsFromConfig(QString &path);
+    void loadVarsFromConfig(QString &path);
 
 public slots:
     void startRead();

@@ -2,6 +2,7 @@
 #include "debugerwindow.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
 
 DebugerWindow *debuger = nullptr;
 
@@ -62,10 +63,36 @@ int main(int argc, char *argv[])
     qRegisterMetaType< uint32_t >( "uint32_t" );
     qRegisterMetaType< uint64_t >( "uint64_t" );
     qRegisterMetaType< varloc_location_t >( "varloc_location_t" );
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("stplot-gui");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    QCommandLineOption newConfigOption(QStringList() << "n" << "new",
+                                    "Open new debugger config.");
+    QCommandLineOption debugConfOption(QStringList() << "d" << "debug-config",
+                                    "Load debugger configuration from <filepath>.",
+                                    "debugConfigPath");
+    QCommandLineOption varConfOption(QStringList() << "a" << "var-address",
+                                    "Load variable address configuration from <filepath>.",
+                                    "varConfigPath");
+    parser.addOption(newConfigOption);
+    parser.addOption(debugConfOption);
+    parser.addOption(varConfOption);
+    parser.process(a);
+    QString debugConfigPath = parser.value(debugConfOption);
+    QString varConfigPath = parser.value(varConfOption);
+
     DebugerWindow _debuger;
     debuger = &_debuger;
     qInstallMessageHandler(myMessageOutput); // Install the handler
     STPlotWindow w(debuger);
+    if (debugConfigPath.isEmpty() == false || parser.isSet(newConfigOption)){
+        w.loadSettingsFromConfig(debugConfigPath);
+    }
+    if (varConfigPath.isEmpty() == false){
+        w.loadVarsFromConfig(varConfigPath);
+    }
     w.show();
     return a.exec();
 }
