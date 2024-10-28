@@ -195,8 +195,8 @@ int SHnetUDPDevice::processRequest(debug_msg_t* req){
             qDebug() << "Socket write error";
             return -1;
         }
-//        QThread::msleep(100);
-        if(!udpSocket->waitForReadyRead(2000))
+        // QThread::msleep(100);
+        if(!udpSocket->waitForReadyRead(500))
         {
             qDebug() << "Socket wait read timeout";
         }
