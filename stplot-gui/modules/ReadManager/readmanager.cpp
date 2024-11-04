@@ -309,8 +309,14 @@ void ReadManager::calcMathFileData(QVector<int> sizeVectorBefore, QVector<VarCha
 
     QVector<QMap<QString, float>> vectorOldValues;
 
+    if(fileProgress != nullptr)
+        fileProgress->setMessadge("Math");
+
     for(int i = 0; i < readTimes.size(); i++)
     {
+        if(fileProgress != nullptr)
+            fileProgress->setProgress(MAX_PROCENT_FILE_DIALOG/readTimes.size()*i);
+
         QVector<float> listChanalesValues = getChanaleReedData(sizeVectorBefore, channels, i);
         QVector<float> listMathChanalesValues = ReadLoop::calcMathChanales(listChanalesName, listChanalesValues, &listMathChanales, &vectorOldValues);
 
