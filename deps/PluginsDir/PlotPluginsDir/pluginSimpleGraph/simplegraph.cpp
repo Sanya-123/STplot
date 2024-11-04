@@ -242,6 +242,11 @@ void SimpleGraph::limitTimeRange(const QCPRange & newRange, const QCPRange & old
 //        return;
     scaleTime = newRange.upper - newRange.lower;
 //    plotWidget->xAxis->setRange(newRange.upper, scaleTime, Qt::AlignmentFlag::AlignRight);
+    QHash<QString, QVariant> props;
+    props["timeRangeUpper"] = QVariant(newRange.upper);
+    props["timeRangeLower"] = QVariant(newRange.lower);
+    emit viewPropsUpdated(props);
+
 }
 
 
@@ -497,27 +502,8 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
 
     if(subLayout->visible()){
         // legend enabled
-
-        double x = plotWidget->xAxis->pixelToCoord(event->pos().x());
-    //    double y = plotWidget->yAxis->pixelToCoord(event->pos().y());
-        double startPos = plotWidget->yAxis->pixelToCoord(0);
-        double endPos = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
-
-        cursor->setVisible(true);
-        cursor->start->setCoords(x, startPos);
-        cursor->end->setCoords(x, endPos);
-
-        QList<VarChannel*> plots = mapPlots.keys();
-    //    QList<QCPItemTracer*> trackers = mapTrackers.values();
-        for(int i = 0 ; i < plots.size(); i++)
-        {
-    //        double _x = x;
-            mapTrackers[plots[i]]->setGraphKey(x);
-            mapTrackers[plots[i]]->updatePosition();
-            mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n"
-                    + QString::number(mapTrackers[plots[i]]->position->value()));
-        }
-        legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString(Qt::DateFormat::ISODateWithMs));
+        double key = plotWidget->xAxis->pixelToCoord(event->pos().x());
+        drawCursor(key);
         neeadReplot = true;
     }
 
@@ -553,7 +539,77 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
         plotWidget->replot();
     }
 
+
+    if (mapPlots.size() > 0){
+        // get index of data point next to mouse cursor
+        QCPGraph* graph0 = plotWidget->xAxis->graphs().at(0);
+        int mouseIndex = 0;
+        QVariant details;
+        if (graph0->selectTest(QPoint(event->pos().x(), event->pos().y()), false, &details))
+        {
+            QCPDataSelection dataPoints = details.value<QCPDataSelection>();
+            if (dataPoints.dataPointCount() > 0){
+                mouseIndex = dataPoints.dataRange().begin();
+            }
+        }
+
+        // get key of point next to mouse cursor
+        double mouseKey = plotWidget->xAxis->pixelToCoord(event->pos().x());
+
+        // emit view props
+        QHash<QString, QVariant> props;
+        props["mouseDataIndex"] = QVariant(mouseIndex);
+        props["mouseGraphKey"] = QVariant(mouseKey);
+        emit viewPropsUpdated(props);
+    }
+
 }
+
+void SimpleGraph::drawCursor(double key)
+{
+    double x = key;
+    double startPos = plotWidget->yAxis->pixelToCoord(0);
+    double endPos = plotWidget->yAxis->pixelToCoord(plotWidget->size().height());
+
+    cursor->setVisible(true);
+    cursor->start->setCoords(x, startPos);
+    cursor->end->setCoords(x, endPos);
+
+    QList<VarChannel*> plots = mapPlots.keys();
+    //    QList<QCPItemTracer*> trackers = mapTrackers.values();
+    for(int i = 0 ; i < plots.size(); i++)
+    {
+        //        double _x = x;
+        mapTrackers[plots[i]]->setGraphKey(x);
+        mapTrackers[plots[i]]->updatePosition();
+        mapPlots[plots[i]]->setName(plots[i]->displayName() + "\n"
+                                    + QString::number(mapTrackers[plots[i]]->position->value()));
+    }
+    legendTime->setText(QTime::fromMSecsSinceStartOfDay(x*1000.0).toString(Qt::DateFormat::ISODateWithMs));
+}
+
+
+
+
+void SimpleGraph::setViewProps(QHash<QString, QVariant> props)
+{
+    double rangeUpper = props["timeRangeUpper"].toDouble();
+    double rangeLower = props["timeRangeLower"].toDouble();
+    if (rangeUpper || rangeLower){
+        // qDebug("Range %d - %d", rangeUpper, rangeLower);
+        plotWidget->xAxis->setRange(rangeLower, rangeUpper);
+        plotWidget->update();
+        plotWidget->replot();
+    }
+    double mouseKey = props["mouseGraphKey"].toDouble();
+
+    if(mouseKey != 0 && subLayout->visible()){
+        drawCursor(mouseKey);
+        plotWidget->update();
+        plotWidget->replot();
+    }
+}
+
 
 //void SimpleGraph::handleMouseWheel(QWheelEvent *event)
 //{

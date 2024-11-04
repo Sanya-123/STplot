@@ -46,6 +46,18 @@ void ViewManager::saveSettings(QSettings *settings)
         settings->setValue("pluginName", listPlotParants[i].second);
         settings->setValue("plotName", listPlotParants[i].first->windowTitle()/*objectName()*/);
         settings->setValue("plotSettings", listPlotParants[i].first->gedSettings()->getSettingsMap());
+        settings->beginWriteArray("connectedPlots");
+        for (int j = 0; j < listPlotParants.size(); j++){
+            settings->setArrayIndex(j);
+            QTableWidgetItem* tableItem = ui->tableWidget_availebleWidgets->item(i,j+1);
+            if (tableItem != nullptr){
+                bool checked = tableItem->checkState() == Qt::Checked;
+                settings->setValue("enPlot", checked);
+            }else{
+                settings->setValue("enPlot", false);
+            }
+        }
+        settings->endArray();
     }
     settings->endArray();
 
@@ -80,6 +92,18 @@ void ViewManager::restoreSettings(QSettings *settings)
         {
             addPlot(plotMap[pluginName], plotName)->gedSettings()->setSettings(gruphSettings);
         }
+    }
+    // another loop for restoring checkboxes after table is filled by addPlot calls above
+    for (int i = 0; i < size; ++i) {
+        settings->setArrayIndex(i);
+        int nConnectedPlots = settings->beginReadArray("connectedPlots");
+        for (int j = 0; j < nConnectedPlots; ++j) {
+            settings->setArrayIndex(j);
+            if(settings->value("enPlot").toBool()){
+                ui->tableWidget_availebleWidgets->item(i,j+1)->setCheckState(Qt::Checked);
+            }
+        }
+        settings->endArray();
     }
     settings->endArray();
 
@@ -161,12 +185,27 @@ PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, Q
     ui->tableWidget_availebleWidgets->setRowCount(numberRow + 1);
     ui->tableWidget_availebleWidgets->setItem(numberRow, 0, new QTableWidgetItem(name));
 
+    int columnCount = ui->tableWidget_availebleWidgets->columnCount();
+    ui->tableWidget_availebleWidgets->insertColumn(columnCount);
+    ui->tableWidget_availebleWidgets->setHorizontalHeaderItem(columnCount, new QTableWidgetItem(name));
+    for (int row = 0; row < numberRow + 1; row++){
+        for (int col = 1; col < columnCount + 1; col++){
+            if (col != row + 1){
+                QTableWidgetItem *checkBoxItem = new QTableWidgetItem();
+                checkBoxItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+                checkBoxItem->setCheckState(Qt::Unchecked);
+                ui->tableWidget_availebleWidgets->setItem(row, col, checkBoxItem);
+            }
+        }
+    }
+
+
     return widgetPlot;
 }
 
 void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int column)
 {
-    if(row >= 0 && row < listPlots.size())
+    if(row >= 0 && row < listPlots.size() && column == 0)
     {
         QString newName = ui->tableWidget_availebleWidgets->item(row, column)->text();
         listPlots[row].second->setWindowTitle(newName);
@@ -176,6 +215,17 @@ void ViewManager::on_tableWidget_availebleWidgets_cellChanged(int row, int colum
 
         if(chanales != nullptr)
             chanales->setPlotName(row, newName);
+    }
+    else if (column != 0){
+        bool checked = ui->tableWidget_availebleWidgets->item(row, column)->checkState();
+        qDebug("cell changed %d %d %d", row, column, checked);
+        if (checked){
+            connect(listPlots[row].first, &PlotWidgetAbstract::viewPropsUpdated, listPlots[column - 1].first, &PlotWidgetAbstract::setViewProps);
+        }
+        else{
+            disconnect(listPlots[row].first, &PlotWidgetAbstract::viewPropsUpdated, listPlots[column - 1].first, &PlotWidgetAbstract::setViewProps);
+        }
+
     }
 }
 
@@ -229,6 +279,7 @@ void ViewManager::on_pushButton_deleteViewes_clicked()
 
         listPlots.removeAt(numberElement);
         listPlotParants.removeAt(numberElement);
+        ui->tableWidget_availebleWidgets->removeColumn(numberElement + 1);
         ui->tableWidget_availebleWidgets->removeRow(numberElement);
     }
 }

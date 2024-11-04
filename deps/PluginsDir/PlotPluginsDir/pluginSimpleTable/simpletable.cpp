@@ -261,7 +261,9 @@ void SimpleTable::plotSelecting()
         return;
 
     ui->tableWidget_table->selectRow(gpuh);
-
+    QHash<QString, QVariant> props;
+    props["channelSelected"] = QVariant(varChanale->getName());
+    emit viewPropsUpdated(props);
 }
 
 void SimpleTable::clearPlot()
@@ -312,6 +314,17 @@ void SimpleTable::updatePositionScroll(int val)
     for(int i = 0; i < mapPlots.size(); i++)
     {
         double value = mapPlots[i]->getValue(mapPlots[i]->getBufferSize() - val - 1).value;
+        ui->tableWidget_table->item(i, 1)->setText(QString::number(value));
+    }
+}
+void SimpleTable::setViewProps(QHash<QString, QVariant> props)
+{
+    // double rangeUpper = props["timeRangeUpper"].toDouble();
+    // double rangeLower = props["timeRangeLower"].toDouble();
+    int mouseIndex = props["mouseDataIndex"].toInt();
+    for(int i = 0; i < mapPlots.size(); i++)
+    {
+        double value = mapPlots[i]->getValue(mouseIndex).value;
         ui->tableWidget_table->item(i, 1)->setText(QString::number(value));
     }
 }

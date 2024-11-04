@@ -29,10 +29,12 @@ public:
 //    void setName(QString name);
 //    QString getName();
     SettingsAbstract* gedSettings() {return &settings; }
+    void setViewProps(QHash<QString, QVariant> props);
 
 private:
     QCPGraph* getGruph(QObject *sender, VarChannel **varChanale);
     void restoreStyleGraphs();
+    void drawCursor(double key);
 
 private slots:
     void doUpdatePlot();
