@@ -544,17 +544,14 @@ void SimpleGraph::handleMouseMove(QMouseEvent *event)
         // get index of data point next to mouse cursor
         QCPGraph* graph0 = plotWidget->xAxis->graphs().at(0);
         int mouseIndex = 0;
-        QVariant details;
-        if (graph0->selectTest(QPoint(event->pos().x(), event->pos().y()), false, &details))
-        {
-            QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-            if (dataPoints.dataPointCount() > 0){
-                mouseIndex = dataPoints.dataRange().begin();
-            }
-        }
+
+        if(graph0->dataCount() > 0)
+            mouseIndex = graph0->findBegin(mapTrackers.first()->position->key(), false);
+        if(mouseIndex < 0)
+            mouseIndex = 0;
 
         // get key of point next to mouse cursor
-        double mouseKey = plotWidget->xAxis->pixelToCoord(event->pos().x());
+        double mouseKey = mapTrackers.first()->graphKey();
 
         // emit view props
         QHash<QString, QVariant> props;

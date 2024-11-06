@@ -29,6 +29,8 @@ public:
 //    void setName(QString name);
 //    QString getName();
     SettingsAbstract* gedSettings() {return &settings; }
+
+public slots:
     void setViewProps(QHash<QString, QVariant> props);
 
 private:

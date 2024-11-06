@@ -188,17 +188,31 @@ PlotWidgetAbstract * ViewManager::addPlot(PlotWidgetInterfacePlugin *plotType, Q
     int columnCount = ui->tableWidget_availebleWidgets->columnCount();
     ui->tableWidget_availebleWidgets->insertColumn(columnCount);
     ui->tableWidget_availebleWidgets->setHorizontalHeaderItem(columnCount, new QTableWidgetItem(name));
-    for (int row = 0; row < numberRow + 1; row++){
-        for (int col = 1; col < columnCount + 1; col++){
-            if (col != row + 1){
-                QTableWidgetItem *checkBoxItem = new QTableWidgetItem();
-                checkBoxItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-                checkBoxItem->setCheckState(Qt::Unchecked);
-                ui->tableWidget_availebleWidgets->setItem(row, col, checkBoxItem);
-            }
+
+    /**
+     *
+     * name old old old new
+     * name old old old new
+     * name old old old new
+     * name new new new new
+     *
+     * needed update just new
+    */
+    for(int i = 0 ; i < numberRow + 1; i++)
+    {
+        if(i != numberRow)
+        {
+            QTableWidgetItem *checkBoxItem = new QTableWidgetItem();
+            checkBoxItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            checkBoxItem->setCheckState(Qt::Unchecked);
+            ui->tableWidget_availebleWidgets->setItem(i, numberRow + 1, checkBoxItem);
+
+            checkBoxItem = new QTableWidgetItem();
+            checkBoxItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            checkBoxItem->setCheckState(Qt::Unchecked);
+            ui->tableWidget_availebleWidgets->setItem(numberRow, i + 1, checkBoxItem);
         }
     }
-
 
     return widgetPlot;
 }

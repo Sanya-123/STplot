@@ -29,6 +29,8 @@ public:
 //    QString getName();
     SettingsAbstract* gedSettings() {return &settings; }
     void resizeEvent(QResizeEvent *event);
+
+public slots:
     void setViewProps(QHash<QString, QVariant> props);
 
 private:
