@@ -39,7 +39,7 @@ STPlotWindow::STPlotWindow(DebugerWindow *debuger, QWidget *parent)
 //    m_DockManager = new ads::CDockManager(ui->dockContainer);
 //    Layout->addWidget(m_DockManager);
 
-    ui->dockContainer->setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+//    ui->dockContainer->setConfigFlag(ads::CDockManager::FocusHighlighting, true);
 
 
     ads::CDockWidget* dockWidgetChanaleWivw = new ads::CDockWidget("Channels");
