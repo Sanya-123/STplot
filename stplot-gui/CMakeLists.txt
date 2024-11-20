@@ -138,7 +138,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     widgets/FileProgress
     ${CMAKE_SOURCE_DIR}/deps/styles/Qt-Advanced-Stylesheets/src
     ${PATH_COMMON_QT_LIBS}
-    ${CMAKE_SOURCE_DIR}/deps/QtnProperty
+    ${CMAKE_SOURCE_DIR}/deps/QtnProperty/QtnProperty
+    ${CMAKE_SOURCE_DIR}/deps/QtnProperty/QtnProperty/QtnProperty
     ${CMAKE_SOURCE_DIR}/deps
   )
 
@@ -151,7 +152,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Svg
     ${OPENGL_LIBS}
     ${OPENGL_LIBRARIES}
-    qtadvanceddocking
+    qt5advanceddocking
     QtnProperty
     VarChannel
 )

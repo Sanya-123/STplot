@@ -8,7 +8,7 @@
 	path = deps/commonQtLibs
 	url = https://github.com/Sanya-123/myCommonQtLibs.git
 [submodule "deps/QtnProperty"]
-	path = deps/QtnProperty
+	path = deps/QtnProperty/QtnProperty
 	url = https://github.com/qtinuum/QtnProperty.git
 [submodule "stplot-gui/widgets/DebugerWindow"]
 	path = stplot-gui/widgets/DebugerWindow
