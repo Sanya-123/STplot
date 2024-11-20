@@ -3,34 +3,25 @@
 	url = https://github.com/stlink-org/stlink
 [submodule "deps/qt-advanced-docking-system"]
 	path = deps/qt-advanced-docking-system
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qt-advanced-docking-system.git
+	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System.git
 [submodule "deps/commonQtLibs"]
 	path = deps/commonQtLibs
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/commonqtlibs.git
+	url = https://github.com/Sanya-123/myCommonQtLibs.git
 [submodule "deps/QtnProperty"]
 	path = deps/QtnProperty
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/qtnproperty.git
-[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSHnetSocketDevice/PEK_Libs"]
-	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginSHnetSocketDevice/PEK_Libs
-	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs
+	url = https://github.com/qtinuum/QtnProperty.git
 [submodule "stplot-gui/widgets/DebugerWindow"]
 	path = stplot-gui/widgets/DebugerWindow
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/debugerwindow.git
+	url = https://github.com/Sanya-123/DebugerWindow.git
 [submodule "deps/PluginsDir/STplotVarCommon"]
 	path = deps/PluginsDir/STplotVarCommon
-	url = git@gitlab2.pekauto.com:development/firmware/libs/stplotvarcommon.git
+	url = https://github.com/Sanya-123/STplotVarCommon.git
 [submodule "deps/PluginsDir/VarLoaderPluginsDir"]
 	path = deps/PluginsDir/VarLoaderPluginsDir
-	url = git@gitlab2.pekauto.com:development/firmware/tools/libs/stplotvarloader.git
+	url = https://github.com/Sanya-123/STplotVarLoader.git
 [submodule "deps/styles/Qt-Advanced-Stylesheets"]
 	path = deps/styles/Qt-Advanced-Stylesheets
 	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Stylesheets.git
 [submodule "windowsLibs/libusb-cmake"]
 	path = windowsLibs/libusb-cmake
 	url = https://github.com/libusb/libusb-cmake.git
-[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs"]
-	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/PEK_Libs
-	url = git@gitlab2.pekauto.com:development/firmware/libs/pek_libs.git
-[submodule "deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/DV"]
-	path = deps/PluginsDir/ReadWriteDevicePluginsDir/pluginTelemetryFileDevice/nav_dev_tree/DV
-	url = git@gitlab2.pekauto.com:development/firmware/libs/dv.git
